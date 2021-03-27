@@ -3,7 +3,6 @@
 #![no_std]
 
 mod kernel;
-mod task_1;
 
 use kernel::{
     task::Task,
@@ -20,7 +19,6 @@ use cortex_m_rt::entry;
 use stm32f4xx_hal as hal;
 use crate::hal::{prelude::*, stm32};
 use embedded_hal;
-use crate::kernel::task_trait::TaskTrait;
 
 #[entry]
 fn main() -> ! {
@@ -45,19 +43,13 @@ fn main() -> ! {
     let button = gpioc.pc13.into_floating_input();
 
 
-    //let mut scheduler = Scheduler::new();
-    //let runnable = || some_runnable(&mut led);
-    //let task = Task::new(&runnable);
-    //Scheduler::spawn(task);
-    let mut task_1 = task_1::Task1::new(led);
+    let task = Task::new(move |&mut c| some_runnable(&mut led));
     let mut scheduler = Scheduler::new();
-    scheduler.spawn(task_1);
+    scheduler.spawn(task);
 
     loop {
-        //Scheduler::exec();
         scheduler.exec();
         scheduler.delay(100);
-        //delay.delay_ms(100u32);
     }
 }
 
@@ -66,4 +58,11 @@ fn some_runnable<Led>(led: &mut Led) -> Result<(), TaskError>
 {
     led.toggle();
     Ok(())
+}
+
+
+struct Test<F>
+    where F: FnMut() -> Result<(), TaskError>
+{
+    fun: [F; 10],
 }
