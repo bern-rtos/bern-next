@@ -1,47 +1,44 @@
 use super::scheduler;
-use core::marker::PhantomData;
 
 #[derive(Debug)]
 pub struct TaskError;
 
-pub trait Context {
-    fn delay(&mut self, ms: u32);
+pub struct Context {
+    next_wut: u64,
 }
 
-// todo: replace with 'trait_alias', as soon as it is stable
-impl <F,C> Context for Task<F,C>
-    where F: FnMut(&mut C) -> Result<(), TaskError>, C: Context
-{
-    fn delay(&mut self, ms: u32) {
-        self.next_wut = scheduler::get_tick() + ms;
+impl Context {
+    pub fn delay(&mut self, ms: u32) {
+        self.next_wut = scheduler::get_tick() + u64::from(ms);
     }
 }
 
-pub struct Task<F,C>
-    where F: FnMut(&mut C) -> Result<(), TaskError>, C: Context
+// todo: replace with 'trait_alias', as soon as it is stable
+pub struct Task<F>
+    where F: FnMut(&mut Context) -> Result<(), TaskError>
 {
     entry: F,
-    next_wut: u32,
-    phantom: PhantomData<C>,
+    context: Context,
 }
 
-impl<F,C> Task<F,C>
-    where F: FnMut(&mut C) -> Result<(), TaskError>, C: Context
+impl<F> Task<F>
+    where F: FnMut(&mut Context) -> Result<(), TaskError>
 {
-    pub fn new(entry: F) -> Task<F,C> {
+    pub fn new(entry: F) -> Task<F> {
         Task {
             entry: entry,
-            next_wut: 0,
-            phantom: PhantomData,
+            context: Context{
+                next_wut: 0,
+            }
         }
     }
 
     pub fn run(&mut self) -> Result<(), TaskError> {
         let entry = &mut self.entry;
-        entry(self)
+        entry(&mut self.context)
     }
 
-    pub fn get_next_wut(&self) -> u32 {
-        self.next_wut
+    pub fn get_next_wut(&self) -> u64 {
+        self.context.next_wut
     }
 }

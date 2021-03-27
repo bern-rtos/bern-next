@@ -4,8 +4,6 @@
 
 
 use super::task::{Task, TaskError, Context};
-use super::task_trait::TaskTrait;
-use core::borrow::Borrow;
 use cortex_m::peripheral::{
     Peripherals,
     SYST,
@@ -13,17 +11,17 @@ use cortex_m::peripheral::{
 };
 use cortex_m_rt::exception;
 
-pub struct Scheduler<F,C>
-    where F: FnMut(&mut C) -> Result<(), TaskError>, C: Context
+pub struct Scheduler<F>
+    where F: FnMut(&mut Context) -> Result<(), TaskError>
 {
-    tasks: [Option<Task<F,C>>; 5],
+    tasks: [Option<Task<F>>; 5],
     syst: SYST
 }
 
-impl<F,C> Scheduler<F,C>
-    where F: FnMut(&mut C) -> Result<(), TaskError>, C: Context
+impl<F> Scheduler<F>
+    where F: FnMut(&mut Context) -> Result<(), TaskError>
 {
-    pub fn new() -> Scheduler<F,C> {
+    pub fn new() -> Scheduler<F> {
         // init systick -> 1ms
         let mut syst = Peripherals::take().unwrap().SYST;
         syst.set_clock_source(SystClkSource::Core);
@@ -39,7 +37,7 @@ impl<F,C> Scheduler<F,C>
         }
     }
 
-    pub fn spawn(&mut self, task: Task<F,C>) {
+    pub fn spawn(&mut self, task: Task<F>) {
         let tasks = &mut self.tasks;
         for _task in tasks {
             if _task.is_none() {
@@ -61,7 +59,7 @@ impl<F,C> Scheduler<F,C>
     }
 
     pub fn delay(&self, ms: u32) {
-        let end = get_tick() + ms;
+        let end = get_tick() + u64::from(ms);
         while get_tick() < end {
 
         }
@@ -69,7 +67,7 @@ impl<F,C> Scheduler<F,C>
 }
 
 
-static mut COUNT: u32 = 0;
+static mut COUNT: u64 = 0;
 
 #[exception]
 fn SysTick() {
@@ -77,6 +75,6 @@ fn SysTick() {
     unsafe { COUNT += 1; }
 }
 
-pub fn get_tick() -> u32 {
+pub fn get_tick() -> u64 {
     unsafe { COUNT }
 }

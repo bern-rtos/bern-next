@@ -14,7 +14,6 @@ use kernel::{
 // Halt on panic and print the stack trace to SWO
 extern crate panic_itm;
 
-use cortex_m;
 use cortex_m_rt::entry;
 use stm32f4xx_hal as hal;
 use crate::hal::{prelude::*, stm32};
@@ -43,13 +42,16 @@ fn main() -> ! {
     let button = gpioc.pc13.into_floating_input();
 
 
-    let task = Task::new(move |&mut c| some_runnable(&mut led));
+    let task = Task::new(move |c| {
+        some_runnable(&mut led);
+        c.delay(500);
+        Ok(())
+    });
     let mut scheduler = Scheduler::new();
     scheduler.spawn(task);
 
     loop {
         scheduler.exec();
-        scheduler.delay(100);
     }
 }
 
@@ -60,9 +62,3 @@ fn some_runnable<Led>(led: &mut Led) -> Result<(), TaskError>
     Ok(())
 }
 
-
-struct Test<F>
-    where F: FnMut() -> Result<(), TaskError>
-{
-    fun: [F; 10],
-}
