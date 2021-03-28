@@ -62,6 +62,14 @@ impl<'a> Task<'a>
         }
     }
 
+    // pub fn new_from_closure<F>(runnable: F) -> (RunnableClosure<F>, Self)
+    //     where F: 'static + FnMut(&mut Context) -> Result<(), TaskError>,
+    // {
+    //     let mut runnable = RunnableClosure::new(runnable);
+    //     let task = Self::new(&mut runnable);
+    //     return (runnable, task);
+    // }
+
     pub fn run(&mut self) -> Result<(), TaskError> {
         self.runnable.run(&mut self.context)
     }

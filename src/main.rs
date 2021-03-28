@@ -3,7 +3,6 @@
 #![no_std]
 
 mod kernel;
-mod task_1;
 
 use kernel::{
     task::Task,
@@ -11,7 +10,6 @@ use kernel::{
     task::RunnableClosure,
     scheduler::Scheduler,
     scheduler,
-    task_trait::TaskTrait,
 };
 
 #[allow(unused_extern_crates)]
@@ -46,8 +44,8 @@ fn main() -> ! {
     let mut led = gpioa.pa5.into_push_pull_output();
     let button = gpioc.pc13.into_floating_input();
 
-
     /* task 1 */
+    /* todo: implement some sort of static Box<> type */
     let mut runnable = RunnableClosure::new(move |c| {
         led.toggle();
         c.delay(100);
@@ -64,8 +62,17 @@ fn main() -> ! {
     let mut scheduler = Scheduler::new();
     scheduler.spawn(task1);
     scheduler.spawn(task2);
+    //scheduler.spawn(new_task());
 
     loop {
         scheduler.exec();
     }
 }
+
+// fn new_task<'a>() -> Task<'a> {
+//     /* task 2 */
+//     let mut runnable = RunnableClosure::new(move |c| {
+//         Ok(())
+//     });
+//     Task::new(&mut runnable)
+// }

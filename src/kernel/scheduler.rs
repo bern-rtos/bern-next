@@ -60,15 +60,6 @@ impl<'a> Scheduler<'a>
     // }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-//struct SchedulerInstance<F>
-//    where F: FnMut(&mut Context) -> Result<(), TaskError>
-//{
-//    scheduler: Option<Scheduler<F>>,
-//}
-
-//static mut SCHEDULER: Option<Scheduler<F>> = None;
 
 ////////////////////////////////////////////////////////////////////////////////
 static mut COUNT: u64 = 0;
