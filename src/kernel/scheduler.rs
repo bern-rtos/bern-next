@@ -11,17 +11,31 @@ use cortex_m::peripheral::{
 };
 use cortex_m_rt::exception;
 
-pub struct Scheduler<F>
-    where F: FnMut(&mut Context) -> Result<(), TaskError>
+pub struct TaskList<F1,F2>
+where
+    F1: FnMut(&mut Context) -> Result<(), TaskError>,
+    F2: FnMut(&mut Context) -> Result<(), TaskError>,
 {
-    tasks: [Option<Task<F>>; 5],
-    syst: SYST
+    pub task_1: Option<Task<F1>>,
+    pub task_2: Option<Task<F2>>,
 }
 
-impl<F> Scheduler<F>
-    where F: FnMut(&mut Context) -> Result<(), TaskError>
+pub struct Scheduler<F1,F2>
+where
+    F1: FnMut(&mut Context) -> Result<(), TaskError>,
+    F2: FnMut(&mut Context) -> Result<(), TaskError>,
 {
-    pub fn new() -> Scheduler<F> {
+    tasks: TaskList<F1,F2>,
+    syst: SYST,
+}
+
+impl<F1,F2> Scheduler<F1,F2>
+where
+    F1: FnMut(&mut Context) -> Result<(), TaskError>,
+    F2: FnMut(&mut Context) -> Result<(), TaskError>,
+{
+
+    pub fn new(tasks: TaskList<F1,F2>) -> Scheduler<F1,F2> {
         // init systick -> 1ms
         let mut syst = Peripherals::take().unwrap().SYST;
         syst.set_clock_source(SystClkSource::Core);
@@ -32,41 +46,43 @@ impl<F> Scheduler<F>
         syst.enable_interrupt();
 
         Scheduler {
-            tasks: [None, None, None, None, None],
+            tasks: tasks,
             syst: syst,
         }
     }
 
-    pub fn spawn(&mut self, task: Task<F>) {
-        let tasks = &mut self.tasks;
-        for _task in tasks {
-            if _task.is_none() {
-                *_task = Some(task);
-                break;
-            }
-        }
-    }
-
     pub fn exec(&mut self) {
-        for task in &mut self.tasks {
-            if task.is_some() {
-                let current_task = task.as_mut().unwrap();
-                if current_task.get_next_wut() <= get_tick() {
-                    current_task.run();
-                }
+        let task = &mut self.tasks.task_1;
+        if task.is_some() {
+            if task.as_mut().unwrap().get_next_wut() < get_tick() {
+                task.as_mut().unwrap().run();
+            }
+        }
+
+        let task = &mut self.tasks.task_2;
+        if task.is_some() {
+            if task.as_mut().unwrap().get_next_wut() < get_tick() {
+                task.as_mut().unwrap().run();
             }
         }
     }
 
-    pub fn delay(&self, ms: u32) {
-        let end = get_tick() + u64::from(ms);
-        while get_tick() < end {
-
-        }
+    fn yield_sched(&mut self) {
+        self.exec();
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
 
+//struct SchedulerInstance<F>
+//    where F: FnMut(&mut Context) -> Result<(), TaskError>
+//{
+//    scheduler: Option<Scheduler<F>>,
+//}
+
+//static mut SCHEDULER: Option<Scheduler<F>> = None;
+
+////////////////////////////////////////////////////////////////////////////////
 static mut COUNT: u64 = 0;
 
 #[exception]

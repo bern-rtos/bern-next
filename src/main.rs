@@ -3,11 +3,14 @@
 #![no_std]
 
 mod kernel;
+mod task_1;
 
 use kernel::{
     task::Task,
     task::TaskError,
     scheduler::Scheduler,
+    scheduler,
+    task_trait::TaskTrait,
 };
 
 #[allow(unused_extern_crates)]
@@ -42,13 +45,26 @@ fn main() -> ! {
     let button = gpioc.pc13.into_floating_input();
 
 
-    let task = Task::new(move |c| {
+
+    let task1 = Task::new(move |c| {
         some_runnable(&mut led);
         c.delay(500);
         Ok(())
     });
-    let mut scheduler = Scheduler::new();
-    scheduler.spawn(task);
+
+    let task2 = Task::new(move |c| {
+        for i in 0..100 {
+
+        }
+        Ok(())
+    });
+    //bla(&some_runnable);
+
+    let tasks = scheduler::TaskList{
+        task_1: Some(task1),
+        task_2: Some(task2),
+    };
+    let mut scheduler = Scheduler::new(tasks);
 
     loop {
         scheduler.exec();
@@ -62,3 +78,6 @@ fn some_runnable<Led>(led: &mut Led) -> Result<(), TaskError>
     Ok(())
 }
 
+fn bla(fun: &fn() -> Result<(), TaskError>) {
+
+}
