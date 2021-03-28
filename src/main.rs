@@ -8,6 +8,7 @@ mod task_1;
 use kernel::{
     task::Task,
     task::TaskError,
+    task::RunnableClosure,
     scheduler::Scheduler,
     scheduler,
     task_trait::TaskTrait,
@@ -21,6 +22,7 @@ use cortex_m_rt::entry;
 use stm32f4xx_hal as hal;
 use crate::hal::{prelude::*, stm32};
 use embedded_hal;
+use crate::kernel::task::Context;
 
 #[entry]
 fn main() -> ! {
@@ -45,39 +47,25 @@ fn main() -> ! {
     let button = gpioc.pc13.into_floating_input();
 
 
-
-    let task1 = Task::new(move |c| {
-        some_runnable(&mut led);
-        c.delay(500);
+    /* task 1 */
+    let mut runnable = RunnableClosure::new(move |c| {
+        led.toggle();
+        c.delay(100);
         Ok(())
     });
+    let mut task1 = Task::new(&mut runnable);
 
-    let task2 = Task::new(move |c| {
-        for i in 0..100 {
-
-        }
+    /* task 2 */
+    let mut runnable = RunnableClosure::new(move |c| {
         Ok(())
     });
-    //bla(&some_runnable);
+    let mut task2 = Task::new(&mut runnable);
 
-    let tasks = scheduler::TaskList{
-        task_1: Some(task1),
-        task_2: Some(task2),
-    };
-    let mut scheduler = Scheduler::new(tasks);
+    let mut scheduler = Scheduler::new();
+    scheduler.spawn(task1);
+    scheduler.spawn(task2);
 
     loop {
         scheduler.exec();
     }
-}
-
-fn some_runnable<Led>(led: &mut Led) -> Result<(), TaskError>
-    where Led: embedded_hal::digital::v2::ToggleableOutputPin
-{
-    led.toggle();
-    Ok(())
-}
-
-fn bla(fun: &fn() -> Result<(), TaskError>) {
-
 }

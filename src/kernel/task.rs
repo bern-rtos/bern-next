@@ -3,6 +3,8 @@ use super::scheduler;
 #[derive(Debug)]
 pub struct TaskError;
 
+////////////////////////////////////////////////////////////////////////////////
+
 pub struct Context {
     next_wut: u64,
 }
@@ -10,33 +12,58 @@ pub struct Context {
 impl Context {
     pub fn delay(&mut self, ms: u32) {
         self.next_wut = scheduler::get_tick() + u64::from(ms);
-
     }
 }
 
-// todo: replace with 'trait_alias', as soon as it is stable
-pub struct Task<F>
-    where F: FnMut(&mut Context) -> Result<(), TaskError>
+////////////////////////////////////////////////////////////////////////////////
+
+pub trait Runnable {
+    fn run(&mut self, context: &mut Context) -> Result<(), TaskError>;
+}
+
+pub struct RunnableClosure<F>
+    where F: FnMut(&mut Context) -> Result<(), TaskError>,
 {
-    entry: F,
+    runnable: F,
+}
+impl<F> RunnableClosure<F>
+    where F: FnMut(&mut Context) -> Result<(), TaskError>,
+{
+    pub fn new(runnable: F) -> Self {
+        RunnableClosure {
+            runnable
+        }
+    }
+}
+impl<F> Runnable for RunnableClosure<F>
+    where F: FnMut(&mut Context) -> Result<(), TaskError>,
+{
+    fn run(&mut self, context: &mut Context) -> Result<(), TaskError> {
+        (self.runnable)(context)
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+pub struct Task<'a>
+{
+    pub runnable: &'a mut dyn Runnable,
     context: Context,
 }
 
-impl<F> Task<F>
-    where F: FnMut(&mut Context) -> Result<(), TaskError>
+impl<'a> Task<'a>
 {
-    pub fn new(entry: F) -> Task<F> {
+    pub fn new(runnable: &'a mut dyn Runnable) -> Self {
         Task {
-            entry: entry,
-            context: Context{
+            runnable,
+            context: Context {
                 next_wut: 0,
             }
         }
     }
 
     pub fn run(&mut self) -> Result<(), TaskError> {
-        let entry = &mut self.entry;
-        entry(&mut self.context)
+        self.runnable.run(&mut self.context)
     }
 
     pub fn get_next_wut(&self) -> u64 {

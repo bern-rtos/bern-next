@@ -10,6 +10,7 @@ cortex-m-rt = "0.6.10"
 panic-halt = "0.2.0"
 panic-itm = "0.4.1"
 embedded-hal = "0.2.4"
+heapless = "0.6.1"
 
 [dependencies.stm32f4xx-hal]
 version = "0.8"

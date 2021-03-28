@@ -11,31 +11,16 @@ use cortex_m::peripheral::{
 };
 use cortex_m_rt::exception;
 
-pub struct TaskList<F1,F2>
-where
-    F1: FnMut(&mut Context) -> Result<(), TaskError>,
-    F2: FnMut(&mut Context) -> Result<(), TaskError>,
+pub struct Scheduler<'a>
 {
-    pub task_1: Option<Task<F1>>,
-    pub task_2: Option<Task<F2>>,
-}
-
-pub struct Scheduler<F1,F2>
-where
-    F1: FnMut(&mut Context) -> Result<(), TaskError>,
-    F2: FnMut(&mut Context) -> Result<(), TaskError>,
-{
-    tasks: TaskList<F1,F2>,
+    tasks: [Option<Task<'a>>; 5],
     syst: SYST,
 }
 
-impl<F1,F2> Scheduler<F1,F2>
-where
-    F1: FnMut(&mut Context) -> Result<(), TaskError>,
-    F2: FnMut(&mut Context) -> Result<(), TaskError>,
+impl<'a> Scheduler<'a>
 {
 
-    pub fn new(tasks: TaskList<F1,F2>) -> Scheduler<F1,F2> {
+    pub fn new() -> Self {
         // init systick -> 1ms
         let mut syst = Peripherals::take().unwrap().SYST;
         syst.set_clock_source(SystClkSource::Core);
@@ -46,30 +31,33 @@ where
         syst.enable_interrupt();
 
         Scheduler {
-            tasks: tasks,
+            tasks: [None, None, None, None, None],
             syst: syst,
         }
     }
 
+    pub fn spawn(&mut self, task: Task<'a>) {
+        for _task in self.tasks.iter_mut() {
+            if _task.is_none() {
+                *_task = Some(task);
+                break;
+            }
+        }
+    }
+
     pub fn exec(&mut self) {
-        let task = &mut self.tasks.task_1;
-        if task.is_some() {
-            if task.as_mut().unwrap().get_next_wut() < get_tick() {
-                task.as_mut().unwrap().run();
-            }
-        }
-
-        let task = &mut self.tasks.task_2;
-        if task.is_some() {
-            if task.as_mut().unwrap().get_next_wut() < get_tick() {
-                task.as_mut().unwrap().run();
+        for task in self.tasks.iter_mut() {
+            if task.is_some() {
+                if task.as_mut().unwrap().get_next_wut() < get_tick() {
+                    task.as_mut().unwrap().run();
+                }
             }
         }
     }
-
-    fn yield_sched(&mut self) {
-        self.exec();
-    }
+    //
+    // fn yield_sched(&mut self) {
+    //     self.exec();
+    // }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
