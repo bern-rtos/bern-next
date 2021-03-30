@@ -50,13 +50,13 @@ impl<F> Runnable for RunnableClosure<F>
 pub struct Task
 {
     //pub runnable: &'a mut dyn Runnable,
-    entry: fn(&mut Context) -> Result<(), TaskError>,
+    entry: &'static mut fn() -> Result<(), TaskError>,
     context: Context,
 }
 
 impl Task
 {
-    pub fn new(entry: fn(&mut Context) -> Result<(), TaskError>) -> Self {
+    pub fn new(entry: &'static mut fn() -> Result<(), TaskError>) -> Self {
         Task {
             entry,
             context: Context {
@@ -74,7 +74,7 @@ impl Task
     // }
 
     pub fn run(&mut self) -> Result<(), TaskError> {
-        (self.entry)(&mut self.context)
+        (self.entry)()
     }
 
     pub fn get_next_wut(&self) -> u64 {

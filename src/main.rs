@@ -47,12 +47,16 @@ fn main() -> ! {
     let button = gpioc.pc13.into_floating_input();
 
     /* task 1 */
-    let mut a = 10;
-    let mut button_closure = RunnableClosure::new(|  | {
+    let mut c = 10;
+    let mut button_closure = RunnableClosure::new( move | | {
         //button;
-        let mut a = 1;
+        c += 1;
         Ok(())
     });
+    let mut vla = pin_this(&mut button_closure.runnable);
+    let basfd = vla.as_mut().get_mut();
+    basfd();
+    let mut task2 = Task::new(basfd);
 
     //RunnableClosure::run(&mut button_closure);
     /* todo: implement some sort of static Box<> type */
@@ -69,10 +73,10 @@ fn main() -> ! {
     });
     let mut task2 = Task::new(&mut runnable);*/
 
-    let mut task1 = Task::new(a_task);
+    //let mut task1 = Task::new(&mut a_task);
 
     Scheduler::init();
-    Scheduler::add(task1);
+    //Scheduler::add(task1);
     //let mut scheduler = Scheduler::new();
     //scheduler.spawn(task1);
     //scheduler.spawn(task2);
@@ -92,7 +96,7 @@ fn main() -> ! {
 // }
 
 
-fn a_task(context: &mut Context) -> Result<(), TaskError> {
+fn a_task() -> Result<(), TaskError> {
     // this is very stupid, but it will do for now
     let stm32_peripherals = unsafe{ stm32::Peripherals::steal() };
     let gpioa = stm32_peripherals.GPIOA.split();
@@ -100,8 +104,12 @@ fn a_task(context: &mut Context) -> Result<(), TaskError> {
 
     loop {
         led.toggle();
-        context.delay(500);
     }
 
     Ok(())
+}
+
+fn pin_this<F>(closure: &'static mut F) -> Pin<&'static mut F> where F: 'static + Sync + FnMut() -> Result<(), TaskError>,
+{
+    unsafe { Pin::new_unchecked(closure) }
 }
