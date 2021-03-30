@@ -11,16 +11,55 @@ use cortex_m::peripheral::{
 };
 use cortex_m_rt::exception;
 
-pub struct Scheduler<'a>
+pub struct Scheduler
 {
-    tasks: [Option<Task<'a>>; 5],
-    syst: SYST,
+    tasks: [Option<Task>; 5],
+    //syst: SYST,
 }
 
-impl<'a> Scheduler<'a>
+impl Scheduler
 {
 
-    pub fn new() -> Self {
+    // pub fn new() -> Self {
+    //     // init systick -> 1ms
+    //     let mut syst = Peripherals::take().unwrap().SYST;
+    //     syst.set_clock_source(SystClkSource::Core);
+    //     // this is configured for the STM32F411 which has a default CPU clock of 48 MHz
+    //     syst.set_reload(48_000);
+    //     syst.clear_current();
+    //     syst.enable_counter();
+    //     syst.enable_interrupt();
+    //
+    //     Scheduler {
+    //         tasks: [None, None, None, None, None],
+    //         //syst: syst,
+    //     }
+    // }
+    //
+    // pub fn spawn(&mut self, task: Task<'a>) {
+    //     for _task in self.tasks.iter_mut() {
+    //         if _task.is_none() {
+    //             *_task = Some(task);
+    //             break;
+    //         }
+    //     }
+    // }
+    //
+    // pub fn exec(&mut self) {
+    //     for task in self.tasks.iter_mut() {
+    //         if task.is_some() {
+    //             if task.as_mut().unwrap().get_next_wut() < get_tick() {
+    //                 task.as_mut().unwrap().run();
+    //             }
+    //         }
+    //     }
+    // }
+    //
+    // fn yield_sched(&mut self) {
+    //     self.exec();
+    // }
+
+    pub fn init() {
         // init systick -> 1ms
         let mut syst = Peripherals::take().unwrap().SYST;
         syst.set_clock_source(SystClkSource::Core);
@@ -30,14 +69,16 @@ impl<'a> Scheduler<'a>
         syst.enable_counter();
         syst.enable_interrupt();
 
-        Scheduler {
-            tasks: [None, None, None, None, None],
-            syst: syst,
-        }
+        unsafe { SCHEDULER = Some(Scheduler {
+                tasks: [None, None, None, None, None],
+                //syst: syst,
+            })
+        };
     }
 
-    pub fn spawn(&mut self, task: Task<'a>) {
-        for _task in self.tasks.iter_mut() {
+    pub fn add(mut task: Task) {
+        let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
+        for _task in scheduler.tasks.iter_mut() {
             if _task.is_none() {
                 *_task = Some(task);
                 break;
@@ -45,8 +86,9 @@ impl<'a> Scheduler<'a>
         }
     }
 
-    pub fn exec(&mut self) {
-        for task in self.tasks.iter_mut() {
+    pub fn exec() {
+        let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
+        for task in scheduler.tasks.iter_mut() {
             if task.is_some() {
                 if task.as_mut().unwrap().get_next_wut() < get_tick() {
                     task.as_mut().unwrap().run();
@@ -54,11 +96,13 @@ impl<'a> Scheduler<'a>
             }
         }
     }
-    //
-    // fn yield_sched(&mut self) {
-    //     self.exec();
-    // }
+
+    pub fn yield_sched() {
+        Scheduler::exec();
+    }
 }
+
+static mut SCHEDULER: Option<Scheduler> = None;
 
 
 ////////////////////////////////////////////////////////////////////////////////

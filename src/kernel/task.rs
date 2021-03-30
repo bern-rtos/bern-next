@@ -12,22 +12,24 @@ pub struct Context {
 impl Context {
     pub fn delay(&mut self, ms: u32) {
         self.next_wut = scheduler::get_tick() + u64::from(ms);
+        scheduler::Scheduler::yield_sched();
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-pub trait Runnable {
-    fn run(&mut self, context: &mut Context) -> Result<(), TaskError>;
+// todo: remove Sync, it's currently needed to share reference to runnable
+pub trait Runnable: Sync {
+    fn run(&mut self) -> Result<(), TaskError>;
 }
 
 pub struct RunnableClosure<F>
-    where F: FnMut(&mut Context) -> Result<(), TaskError>,
+    where F: 'static + Sync + FnMut() -> Result<(), TaskError>,
 {
-    runnable: F,
+    pub runnable: F,
 }
 impl<F> RunnableClosure<F>
-    where F: FnMut(&mut Context) -> Result<(), TaskError>,
+    where F: 'static + Sync + FnMut() -> Result<(), TaskError>,
 {
     pub fn new(runnable: F) -> Self {
         RunnableClosure {
@@ -36,26 +38,27 @@ impl<F> RunnableClosure<F>
     }
 }
 impl<F> Runnable for RunnableClosure<F>
-    where F: FnMut(&mut Context) -> Result<(), TaskError>,
+    where F: 'static + Sync + FnMut() -> Result<(), TaskError>,
 {
-    fn run(&mut self, context: &mut Context) -> Result<(), TaskError> {
-        (self.runnable)(context)
+    fn run(&mut self) -> Result<(), TaskError> {
+        (self.runnable)()
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-pub struct Task<'a>
+pub struct Task
 {
-    pub runnable: &'a mut dyn Runnable,
+    //pub runnable: &'a mut dyn Runnable,
+    entry: fn(&mut Context) -> Result<(), TaskError>,
     context: Context,
 }
 
-impl<'a> Task<'a>
+impl Task
 {
-    pub fn new(runnable: &'a mut dyn Runnable) -> Self {
+    pub fn new(entry: fn(&mut Context) -> Result<(), TaskError>) -> Self {
         Task {
-            runnable,
+            entry,
             context: Context {
                 next_wut: 0,
             }
@@ -71,7 +74,7 @@ impl<'a> Task<'a>
     // }
 
     pub fn run(&mut self) -> Result<(), TaskError> {
-        self.runnable.run(&mut self.context)
+        (self.entry)(&mut self.context)
     }
 
     pub fn get_next_wut(&self) -> u64 {

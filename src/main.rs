@@ -1,4 +1,4 @@
-#![deny(unsafe_code)]
+//#![deny(unsafe_code)] todo: just for now
 #![no_main]
 #![no_std]
 
@@ -21,6 +21,8 @@ use stm32f4xx_hal as hal;
 use crate::hal::{prelude::*, stm32};
 use embedded_hal;
 use crate::kernel::task::Context;
+use core::borrow::BorrowMut;
+use core::pin::Pin;
 
 #[entry]
 fn main() -> ! {
@@ -33,7 +35,7 @@ fn main() -> ! {
     let clocks = rcc.cfgr.sysclk(48.mhz()).freeze();
 
     // gpio's
-    let gpioa = stm32_peripherals.GPIOA.split();
+    //let gpioa = stm32_peripherals.GPIOA.split();
     let gpiob = stm32_peripherals.GPIOB.split();
     let gpioc = stm32_peripherals.GPIOC.split();
 
@@ -41,31 +43,43 @@ fn main() -> ! {
     //let stim = &mut cortex_peripherals.ITM.stim[1];
 
     // button to led map module
-    let mut led = gpioa.pa5.into_push_pull_output();
+    //let mut led = gpioa.pa5.into_push_pull_output();
     let button = gpioc.pc13.into_floating_input();
 
     /* task 1 */
+    let mut a = 10;
+    let mut button_closure = RunnableClosure::new(|  | {
+        //button;
+        let mut a = 1;
+        Ok(())
+    });
+
+    //RunnableClosure::run(&mut button_closure);
     /* todo: implement some sort of static Box<> type */
-    let mut runnable = RunnableClosure::new(move |c| {
+    /*let mut runnable = RunnableClosure::new(move |c| {
         led.toggle();
         c.delay(100);
         Ok(())
     });
-    let mut task1 = Task::new(&mut runnable);
+    let mut task1 = Task::new(&mut runnable);*/
 
     /* task 2 */
-    let mut runnable = RunnableClosure::new(move |c| {
+    /*let mut runnable = RunnableClosure::new(move |c| {
         Ok(())
     });
-    let mut task2 = Task::new(&mut runnable);
+    let mut task2 = Task::new(&mut runnable);*/
 
-    let mut scheduler = Scheduler::new();
-    scheduler.spawn(task1);
-    scheduler.spawn(task2);
+    let mut task1 = Task::new(a_task);
+
+    Scheduler::init();
+    Scheduler::add(task1);
+    //let mut scheduler = Scheduler::new();
+    //scheduler.spawn(task1);
+    //scheduler.spawn(task2);
     //scheduler.spawn(new_task());
 
     loop {
-        scheduler.exec();
+        Scheduler::exec();
     }
 }
 
@@ -76,3 +90,18 @@ fn main() -> ! {
 //     });
 //     Task::new(&mut runnable)
 // }
+
+
+fn a_task(context: &mut Context) -> Result<(), TaskError> {
+    // this is very stupid, but it will do for now
+    let stm32_peripherals = unsafe{ stm32::Peripherals::steal() };
+    let gpioa = stm32_peripherals.GPIOA.split();
+    let mut led = gpioa.pa5.into_push_pull_output();
+
+    loop {
+        led.toggle();
+        context.delay(500);
+    }
+
+    Ok(())
+}
