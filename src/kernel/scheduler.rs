@@ -10,55 +10,16 @@ use cortex_m::peripheral::{
     syst::SystClkSource,
 };
 use cortex_m_rt::exception;
+use crate::TASKS;
 
-pub struct Scheduler
+pub struct Scheduler<'a>
 {
-    tasks: [Option<Task>; 5],
+    tasks: [Option<Task<'a>>; 5],
     //syst: SYST,
 }
 
-impl Scheduler
+impl<'a> Scheduler<'a>
 {
-
-    // pub fn new() -> Self {
-    //     // init systick -> 1ms
-    //     let mut syst = Peripherals::take().unwrap().SYST;
-    //     syst.set_clock_source(SystClkSource::Core);
-    //     // this is configured for the STM32F411 which has a default CPU clock of 48 MHz
-    //     syst.set_reload(48_000);
-    //     syst.clear_current();
-    //     syst.enable_counter();
-    //     syst.enable_interrupt();
-    //
-    //     Scheduler {
-    //         tasks: [None, None, None, None, None],
-    //         //syst: syst,
-    //     }
-    // }
-    //
-    // pub fn spawn(&mut self, task: Task<'a>) {
-    //     for _task in self.tasks.iter_mut() {
-    //         if _task.is_none() {
-    //             *_task = Some(task);
-    //             break;
-    //         }
-    //     }
-    // }
-    //
-    // pub fn exec(&mut self) {
-    //     for task in self.tasks.iter_mut() {
-    //         if task.is_some() {
-    //             if task.as_mut().unwrap().get_next_wut() < get_tick() {
-    //                 task.as_mut().unwrap().run();
-    //             }
-    //         }
-    //     }
-    // }
-    //
-    // fn yield_sched(&mut self) {
-    //     self.exec();
-    // }
-
     pub fn init() {
         // init systick -> 1ms
         let mut syst = Peripherals::take().unwrap().SYST;
@@ -76,8 +37,9 @@ impl Scheduler
         };
     }
 
-    pub fn add(mut task: Task) {
+    pub fn add(mut task: Task<'static>) {
         let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
+
         for _task in scheduler.tasks.iter_mut() {
             if _task.is_none() {
                 *_task = Some(task);
@@ -88,10 +50,12 @@ impl Scheduler
 
     pub fn exec() {
         let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
+
         for task in scheduler.tasks.iter_mut() {
             if task.is_some() {
                 if task.as_mut().unwrap().get_next_wut() < get_tick() {
                     task.as_mut().unwrap().run();
+                    task.as_mut().unwrap().delay(100);
                 }
             }
         }
@@ -103,6 +67,7 @@ impl Scheduler
 }
 
 static mut SCHEDULER: Option<Scheduler> = None;
+
 
 
 ////////////////////////////////////////////////////////////////////////////////

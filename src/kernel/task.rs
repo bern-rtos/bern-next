@@ -47,37 +47,30 @@ impl<F> Runnable for RunnableClosure<F>
 
 ////////////////////////////////////////////////////////////////////////////////
 
-pub struct Task
+pub struct Task<'a>
 {
-    //pub runnable: &'a mut dyn Runnable,
-    entry: &'static mut fn() -> Result<(), TaskError>,
-    context: Context,
+    runnable: &'a mut (dyn Runnable + 'static),
+    next_wut: u64,
 }
 
-impl Task
+impl<'a> Task<'a>
 {
-    pub fn new(entry: &'static mut fn() -> Result<(), TaskError>) -> Self {
+    pub fn new(runnable: &'a mut (dyn Runnable + 'static)) -> Self {
         Task {
-            entry,
-            context: Context {
-                next_wut: 0,
-            }
+            runnable,
+            next_wut: 0,
         }
     }
 
-    // pub fn new_from_closure<F>(runnable: F) -> (RunnableClosure<F>, Self)
-    //     where F: 'static + FnMut(&mut Context) -> Result<(), TaskError>,
-    // {
-    //     let mut runnable = RunnableClosure::new(runnable);
-    //     let task = Self::new(&mut runnable);
-    //     return (runnable, task);
-    // }
-
     pub fn run(&mut self) -> Result<(), TaskError> {
-        (self.entry)()
+        self.runnable.run()
     }
 
     pub fn get_next_wut(&self) -> u64 {
-        self.context.next_wut
+        self.next_wut
+    }
+
+    pub fn delay(&mut self, ms: u32) {
+        self.next_wut = scheduler::get_tick() + u64::from(ms);
     }
 }

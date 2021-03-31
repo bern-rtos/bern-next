@@ -20,7 +20,7 @@ rustflags = [
 
   # if you run into problems with LLD switch to the GNU linker by commenting out
   # this line
-  # "-C", "linker=arm-none-eabi-ld",
+  "-C", "linker=arm-none-eabi-ld",
 
   # if you need to link to pre-compiled C libraries provided by a C toolchain
   # use GCC as the linker by commenting out both lines above and then
@@ -30,6 +30,10 @@ rustflags = [
   # "-C", "link-arg=-nostartfiles",
 
   "-C", "inline-threshold=275", # use with opt "s"
+
+  "-C", "link-arg=-Map=output.map",
+  "-C", "link-arg=--print-memory-usage",
+  "-Z", "print-link-args",
 ]
 
 [build]
