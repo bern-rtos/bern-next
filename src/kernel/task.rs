@@ -1,22 +1,38 @@
 use super::scheduler;
+use super::scheduler::Scheduler;
+use super::boxed::Box;
+use core::ptr::NonNull;
+use core::mem::size_of;
 
 #[derive(Debug)]
 pub struct TaskError;
 
-////////////////////////////////////////////////////////////////////////////////
-
-pub struct Context {
-    next_wut: u64,
+// todo: enforce alignment and size restrictions
+// todo: a stack section to memory
+#[macro_export]
+macro_rules! alloc_static_stack {
+    ($size:expr) => {
+        {
+            static mut STACK: [u8; $size] = [0; $size];
+            unsafe { STACK.as_mut() }
+        }
+    };
 }
 
-impl Context {
-    pub fn delay(&mut self, ms: u32) {
-        self.next_wut = scheduler::get_tick() + u64::from(ms);
-        scheduler::Scheduler::yield_sched();
-    }
-}
-
 ////////////////////////////////////////////////////////////////////////////////
+
+/// Issue with closures and static tasks
+/// ------------------------------------
+/// Every closure has its own anonymous type. A closure can only be stored in a
+/// generic struct. The task object stored in the task "list" (array) must all
+/// have the same size -> not generic. Thus, the closure can only be referenced
+/// as trait object. But need to force the closure to be static, so our
+/// reference can be as well. A static closure is not possible, as every static
+/// needs a specified type.
+/// To overcome the issue of storing a closure into a static task we need to
+/// wrap the closure in struct and **copy** it into a static stack. Access to
+/// the closure is provided via a trait object, which now references a static
+/// object which cannot go out of scope.
 
 // todo: remove Sync, it's currently needed to share reference to runnable
 pub trait Runnable: Sync {
@@ -47,19 +63,29 @@ impl<F> Runnable for RunnableClosure<F>
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// todo: manage lifetime of stack & runnable
 pub struct Task<'a>
 {
     runnable: &'a mut (dyn Runnable + 'static),
     next_wut: u64,
+    stack_ptr: *const u32, // todo: remove platform dependency
 }
 
 impl<'a> Task<'a>
 {
-    pub fn new(runnable: &'a mut (dyn Runnable + 'static)) -> Self {
-        Task {
-            runnable,
+    // todo: replace stack with own type
+    pub fn spawn<F>(closure: F, stack: &mut [u8])
+        where F: 'static + Sync + FnMut() -> Result<(), TaskError>
+    {
+        let mut runnable = RunnableClosure::new(closure);
+        let mut task = Task {
+            runnable: Box::new(runnable, stack),
             next_wut: 0,
-        }
+            stack_ptr: unsafe { stack.as_ptr().offset(size_of::<F>() as isize)} as *const u32,
+        };
+
+        Scheduler::add(task);
+        // todo: task handle?
     }
 
     pub fn run(&mut self) -> Result<(), TaskError> {

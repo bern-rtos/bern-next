@@ -3,19 +3,20 @@
 #![allow(unsafe_code)]
 
 
-use super::task::{Task, TaskError, Context};
+use super::task::{Task, TaskError};
 use cortex_m::peripheral::{
     Peripherals,
     SYST,
     syst::SystClkSource,
 };
 use cortex_m_rt::exception;
-use crate::TASKS;
 
+// todo: lock sched
 pub struct Scheduler<'a>
 {
     tasks: [Option<Task<'a>>; 5],
     //syst: SYST,
+    current_task: Option<&'a mut Task<'a>>,
 }
 
 impl<'a> Scheduler<'a>
@@ -33,6 +34,7 @@ impl<'a> Scheduler<'a>
         unsafe { SCHEDULER = Some(Scheduler {
                 tasks: [None, None, None, None, None],
                 //syst: syst,
+                current_task: None,
             })
         };
     }
@@ -54,15 +56,19 @@ impl<'a> Scheduler<'a>
         for task in scheduler.tasks.iter_mut() {
             if task.is_some() {
                 if task.as_mut().unwrap().get_next_wut() < get_tick() {
-                    task.as_mut().unwrap().run();
-                    task.as_mut().unwrap().delay(100);
+                    let current_task = task.as_mut().unwrap();
+                    scheduler.current_task = Some(current_task);
+                    scheduler.current_task.as_mut().unwrap().run();
                 }
             }
         }
+        scheduler.current_task = None;
     }
 
-    pub fn yield_sched() {
-        Scheduler::exec();
+    pub fn delay(ms: u32) {
+        // todo: unsafe -> already &mut in exec
+        let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
+        scheduler.current_task.as_mut().unwrap().delay(ms);
     }
 }
 

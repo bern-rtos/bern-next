@@ -32,8 +32,9 @@ rustflags = [
   "-C", "inline-threshold=275", # use with opt "s"
 
   "-C", "link-arg=-Map=output.map",
+  "-C", "link-arg=--demangle",
   "-C", "link-arg=--print-memory-usage",
-  "-Z", "print-link-args",
+  # "-Z", "print-link-args",
 ]
 
 [build]

@@ -21,7 +21,7 @@ use cortex_m_rt::entry;
 use stm32f4xx_hal as hal;
 use crate::hal::{prelude::*, stm32};
 use embedded_hal;
-use crate::kernel::task::{Context, Runnable};
+use crate::kernel::task::Runnable;
 use core::mem::take;
 use core::pin::Pin;
 
@@ -47,29 +47,27 @@ fn main() -> ! {
 
     // button to led map module
     let mut led = gpioa.pa5.into_push_pull_output();
-    let button = gpioc.pc13.into_floating_input();
+    //let mut led_0 = gpiob.pb11.into_push_pull_output();
+    //let mut led_1 = gpiob.pb12.into_push_pull_output();
+    //let mut led_2 = gpioc.pc2.into_push_pull_output();
+    //let mut led_3 = gpioc.pc3.into_push_pull_output();
+    //let mut led_4 = gpioa.pa2.into_push_pull_output();
+    //let mut led_5 = gpioa.pa3.into_push_pull_output();
+    //let mut led_6 = gpioc.pc6.into_push_pull_output();
+    let mut led_7 = gpioc.pc7.into_push_pull_output();
+    //let button = gpioc.pc13.into_floating_input();
 
     /* task 1 */
-    task_spawn(move | | {
-        led.toggle();
-        Ok(())
-    });
+    Task::spawn(move | | {
+            led.toggle();
+            led_7.toggle();
+            Scheduler::delay(500);
+            Ok(())
+        },
+        alloc_static_stack!(256)
+    );
 
     loop {
         Scheduler::exec();
     }
 }
-
-fn task_spawn<F>(closure: F)
-    where
-        F: 'static + Sync + FnMut() -> Result<(), TaskError>,
-{
-    let mut runnable = RunnableClosure::new(closure);
-    let mut task = Task::new(
-        kernel::boxed::Box::new(runnable, unsafe { TASK_A_STACK.as_mut() })
-    );
-    Scheduler::add(task);
-}
-
-static mut TASKS: Option<Task> = None;
-static mut TASK_A_STACK: [u8; 256] = [0; 256];
