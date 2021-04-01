@@ -8,7 +8,6 @@ mod kernel;
 use kernel::{
     task::Task,
     task::TaskError,
-    task::RunnableClosure,
     scheduler::Scheduler,
     scheduler,
 };
@@ -21,7 +20,6 @@ use cortex_m_rt::entry;
 use stm32f4xx_hal as hal;
 use crate::hal::{prelude::*, stm32};
 use embedded_hal;
-use crate::kernel::task::Runnable;
 use core::mem::take;
 use core::pin::Pin;
 

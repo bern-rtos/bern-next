@@ -15,7 +15,7 @@ use cortex_m_rt::exception;
 pub struct Scheduler<'a>
 {
     tasks: [Option<Task<'a>>; 5],
-    //syst: SYST,
+    core: Peripherals,
     current_task: Option<&'a mut Task<'a>>,
 }
 
@@ -23,17 +23,17 @@ impl<'a> Scheduler<'a>
 {
     pub fn init() {
         // init systick -> 1ms
-        let mut syst = Peripherals::take().unwrap().SYST;
-        syst.set_clock_source(SystClkSource::Core);
+        let mut core = Peripherals::take().unwrap();
+        core.SYST.set_clock_source(SystClkSource::Core);
         // this is configured for the STM32F411 which has a default CPU clock of 48 MHz
-        syst.set_reload(48_000);
-        syst.clear_current();
-        syst.enable_counter();
-        syst.enable_interrupt();
+        core.SYST.set_reload(48_000);
+        core.SYST.clear_current();
+        core.SYST.enable_counter();
+        core.SYST.enable_interrupt();
 
         unsafe { SCHEDULER = Some(Scheduler {
                 tasks: [None, None, None, None, None],
-                //syst: syst,
+                core,
                 current_task: None,
             })
         };
