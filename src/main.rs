@@ -1,4 +1,5 @@
 #![feature(unsize)]
+#![feature(asm)]
 //#![deny(unsafe_code)] todo: just for now
 #![no_main]
 #![no_std]
@@ -26,6 +27,14 @@ use core::pin::Pin;
 #[entry]
 fn main() -> ! {
     Scheduler::init();
+    /* idle task */
+    Task::spawn(move | | {
+        loop {
+            cortex_m::asm::nop();
+        }
+    },
+        alloc_static_stack!(128)
+    );
 
     // Take hardware peripherals
     let stm32_peripherals = stm32::Peripherals::take().expect("cannot take stm32 peripherals");
@@ -51,21 +60,37 @@ fn main() -> ! {
     //let mut led_3 = gpioc.pc3.into_push_pull_output();
     //let mut led_4 = gpioa.pa2.into_push_pull_output();
     //let mut led_5 = gpioa.pa3.into_push_pull_output();
-    //let mut led_6 = gpioc.pc6.into_push_pull_output();
+    let mut led_6 = gpioc.pc6.into_push_pull_output();
     let mut led_7 = gpioc.pc7.into_push_pull_output();
     //let button = gpioc.pc13.into_floating_input();
 
     /* task 1 */
     Task::spawn(move | | {
-            led.toggle();
+        led.set_high();
+        loop {
             led_7.toggle();
-            Scheduler::delay(500);
-            Ok(())
-        },
+            Scheduler::delay(100);
+        }
+    },
         alloc_static_stack!(256)
     );
 
+    /* task 2 */
+    let mut a = 0;
+    Task::spawn(move | | {
+        loop {
+            a += 1;
+            led_6.set_high();
+            Scheduler::delay(50);
+            led_6.set_low();
+            Scheduler::delay(400);
+        }
+    },
+        alloc_static_stack!(256)
+    );
+
+    Scheduler::start();
     loop {
-        Scheduler::exec();
+        panic!("We should have never arrived here!");
     }
 }

@@ -8,9 +8,8 @@ add_custom_target(
         BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/target/thumbv7em-none-eabihf/debug/scheduler_demo
 )
 
-add_executable(Executable IMPORTED GLOBAL)
-set_target_properties(
-        Executable PROPERTIES
-        IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/target/thumbv7em-none-eabihf/debug/scheduler_demo
+add_custom_target(
+        BuildRelease
+        COMMAND cargo build --release
+        BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/target/thumbv7em-none-eabihf/release/scheduler_demo
 )
-add_dependencies(Executable Build)
