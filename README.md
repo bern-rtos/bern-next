@@ -1,1 +1,4 @@
-scheduler_demo
+# Kernel Next
+
+Repository for kernel component development and proof of concepts.
+
