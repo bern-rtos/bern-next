@@ -1,0 +1,941 @@
+     VMA      LMA     Size Align Out     In      Symbol
+       0        0        0     1 PROVIDE ( NonMaskableInt = DefaultHandler )
+       0        0        0     1 PROVIDE ( MemoryManagement = DefaultHandler )
+       0        0        0     1 PROVIDE ( BusFault = DefaultHandler )
+       0        0        0     1 PROVIDE ( UsageFault = DefaultHandler )
+       0        0        0     1 PROVIDE ( SVCall = DefaultHandler )
+       0        0        0     1 PROVIDE ( DebugMonitor = DefaultHandler )
+       0        0        0     1 PROVIDE ( PendSV = DefaultHandler )
+       0        0        0     1 PROVIDE ( SysTick = DefaultHandler )
+       0        0        0     1 PROVIDE ( DefaultHandler = DefaultHandler_ )
+       0        0        0     1 PROVIDE ( HardFault = HardFault_ )
+       0        0        0     1 PROVIDE ( __pre_init = DefaultPreInit )
+       0        0        0     1 PROVIDE ( _stack_start = ORIGIN ( RAM ) + LENGTH ( RAM ) )
+ 8000000  8000000      1a8     4 .vector_table
+ 8000000  8000000        4     1         LONG ( _stack_start )
+ 8000004  8000004        4     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.1.rcgu.o):(.vector_table.reset_vector)
+ 8000004  8000004        4     1                 __RESET_VECTOR
+ 8000008  8000008        0     1         __reset_vector = .
+ 8000008  8000008       38     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.1.rcgu.o):(.vector_table.exceptions)
+ 8000008  8000008       38     1                 __EXCEPTIONS
+ 8000040  8000040        0     1         __eexceptions = .
+ 8000040  8000040      168     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libstm32f4-c3530fc99c970234.rlib(stm32f4-c3530fc99c970234.stm32f4.ebnjcbak-cgu.5.rcgu.o):(.vector_table.interrupts)
+ 8000040  8000040      168     1                 __INTERRUPTS
+ 80001a8  80001a8        0     1 PROVIDE ( _stext = ADDR ( .vector_table ) + SIZEOF ( .vector_table ) )
+ 80001a8  80001a8     1b74     4 .text
+ 80001a8  80001a8       58     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.1.rcgu.o):(.Reset)
+ 80001a8  80001a8        0     1                 $t.2
+ 80001a9  80001a9       58     1                 Reset
+ 8000200  8000200        8     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.1ys7e9re56t3yekn.rcgu.o:(.text.rust_begin_unwind)
+ 8000200  8000200        0     1                 $t.0
+ 8000201  8000201        8     1                 rust_begin_unwind
+ 8000208  8000208        a     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.1ys7e9re56t3yekn.rcgu.o:(.text.main)
+ 8000208  8000208        0     1                 $t.1
+ 8000209  8000209        a     1                 main
+ 8000212  8000212      120     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.1ys7e9re56t3yekn.rcgu.o:(.text._ZN4test18__cortex_m_rt_main17h8cc3d1ffe027f41aE)
+ 8000212  8000212        0     1                 $t.2
+ 8000213  8000213      120     1                 test::__cortex_m_rt_main::h8cc3d1ffe027f41a
+ 8000332  8000332       10     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.4cke3idfc6zfo80f.rcgu.o:(.text._ZN4core5slice29_$LT$impl$u20$$u5b$T$u5d$$GT$3len17h47be6ae4fa83c86bE)
+ 8000332  8000332        0     1                 $t.0
+ 8000333  8000333       10     1                 core::slice::_$LT$impl$u20$$u5b$T$u5d$$GT$::len::h47be6ae4fa83c86b
+ 8000342  8000342       26     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.qyho4y1g18clbed.rcgu.o:(.text._ZN4core10intrinsics11write_bytes17hfedf84fb35a33215E)
+ 8000342  8000342        0     1                 $t.0
+ 8000343  8000343       26     1                 core::intrinsics::write_bytes::hfedf84fb35a33215
+ 8000368  8000368       84     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.text._ZN10rtt_target3rtt9RttHeader4init17h8afcc325ff11c8d6E)
+ 8000368  8000368        0     1                 $t.10
+ 8000369  8000369       84     1                 rtt_target::rtt::RttHeader::init::h8afcc325ff11c8d6
+ 80003ec  80003ec       8a     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.text._ZN10rtt_target3rtt10RttChannel4init17h84308c7b1d88b78fE)
+ 80003ec  80003ec        0     1                 $t.12
+ 80003ed  80003ed       8a     1                 rtt_target::rtt::RttChannel::init::h84308c7b1d88b78f
+ 8000476  8000476       40     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.text._ZN10rtt_target3rtt10RttChannel4mode17h9a56a81014512b05E)
+ 8000476  8000476        0     1                 $t.14
+ 8000477  8000477       40     1                 rtt_target::rtt::RttChannel::mode::h9a56a81014512b05
+ 80004b6  80004b6       2c     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.text._ZN10rtt_target3rtt10RttChannel6writer17hca93c86037331850E)
+ 80004b6  80004b6        0     1                 $t.17
+ 80004b7  80004b7       2c     1                 rtt_target::rtt::RttChannel::writer::hca93c86037331850
+ 80004e2  80004e2       b4     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.text._ZN10rtt_target3rtt10RttChannel13read_pointers17h6f0a913e0623643eE)
+ 80004e2  80004e2        0     1                 $t.18
+ 80004e3  80004e3       b4     1                 rtt_target::rtt::RttChannel::read_pointers::h6f0a913e0623643e
+ 8000596  8000596       5a     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.text._ZN10rtt_target3rtt9RttWriter5write17h30557e7faca7207cE)
+ 8000596  8000596        0     1                 $t.19
+ 8000597  8000597       5a     1                 rtt_target::rtt::RttWriter::write::h30557e7faca7207c
+ 80005f0  80005f0      2ce     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.text._ZN10rtt_target3rtt9RttWriter15write_with_mode17h384021bf0b2a2844E)
+ 80005f0  80005f0        0     1                 $t.20
+ 80005f1  80005f1      2ce     1                 rtt_target::rtt::RttWriter::write_with_mode::h384021bf0b2a2844
+ 80008be  80008be       66     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.text._ZN10rtt_target3rtt9RttWriter9is_failed17h7ec145f63484a87bE)
+ 80008be  80008be        0     1                 $t.21
+ 80008bf  80008bf       66     1                 rtt_target::rtt::RttWriter::is_failed::h7ec145f63484a87b
+ 8000924  8000924       46     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.text._ZN68_$LT$rtt_target..rtt..RttWriter$u20$as$u20$core..ops..drop..Drop$GT$4drop17h72185257669ef280E)
+ 8000924  8000924        0     1                 $t.23
+ 8000925  8000925       46     1                 _$LT$rtt_target..rtt..RttWriter$u20$as$u20$core..ops..drop..Drop$GT$::drop::h72185257669ef280
+ 800096a  800096a       44     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.10.rcgu.o):(.text._ZN4core3cmp5impls50_$LT$impl$u20$core..cmp..Ord$u20$for$u20$usize$GT$3cmp17hb3782fb144d32258E)
+ 800096a  800096a        0     1                 $t.0
+ 800096b  800096b       44     1                 core::cmp::impls::_$LT$impl$u20$core..cmp..Ord$u20$for$u20$usize$GT$::cmp::hb3782fb144d32258
+ 80009ae  80009ae        a     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.10.rcgu.o):(.text._ZN4core5slice29_$LT$impl$u20$$u5b$T$u5d$$GT$10as_mut_ptr17h84bad5b62323a42cE)
+ 80009ae  80009ae        0     1                 $t.1
+ 80009af  80009af        a     1                 core::slice::_$LT$impl$u20$$u5b$T$u5d$$GT$::as_mut_ptr::h84bad5b62323a42c
+ 80009b8  80009b8       1e     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.10.rcgu.o):(.text._ZN4core5slice29_$LT$impl$u20$$u5b$T$u5d$$GT$8is_empty17h843b0a87d3de36c0E)
+ 80009b8  80009b8        0     1                 $t.2
+ 80009b9  80009b9       1e     1                 core::slice::_$LT$impl$u20$$u5b$T$u5d$$GT$::is_empty::h843b0a87d3de36c0
+ 80009d6  80009d6       72     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.10.rcgu.o):(.text._ZN8cortex_m9interrupt4free17h664d9c92bdb029a2E)
+ 80009d6  80009d6        0     1                 $t.3
+ 80009d7  80009d7       72     1                 cortex_m::interrupt::free::h664d9c92bdb029a2
+ 8000a48  8000a48       3e     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.11.rcgu.o):(.text._ZN10rtt_target5print20set_print_channel_cs28_$u7b$$u7b$closure$u7d$$u7d$17he3b6dd596733506dE)
+ 8000a48  8000a48        0     1                 $t.1
+ 8000a49  8000a49       3e     1                 rtt_target::print::set_print_channel_cs::_$u7b$$u7b$closure$u7d$$u7d$::he3b6dd596733506d
+ 8000a86  8000a86       40     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.11.rcgu.o):(.text._ZN10rtt_target5print17set_print_channel17hf2778fd2cabd08d7E)
+ 8000a86  8000a86        0     1                 $t.2
+ 8000a87  8000a87       40     1                 rtt_target::print::set_print_channel::hf2778fd2cabd08d7
+ 8000ac6  8000ac6       1e     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.11.rcgu.o):(.text._ZN10rtt_target5print17set_print_channel28_$u7b$$u7b$closure$u7d$$u7d$28_$u7b$$u7b$closure$u7d$$u7d$17hd438775ffb97fc86E)
+ 8000ac6  8000ac6        0     1                 $t.3
+ 8000ac7  8000ac7       1e     1                 rtt_target::print::set_print_channel::_$u7b$$u7b$closure$u7d$$u7d$::_$u7b$$u7b$closure$u7d$$u7d$::hd438775ffb97fc86
+ 8000ae4  8000ae4       22     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.11.rcgu.o):(.text._ZN10rtt_target5print17set_print_channel28_$u7b$$u7b$closure$u7d$$u7d$17hb645f0cd68b6ecf3E)
+ 8000ae4  8000ae4        0     1                 $t.4
+ 8000ae5  8000ae5       22     1                 rtt_target::print::set_print_channel::_$u7b$$u7b$closure$u7d$$u7d$::hb645f0cd68b6ecf3
+ 8000b06  8000b06        8     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.12.rcgu.o):(.text._ZN4core4cell19UnsafeCell$LT$T$GT$3get17hb0ba31b78505e3dfE)
+ 8000b06  8000b06        0     1                 $t.1
+ 8000b07  8000b07        8     1                 core::cell::UnsafeCell$LT$T$GT$::get::hb0ba31b78505e3df
+ 8000b0e  8000b0e        8     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.12.rcgu.o):(.text._ZN4core4cell19UnsafeCell$LT$T$GT$3get17he3d25a6f7ae796ecE)
+ 8000b0e  8000b0e        0     1                 $t.2
+ 8000b0f  8000b0f        8     1                 core::cell::UnsafeCell$LT$T$GT$::get::he3d25a6f7ae796ec
+ 8000b16  8000b16       1c     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.13.rcgu.o):(.text._ZN4core3ops8function6FnOnce9call_once17h1e3035897a4c4287E)
+ 8000b16  8000b16        0     1                 $t.0
+ 8000b17  8000b17       1c     1                 core::ops::function::FnOnce::call_once::h1e3035897a4c4287
+ 8000b32  8000b32       18     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.13.rcgu.o):(.text._ZN4core3ops8function6FnOnce9call_once17h2356b2aa865bdfc8E)
+ 8000b32  8000b32        0     1                 $t.1
+ 8000b33  8000b33       18     1                 core::ops::function::FnOnce::call_once::h2356b2aa865bdfc8
+ 8000b4a  8000b4a       18     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.13.rcgu.o):(.text._ZN4core3ops8function6FnOnce9call_once17h5540e47393009a65E)
+ 8000b4a  8000b4a        0     1                 $t.3
+ 8000b4b  8000b4b       18     1                 core::ops::function::FnOnce::call_once::h5540e47393009a65
+ 8000b62  8000b62       1c     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.13.rcgu.o):(.text._ZN4core3ops8function6FnOnce9call_once17heaf712a7251f96d6E)
+ 8000b62  8000b62        0     1                 $t.4
+ 8000b63  8000b63       1c     1                 core::ops::function::FnOnce::call_once::heaf712a7251f96d6
+ 8000b7e  8000b7e       1e     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.13.rcgu.o):(.text._ZN4core3ptr47drop_in_place$LT$rtt_target..TerminalWriter$GT$17h71032b5722e8fda8E)
+ 8000b7e  8000b7e        0     1                 $t.5
+ 8000b7f  8000b7f       1e     1                 core::ptr::drop_in_place$LT$rtt_target..TerminalWriter$GT$::h71032b5722e8fda8
+ 8000b9c  8000b9c       18     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.13.rcgu.o):(.text._ZN4core3ptr9const_ptr43_$LT$impl$u20$$BP$const$u20$$u5b$T$u5d$$GT$3len17hca9b971561ee38eeE)
+ 8000b9c  8000b9c        0     1                 $t.9
+ 8000b9d  8000b9d       18     1                 core::ptr::const_ptr::_$LT$impl$u20$$BP$const$u20$$u5b$T$u5d$$GT$::len::hca9b971561ee38ee
+ 8000bb4  8000bb4        a     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.13.rcgu.o):(.text._ZN4core3ptr9const_ptr43_$LT$impl$u20$$BP$const$u20$$u5b$T$u5d$$GT$6as_ptr17h8fe93ea7f54c5444E)
+ 8000bb4  8000bb4        0     1                 $t.10
+ 8000bb5  8000bb5        a     1                 core::ptr::const_ptr::_$LT$impl$u20$$BP$const$u20$$u5b$T$u5d$$GT$::as_ptr::h8fe93ea7f54c5444
+ 8000bbe  8000bbe       38     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.13.rcgu.o):(.text._ZN4core6result19Result$LT$T$C$E$GT$2ok17h5e73e8e95c1acf3bE)
+ 8000bbe  8000bbe        0     1                 $t.11
+ 8000bbf  8000bbf       38     1                 core::result::Result$LT$T$C$E$GT$::ok::h5e73e8e95c1acf3b
+ 8000bf6  8000bf6       10     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.14.rcgu.o):(.text._ZN4core3ptr8metadata8metadata17h568c8349ad124132E)
+ 8000bf6  8000bf6        0     1                 $t.1
+ 8000bf7  8000bf7       10     1                 core::ptr::metadata::metadata::h568c8349ad124132
+ 8000c06  8000c06       34     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.15.rcgu.o):(.text._ZN8cortex_m8register7primask4read17h0ec0a348a4b624ecE)
+ 8000c06  8000c06        0     1                 $t.2
+ 8000c07  8000c07       34     1                 cortex_m::register::primask::read::h0ec0a348a4b624ec
+ 8000c3a  8000c3a       62     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.15.rcgu.o):(.text._ZN8cortex_m8register7primask7Primask9is_active17h9baa367a1848f311E)
+ 8000c3a  8000c3a        0     1                 $t.3
+ 8000c3b  8000c3b       62     1                 cortex_m::register::primask::Primask::is_active::h9baa367a1848f311
+ 8000c9c  8000c9c        c     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.3.rcgu.o):(.text._ZN10rtt_target9UpChannel3new17he6e803e2ae09ec83E)
+ 8000c9c  8000c9c        0     1                 $t.5
+ 8000c9d  8000c9d        c     1                 rtt_target::UpChannel::new::he6e803e2ae09ec83
+ 8000ca8  8000ca8       16     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.3.rcgu.o):(.text._ZN10rtt_target15TerminalChannel3new17hd67b0ee68880ba24E)
+ 8000ca8  8000ca8        0     1                 $t.17
+ 8000ca9  8000ca9       16     1                 rtt_target::TerminalChannel::new::hd67b0ee68880ba24
+ 8000cbe  8000cbe      158     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.3.rcgu.o):(.text._ZN10rtt_target15TerminalChannel5write17h59484fd60e2eb8fbE)
+ 8000cbe  8000cbe        0     1                 $t.18
+ 8000cbf  8000cbf      158     1                 rtt_target::TerminalChannel::write::h59484fd60e2eb8fb
+ 8000e16  8000e16       3a     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.3.rcgu.o):(.text._ZN63_$LT$rtt_target..TerminalWriter$u20$as$u20$core..fmt..Write$GT$9write_str17hea18b30e9689ea14E)
+ 8000e16  8000e16        0     1                 $t.21
+ 8000e17  8000e17       3a     1                 _$LT$rtt_target..TerminalWriter$u20$as$u20$core..fmt..Write$GT$::write_str::hea18b30e9689ea14
+ 8000e50  8000e50       2a     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.3.rcgu.o):(.text._ZN68_$LT$rtt_target..TerminalWriter$u20$as$u20$core..ops..drop..Drop$GT$4drop17h65efbb636f337fb5E)
+ 8000e50  8000e50        0     1                 $t.23
+ 8000e51  8000e51       2a     1                 _$LT$rtt_target..TerminalWriter$u20$as$u20$core..ops..drop..Drop$GT$::drop::h65efbb636f337fb5
+ 8000e7c  8000e7c       92     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.text._ZN4core4sync6atomic11AtomicUsize4load17h6faa657a17767dcfE)
+ 8000e7c  8000e7c        0     1                 $t.0
+ 8000e7d  8000e7d       92     1                 core::sync::atomic::AtomicUsize::load::h6faa657a17767dcf
+ 8000eaa  8000eaa        0     1                 $d.1
+ 8000eb0  8000eb0        0     1                 $t.2
+ 8000f10  8000f10       98     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.text._ZN4core4sync6atomic11AtomicUsize5store17hcb989b27771f6e24E)
+ 8000f10  8000f10        0     1                 $t.3
+ 8000f11  8000f11       98     1                 core::sync::atomic::AtomicUsize::store::hcb989b27771f6e24
+ 8000f46  8000f46        0     1                 $d.4
+ 8000f4c  8000f4c        0     1                 $t.5
+ 8000fa8  8000fa8       42     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.text._ZN4core4sync6atomic14compiler_fence17hf85ce12561abd440E)
+ 8000fa8  8000fa8        0     1                 $t.18
+ 8000fa9  8000fa9       42     1                 core::sync::atomic::compiler_fence::hf85ce12561abd440
+ 8000fbe  8000fbe        0     1                 $d.19
+ 8000fc4  8000fc4        0     1                 $t.20
+ 8000fec  8000fec       92     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.text._ZN4core4sync6atomic18AtomicPtr$LT$T$GT$4load17he3bd0a15e484713aE)
+ 8000fec  8000fec        0     1                 $t.21
+ 8000fed  8000fed       92     1                 core::sync::atomic::AtomicPtr$LT$T$GT$::load::he3bd0a15e484713a
+ 800101a  800101a        0     1                 $d.22
+ 8001020  8001020        0     1                 $t.23
+ 8001080  8001080       98     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.text._ZN4core4sync6atomic18AtomicPtr$LT$T$GT$5store17hb58b4097919eded2E)
+ 8001080  8001080        0     1                 $t.24
+ 8001081  8001081       98     1                 core::sync::atomic::AtomicPtr$LT$T$GT$::store::hb58b4097919eded2
+ 80010b6  80010b6        0     1                 $d.25
+ 80010bc  80010bc        0     1                 $t.26
+ 8001118  8001118       52     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.text._ZN4core4sync6atomic5fence17h1ac3e0064cf06a22E)
+ 8001118  8001118        0     1                 $t.27
+ 8001119  8001119       52     1                 core::sync::atomic::fence::h1ac3e0064cf06a22
+ 800112e  800112e        0     1                 $d.28
+ 8001134  8001134        0     1                 $t.29
+ 800116a  800116a       6c     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.5.rcgu.o):(.text._ZN10rtt_target5print10print_impl11with_writer28_$u7b$$u7b$closure$u7d$$u7d$17he3006f48e1a31fe2E)
+ 800116a  800116a        0     1                 $t.1
+ 800116b  800116b       6c     1                 rtt_target::print::print_impl::with_writer::_$u7b$$u7b$closure$u7d$$u7d$::he3006f48e1a31fe2
+ 80011d6  80011d6       8c     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.5.rcgu.o):(.text._ZN10rtt_target5print10print_impl9write_str17hc73730ee8330cc55E)
+ 80011d6  80011d6        0     1                 $t.2
+ 80011d7  80011d7       8c     1                 rtt_target::print::print_impl::write_str::hc73730ee8330cc55
+ 8001262  8001262       16     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.6.rcgu.o):(.text._ZN4core3ptr7mut_ptr31_$LT$impl$u20$$BP$mut$u20$T$GT$6offset17h84575c730e0f5523E)
+ 8001262  8001262        0     1                 $t.3
+ 8001263  8001263       16     1                 core::ptr::mut_ptr::_$LT$impl$u20$$BP$mut$u20$T$GT$::offset::h84575c730e0f5523
+ 8001278  8001278       2c     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.6.rcgu.o):(.text._ZN4core3ptr7mut_ptr31_$LT$impl$u20$$BP$mut$u20$T$GT$7is_null17h5235cfa259674024E)
+ 8001278  8001278        0     1                 $t.4
+ 8001279  8001279       2c     1                 core::ptr::mut_ptr::_$LT$impl$u20$$BP$mut$u20$T$GT$::is_null::h5235cfa259674024
+ 80012a4  80012a4        e     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.7.rcgu.o):(.text._ZN4core3ptr14write_volatile17h4cb3329a5a8b38f4E)
+ 80012a4  80012a4        0     1                 $t.0
+ 80012a5  80012a5        e     1                 core::ptr::write_volatile::h4cb3329a5a8b38f4
+ 80012b2  80012b2        e     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.7.rcgu.o):(.text._ZN4core3ptr14write_volatile17hd5b465308e15d4bdE)
+ 80012b2  80012b2        0     1                 $t.1
+ 80012b3  80012b3        e     1                 core::ptr::write_volatile::hd5b465308e15d4bd
+ 80012c0  80012c0        e     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.7.rcgu.o):(.text._ZN4core3ptr14write_volatile17hf68166eb647d4ed2E)
+ 80012c0  80012c0        0     1                 $t.2
+ 80012c1  80012c1        e     1                 core::ptr::write_volatile::hf68166eb647d4ed2
+ 80012ce  80012ce       1c     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.7.rcgu.o):(.text._ZN4core3ptr5write17h8ad0b5143685adf9E)
+ 80012ce  80012ce        0     1                 $t.4
+ 80012cf  80012cf       1c     1                 core::ptr::write::h8ad0b5143685adf9
+ 80012ea  80012ea       26     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.8.rcgu.o):(.text._ZN4core5slice5index74_$LT$impl$u20$core..ops..index..Index$LT$I$GT$$u20$for$u20$$u5b$T$u5d$$GT$5index17hec5ffa2818652ac6E)
+ 80012ea  80012ea        0     1                 $t.0
+ 80012eb  80012eb       26     1                 core::slice::index::_$LT$impl$u20$core..ops..index..Index$LT$I$GT$$u20$for$u20$$u5b$T$u5d$$GT$::index::hec5ffa2818652ac6
+ 8001310  8001310       94     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.2.rcgu.o):(.text._ZN110_$LT$core..ops..range..RangeFrom$LT$usize$GT$$u20$as$u20$core..slice..index..SliceIndex$LT$$u5b$T$u5d$$GT$$GT$5index17h1ed4f03663ae1155E)
+ 8001310  8001310        0     1                 $t.6
+ 8001311  8001311       94     1                 _$LT$core..ops..range..RangeFrom$LT$usize$GT$$u20$as$u20$core..slice..index..SliceIndex$LT$$u5b$T$u5d$$GT$$GT$::index::h1ed4f03663ae1155
+ 80013a4  80013a4       84     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.9.rcgu.o):(.text._ZN4core3cmp3min17h3b35c46e30142f35E)
+ 80013a4  80013a4        0     1                 $t.1
+ 80013a5  80013a5       84     1                 core::cmp::min::h3b35c46e30142f35
+ 8001428  8001428        a     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.1.rcgu.o):(.text.ResetTrampoline)
+ 8001428  8001428        0     1                 $t.3
+ 8001429  8001429        a     1                 ResetTrampoline
+ 8001432  8001432       1a     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.1.rcgu.o):(.text.DefaultHandler_)
+ 8001432  8001432        0     1                 $t.5
+ 8001433  8001433       1a     1                 DefaultHandler_
+ 800144c  800144c        2     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.1.rcgu.o):(.text.DefaultPreInit)
+ 800144c  800144c        0     1                 $t.6
+ 800144d  800144d        2     1                 DefaultPreInit
+ 8001450  8001450       42     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.3.rcgu.o):(.text._ZN4core4sync6atomic14compiler_fence17hb55c134559645a05E)
+ 8001450  8001450        0     1                 $t.0
+ 8001451  8001451       42     1                 core::sync::atomic::compiler_fence::hb55c134559645a05
+ 8001466  8001466        0     1                 $d.1
+ 800146c  800146c        0     1                 $t.2
+ 8001492  8001492        e     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.8.rcgu.o):(.text._ZN4core3ptr14write_volatile17h1da3a6f1d7ad7358E)
+ 8001492  8001492        0     1                 $t.0
+ 8001493  8001493        e     1                 core::ptr::write_volatile::h1da3a6f1d7ad7358
+ 80014a0  80014a0       28     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.8.rcgu.o):(.text._ZN4core3ptr4read17h4350483db17977c8E)
+ 80014a0  80014a0        0     1                 $t.1
+ 80014a1  80014a1       28     1                 core::ptr::read::h4350483db17977c8
+ 80014c8  80014c8       14     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.8.rcgu.o):(.text._ZN4core3ptr5write17h7dc60f5e71ae32f1E)
+ 80014c8  80014c8        0     1                 $t.2
+ 80014c9  80014c9       14     1                 core::ptr::write::h7dc60f5e71ae32f1
+ 80014dc  80014dc       4a     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.9.rcgu.o):(.text._ZN2r08zero_bss17h7b519689ce3ed90dE)
+ 80014dc  80014dc        0     1                 $t.0
+ 80014dd  80014dd       4a     1                 r0::zero_bss::h7b519689ce3ed90d
+ 8001526  8001526       58     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.9.rcgu.o):(.text._ZN2r09init_data17h76cbfc1e4a72feb7E)
+ 8001526  8001526        0     1                 $t.1
+ 8001527  8001527       58     1                 r0::init_data::h76cbfc1e4a72feb7
+ 800157e  800157e       24     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.4.rcgu.o):(.text._ZN4core3mem12maybe_uninit20MaybeUninit$LT$T$GT$6zeroed17hff7e8d8cfaed68a9E)
+ 800157e  800157e        0     1                 $t.0
+ 800157f  800157f       24     1                 core::mem::maybe_uninit::MaybeUninit$LT$T$GT$::zeroed::hff7e8d8cfaed68a9
+ 80015a2  80015a2       18     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.7.rcgu.o):(.text._ZN4core3ptr7mut_ptr31_$LT$impl$u20$$BP$mut$u20$T$GT$11write_bytes17hb8ba9dde669dd1a0E)
+ 80015a2  80015a2        0     1                 $t.0
+ 80015a3  80015a3       18     1                 core::ptr::mut_ptr::_$LT$impl$u20$$BP$mut$u20$T$GT$::write_bytes::hb8ba9dde669dd1a0
+ 80015ba  80015ba       18     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.7.rcgu.o):(.text._ZN4core3ptr7mut_ptr31_$LT$impl$u20$$BP$mut$u20$T$GT$6offset17h6d76e4b397d49f4cE)
+ 80015ba  80015ba        0     1                 $t.1
+ 80015bb  80015bb       18     1                 core::ptr::mut_ptr::_$LT$impl$u20$$BP$mut$u20$T$GT$::offset::h6d76e4b397d49f4c
+ 80015d2  80015d2       22     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.2.rcgu.o):(.text._ZN4core10intrinsics11write_bytes17h297576dee9dc0956E)
+ 80015d2  80015d2        0     1                 $t.0
+ 80015d3  80015d3       22     1                 core::intrinsics::write_bytes::h297576dee9dc0956
+ 80015f4  80015f4       18     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.0.rcgu.o):(.text._ZN4core3ptr9const_ptr33_$LT$impl$u20$$BP$const$u20$T$GT$6offset17h7c1763a85f69b4a6E)
+ 80015f4  80015f4        0     1                 $t.0
+ 80015f5  80015f5       18     1                 core::ptr::const_ptr::_$LT$impl$u20$$BP$const$u20$T$GT$::offset::h7c1763a85f69b4a6
+ 800160c  800160c       2a     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.1.rcgu.o):(.text._ZN4core3ptr20slice_from_raw_parts17h353e96bcf1258396E)
+ 800160c  800160c        0     1                 $t.4
+ 800160d  800160d       2a     1                 core::ptr::slice_from_raw_parts::h353e96bcf1258396
+ 8001636  8001636       1a     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.12.rcgu.o):(.text._ZN4core3ptr9const_ptr33_$LT$impl$u20$$BP$const$u20$T$GT$3add17hae3b0c3ecd141680E)
+ 8001636  8001636        0     1                 $t.0
+ 8001637  8001637       1a     1                 core::ptr::const_ptr::_$LT$impl$u20$$BP$const$u20$T$GT$::add::hae3b0c3ecd141680
+ 8001650  8001650        8     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.12.rcgu.o):(.text._ZN4core3ptr9const_ptr33_$LT$impl$u20$$BP$const$u20$T$GT$4cast17h4669e39b8af326aeE)
+ 8001650  8001650        0     1                 $t.1
+ 8001651  8001651        8     1                 core::ptr::const_ptr::_$LT$impl$u20$$BP$const$u20$T$GT$::cast::h4669e39b8af326ae
+ 8001658  8001658       1a     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.13.rcgu.o):(.text._ZN4core3ptr8metadata14from_raw_parts17he8d067ae15190da8E)
+ 8001658  8001658        0     1                 $t.1
+ 8001659  8001659       1a     1                 core::ptr::metadata::from_raw_parts::he8d067ae15190da8
+ 8001672  8001672       10     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.6.rcgu.o):(.text._ZN4core5slice29_$LT$impl$u20$$u5b$T$u5d$$GT$3len17hf82a978ed2d13024E)
+ 8001672  8001672        0     1                 $t.3
+ 8001673  8001673       10     1                 core::slice::_$LT$impl$u20$$u5b$T$u5d$$GT$::len::hf82a978ed2d13024
+ 8001682  8001682        a     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.6.rcgu.o):(.text._ZN4core5slice29_$LT$impl$u20$$u5b$T$u5d$$GT$6as_ptr17ha83bb08f820389b0E)
+ 8001682  8001682        0     1                 $t.5
+ 8001683  8001683        a     1                 core::slice::_$LT$impl$u20$$u5b$T$u5d$$GT$::as_ptr::ha83bb08f820389b0
+ 800168c  800168c        6     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libbare_metal-d0decc7a5fb6c4f5.rlib(bare_metal-d0decc7a5fb6c4f5.bare_metal.cjwwl3ar-cgu.0.rcgu.o):(.text._ZN10bare_metal15CriticalSection3new17h0a281aa4b214d904E)
+ 800168c  800168c        0     1                 $t.0
+ 800168d  800168d        6     1                 bare_metal::CriticalSection::new::h0a281aa4b214d904
+ 8001692  8001692        2     2         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.text._ZN4core3ptr102drop_in_place$LT$$RF$core..iter..adapters..copied..Copied$LT$core..slice..iter..Iter$LT$u8$GT$$GT$$GT$17hc640b57f7c9a8ca6E)
+ 8001692  8001692        0     1                 $t.1
+ 8001693  8001693        2     1                 core::ptr::drop_in_place$LT$$RF$core..iter..adapters..copied..Copied$LT$core..slice..iter..Iter$LT$u8$GT$$GT$$GT$::hc640b57f7c9a8ca6
+ 8001694  8001694       12     2         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.text._ZN36_$LT$T$u20$as$u20$core..any..Any$GT$7type_id17hb1f3750a2d509a89E)
+ 8001694  8001694        0     1                 $t.87
+ 8001695  8001695       12     1                 _$LT$T$u20$as$u20$core..any..Any$GT$::type_id::hb1f3750a2d509a89
+ 80016a6  80016a6       30     2         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.text.unlikely._ZN4core9panicking5panic17h6fa76ac6d5905a32E)
+ 80016a6  80016a6        0     1                 $t.166
+ 80016a7  80016a7       30     1                 core::panicking::panic::h6fa76ac6d5905a32
+ 80016d6  80016d6       42     2         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.text.unlikely._ZN4core9panicking18panic_bounds_check17h330ac9c7444ee30fE)
+ 80016d6  80016d6        0     1                 $t.167
+ 80016d7  80016d7       42     1                 core::panicking::panic_bounds_check::h330ac9c7444ee30f
+ 8001718  8001718       26     2         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.text.unlikely._ZN4core9panicking9panic_fmt17hff4f81821b36b34dE)
+ 8001718  8001718        0     1                 $t.168
+ 8001719  8001719       26     1                 core::panicking::panic_fmt::hff4f81821b36b34d
+ 800173e  800173e      2d4     2         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.text._ZN4core3fmt9Formatter12pad_integral17h6f440cd9ef6d9563E)
+ 800173e  800173e        0     1                 $t.224
+ 800173f  800173f      2d4     1                 core::fmt::Formatter::pad_integral::h6f440cd9ef6d9563
+ 8001a12  8001a12       44     2         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.text._ZN4core3fmt9Formatter12pad_integral12write_prefix17h2175d08ddab90a17E)
+ 8001a12  8001a12        0     1                 $t.225
+ 8001a13  8001a13       44     1                 core::fmt::Formatter::pad_integral::write_prefix::h2175d08ddab90a17
+ 8001a56  8001a56       42     2         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.text.unlikely._ZN4core5slice5index26slice_start_index_len_fail17h96d29c7354899bf7E)
+ 8001a56  8001a56        0     1                 $t.276
+ 8001a57  8001a57       42     1                 core::slice::index::slice_start_index_len_fail::h96d29c7354899bf7
+ 8001a98  8001a98       f2     2         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.text._ZN4core3fmt3num3imp52_$LT$impl$u20$core..fmt..Display$u20$for$u20$u32$GT$3fmt17hfcea4a4f9e2cc1d9E)
+ 8001a98  8001a98        0     1                 $t.575
+ 8001a99  8001a99       f2     1                 core::fmt::num::imp::_$LT$impl$u20$core..fmt..Display$u20$for$u20$u32$GT$::fmt::hfcea4a4f9e2cc1d9
+ 8001a99  8001a99       f2     1                 core::fmt::num::imp::_$LT$impl$u20$core..fmt..Display$u20$for$u20$usize$GT$::fmt::he566abc95c1eb98e
+ 8001b8a  8001b8a       7e     2         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.116.rcgu.o):(.text.__aeabi_memcpy)
+ 8001b8a  8001b8a        0     1                 $t.4
+ 8001b8b  8001b8b       7e     1                 __aeabi_memcpy
+ 8001c08  8001c08       56     2         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.116.rcgu.o):(.text.__aeabi_memset)
+ 8001c08  8001c08        0     1                 $t.9
+ 8001c09  8001c09       56     1                 __aeabi_memset
+ 8001c5e  8001c5e       8c     2         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.116.rcgu.o):(.text.__aeabi_memset4)
+ 8001c5e  8001c5e        0     1                 $t.10
+ 8001c5f  8001c5f       8c     1                 __aeabi_memset4
+ 8001cea  8001cea       14     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex-m-rt.o):(.HardFaultTrampoline)
+ 8001cea  8001cea        0     1                 $t
+ 8001ceb  8001ceb       14     1                 HardFaultTrampoline
+ 8001cfe  8001cfe       1c     2         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.1.rcgu.o):(.HardFault.default)
+ 8001cfe  8001cfe        0     1                 $t.4
+ 8001cff  8001cff       1c     1                 HardFault_
+ 8001d1a  8001d1a        2     1         . = ALIGN ( 4 )
+ 8001d1c  8001d1c        0     1         __etext = .
+ 8001d1c  8001d1c      5b8    16 .rodata
+ 8001d1c  8001d1c        9     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.1ys7e9re56t3yekn.rcgu.o:(.rodata..L__unnamed_1)
+ 8001d1c  8001d1c        9     1                 .L__unnamed_1
+ 8001d25  8001d25       20     1         <internal>:(.rodata)
+ 8001d45  8001d45        5     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.rodata..L__unnamed_2)
+ 8001d45  8001d45        5     1                 .L__unnamed_2
+ 8001d4a  8001d4a        c     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.rodata..L__unnamed_3)
+ 8001d4a  8001d4a        c     1                 .L__unnamed_3
+ 8001d56  8001d56       58     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.rodata..L__unnamed_17)
+ 8001db0  8001db0       1c    16         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.rodata.str.0)
+ 8001db0  8001db0       1c     1                 str.0
+ 8001dd0  8001dd0       21    16         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.rodata.str.1)
+ 8001dd0  8001dd0       21     1                 str.1
+ 8001df1  8001df1        1     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.rodata..L__unnamed_9)
+ 8001df1  8001df1        1     1                 .L__unnamed_9
+ 8001df4  8001df4       10     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.rodata..L__unnamed_14)
+ 8001df4  8001df4       10     1                 .L__unnamed_14
+ 8001e04  8001e04       10     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.rodata..L__unnamed_15)
+ 8001e04  8001e04       10     1                 .L__unnamed_15
+ 8001e14  8001e14       10     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.rodata..L__unnamed_13)
+ 8001e14  8001e14       10     1                 .L__unnamed_13
+ 8001e24  8001e24       10     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.rodata..L__unnamed_10)
+ 8001e24  8001e24       10     1                 .L__unnamed_10
+ 8001e34  8001e34       10     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.rodata..L__unnamed_11)
+ 8001e34  8001e34       10     1                 .L__unnamed_11
+ 8001e44  8001e44       10     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.rodata..L__unnamed_12)
+ 8001e44  8001e44       10     1                 .L__unnamed_12
+ 8001e54  8001e54        1     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.rodata..L__unnamed_16)
+ 8001e54  8001e54        1     1                 .L__unnamed_16
+ 8001e58  8001e58        4     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.11.rcgu.o):(.rodata..L__unnamed_1)
+ 8001e58  8001e58        4     1                 .L__unnamed_1
+ 8001e5c  8001e5c        1     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.15.rcgu.o):(.rodata..L__unnamed_1)
+ 8001e5c  8001e5c        1     1                 .L__unnamed_1
+ 8001e60  8001e60        4     4         <internal>:(.rodata)
+ 8001e64  8001e64       58     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.3.rcgu.o):(.rodata..L__unnamed_5)
+ 8001ebc  8001ebc       10     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.3.rcgu.o):(.rodata..L__unnamed_4)
+ 8001ebc  8001ebc       10     1                 .L__unnamed_4
+ 8001ecc  8001ecc       31     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.rodata..L__unnamed_1)
+ 8001ecc  8001ecc       31     1                 .L__unnamed_1
+ 8001efd  8001efd       75     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.rodata..L__unnamed_13)
+ 8001f74  8001f74       10     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.rodata..L__unnamed_2)
+ 8001f74  8001f74       10     1                 .L__unnamed_2
+ 8001f84  8001f84       28     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.rodata..L__unnamed_3)
+ 8001f84  8001f84       28     1                 .L__unnamed_3
+ 8001fac  8001fac       10     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.rodata..L__unnamed_4)
+ 8001fac  8001fac       10     1                 .L__unnamed_4
+ 8001fbc  8001fbc       32     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.rodata..L__unnamed_5)
+ 8001fbc  8001fbc       32     1                 .L__unnamed_5
+ 8001ff0  8001ff0       10     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.rodata..L__unnamed_6)
+ 8001ff0  8001ff0       10     1                 .L__unnamed_6
+ 8002000  8002000       2a     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.rodata..L__unnamed_7)
+ 8002000  8002000       2a     1                 .L__unnamed_7
+ 800202c  800202c       10     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.rodata..L__unnamed_8)
+ 800202c  800202c       10     1                 .L__unnamed_8
+ 800203c  800203c       32     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.rodata..L__unnamed_9)
+ 800203c  800203c       32     1                 .L__unnamed_9
+ 8002070  8002070       10     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.rodata..L__unnamed_10)
+ 8002070  8002070       10     1                 .L__unnamed_10
+ 8002080  8002080       29     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.rodata..L__unnamed_11)
+ 8002080  8002080       29     1                 .L__unnamed_11
+ 80020ac  80020ac       10     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.rodata..L__unnamed_12)
+ 80020ac  80020ac       10     1                 .L__unnamed_12
+ 80020bc  80020bc       32     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.3.rcgu.o):(.rodata..L__unnamed_1)
+ 80020bc  80020bc       32     1                 .L__unnamed_1
+ 80020ee  80020ee       75     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.3.rcgu.o):(.rodata..L__unnamed_3)
+ 8002164  8002164       10     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.3.rcgu.o):(.rodata..L__unnamed_2)
+ 8002164  8002164       10     1                 .L__unnamed_2
+ 8002174  8002174        0     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.rodata..Lanon.6375213a2eff462ddf3aa2eafee7040c.10)
+ 8002174  8002174        0     1                 .Lanon.6375213a2eff462ddf3aa2eafee7040c.10
+ 8002174  8002174       10     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.rodata..Lanon.6375213a2eff462ddf3aa2eafee7040c.172)
+ 8002174  8002174       10     1                 .Lanon.6375213a2eff462ddf3aa2eafee7040c.172
+ 8002184  8002184       20     4         <internal>:(.rodata)
+ 80021a4  80021a4       12     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.rodata..Lanon.6375213a2eff462ddf3aa2eafee7040c.180)
+ 80021b8  80021b8       10     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.rodata..Lanon.6375213a2eff462ddf3aa2eafee7040c.181)
+ 80021b8  80021b8       10     1                 .Lanon.6375213a2eff462ddf3aa2eafee7040c.181
+ 80021c8  80021c8       c8     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.rodata..Lanon.6375213a2eff462ddf3aa2eafee7040c.229)
+ 80021c8  80021c8       c8     1                 .Lanon.6375213a2eff462ddf3aa2eafee7040c.229
+ 8002290  8002290       12     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.rodata..Lanon.6375213a2eff462ddf3aa2eafee7040c.249)
+ 80022a2  80022a2       22     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.rodata..Lanon.6375213a2eff462ddf3aa2eafee7040c.250)
+ 80022c4  80022c4       10     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.rodata..Lanon.6375213a2eff462ddf3aa2eafee7040c.251)
+ 80022c4  80022c4       10     1                 .Lanon.6375213a2eff462ddf3aa2eafee7040c.251
+ 80022d4  80022d4        0     1         . = ALIGN ( 4 )
+ 80022d4  80022d4        0     1         __erodata = .
+20000000 20000000        0     4 .data
+20000000 20000000        0     1         . = ALIGN ( 4 )
+20000000 20000000        0     1         __sdata = .
+20000000 20000000        0     1         . = ALIGN ( 4 )
+20000000 20000000        0     1         __edata = .
+20000000 20000000        0     1 __sidata = LOADADDR ( .data )
+20000000  80022d4      43c     4 .bss
+20000000  80022d4        0     1         . = ALIGN ( 4 )
+20000000  80022d4        0     1         __sbss = .
+20000000  80022d4       30     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.1ys7e9re56t3yekn.rcgu.o:(.bss._SEGGER_RTT)
+20000000  80022d4       30     1                 _SEGGER_RTT
+20000030  8002304      400     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.1ys7e9re56t3yekn.rcgu.o:(.bss._ZN4test18__cortex_m_rt_main19_RTT_CHANNEL_BUFFER17h2d43a7f0d7d30e0dE)
+20000030  8002304      400     1                 test::__cortex_m_rt_main::_RTT_CHANNEL_BUFFER::h2d43a7f0d7d30e0d
+20000430  8002704        4     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.11.rcgu.o):(.bss._ZN10rtt_target5print16CRITICAL_SECTION17h13e47aa80814ef39E)
+20000430  8002704        4     1                 rtt_target::print::CRITICAL_SECTION::h13e47aa80814ef39
+20000434  8002708        8     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.11.rcgu.o):(.bss._ZN10rtt_target5print14PRINT_TERMINAL17h820b7f5225525cf2E)
+20000434  8002708        8     1                 rtt_target::print::PRINT_TERMINAL::h820b7f5225525cf2
+2000043c  8002710        0     1         . = ALIGN ( 4 )
+2000043c  8002710        0     1         __ebss = .
+20000440 20000440        0     8 .taskstack
+20000440 20000440        0     1         . = ALIGN ( 8 )
+20000440 20000440        0     4 .uninit
+20000440 20000440        0     1         . = ALIGN ( 4 )
+20000440 20000440        0     1         . = ALIGN ( 4 )
+20000440 20000440        0     1 . = ALIGN ( 4 )
+20000440 20000440        0     1 __sheap = .
+20000440 20000440        0     1 
+20000440 20000440        0     1 
+20000440 20000440        0     1 
+20000440 20000440        0     1 
+20000440 20000440        0     1 
+20000440 20000440        0     1 
+20000440 20000440        0     1 
+20000440 20000440        0     1 
+20000440 20000440        0     1 
+20000440 20000440        0     1 
+20000440 20000440        0     1 
+20000440 20000440        0     1 
+20000440 20000440        0     1 PROVIDE ( WWDG = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( TAMP_STAMP = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( RTC_WKUP = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( FLASH = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( RCC = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( EXTI0 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( EXTI1 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( EXTI2 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( EXTI3 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( EXTI4 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( DMA1_STREAM0 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( DMA1_STREAM1 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( DMA1_STREAM2 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( DMA1_STREAM3 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( DMA1_STREAM4 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( DMA1_STREAM5 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( DMA1_STREAM6 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( ADC = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( CAN1_TX = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( CAN1_RX0 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( CAN1_RX1 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( CAN1_SCE = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( EXTI9_5 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( TIM1_BRK_TIM9 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( TIM1_UP_TIM10 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( TIM1_TRG_COM_TIM11 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( TIM1_CC = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( TIM2 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( TIM3 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( TIM4 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( I2C1_EV = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( I2C1_ER = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( I2C2_EV = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( I2C2_ER = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( SPI1 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( SPI2 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( USART1 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( USART2 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( USART3 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( EXTI15_10 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( RTC_ALARM = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( OTG_FS_WKUP = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( TIM8_BRK_TIM12 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( TIM8_UP_TIM13 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( TIM8_TRG_COM_TIM14 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( TIM8_CC = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( DMA1_STREAM7 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( FMC = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( TIM5 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( SPI3 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( UART4 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( UART5 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( TIM6_DAC = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( TIM7 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( DMA2_STREAM0 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( DMA2_STREAM1 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( DMA2_STREAM2 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( DMA2_STREAM3 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( DMA2_STREAM4 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( ETH = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( ETH_WKUP = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( CAN2_TX = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( CAN2_RX0 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( CAN2_RX1 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( CAN2_SCE = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( OTG_FS = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( DMA2_STREAM5 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( DMA2_STREAM6 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( DMA2_STREAM7 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( USART6 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( I2C3_EV = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( I2C3_ER = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( DCMI = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( FPU = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( UART7 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( UART8 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( SPI4 = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( LCD_TFT = DefaultHandler )
+20000440 20000440        0     1 PROVIDE ( LCD_TFT_1 = DefaultHandler )
+20000440 20000440        0     1 
+       0        0     2c58     1 .debug_abbrev
+       0        0      1b5     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.1ys7e9re56t3yekn.rcgu.o:(.debug_abbrev)
+     1b5      1b5       7b     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.4cke3idfc6zfo80f.rcgu.o:(.debug_abbrev)
+     230      230       96     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.qyho4y1g18clbed.rcgu.o:(.debug_abbrev)
+     2c6      2c6      282     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.debug_abbrev)
+     548      548       ce     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.1.rcgu.o):(.debug_abbrev)
+     616      616      129     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.10.rcgu.o):(.debug_abbrev)
+     73f      73f      124     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.11.rcgu.o):(.debug_abbrev)
+     863      863       ab     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.12.rcgu.o):(.debug_abbrev)
+     90e      90e      14a     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.13.rcgu.o):(.debug_abbrev)
+     a58      a58       96     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.14.rcgu.o):(.debug_abbrev)
+     aee      aee      18b     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.15.rcgu.o):(.debug_abbrev)
+     c79      c79      288     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.3.rcgu.o):(.debug_abbrev)
+     f01      f01      107     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.debug_abbrev)
+    1008     1008      199     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.5.rcgu.o):(.debug_abbrev)
+    11a1     11a1      11f     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.6.rcgu.o):(.debug_abbrev)
+    12c0     12c0       8e     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.7.rcgu.o):(.debug_abbrev)
+    134e     134e       87     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.8.rcgu.o):(.debug_abbrev)
+    13d5     13d5      11f     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.2.rcgu.o):(.debug_abbrev)
+    14f4     14f4       cd     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.9.rcgu.o):(.debug_abbrev)
+    15c1     15c1      175     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libstm32f4-c3530fc99c970234.rlib(stm32f4-c3530fc99c970234.stm32f4.ebnjcbak-cgu.5.rcgu.o):(.debug_abbrev)
+    1736     1736      1a3     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.1.rcgu.o):(.debug_abbrev)
+    18d9     18d9       64     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.3.rcgu.o):(.debug_abbrev)
+    193d     193d       77     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.5.rcgu.o):(.debug_abbrev)
+    19b4     19b4       fc     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.6.rcgu.o):(.debug_abbrev)
+    1ab0     1ab0       d4     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.8.rcgu.o):(.debug_abbrev)
+    1b84     1b84       81     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.9.rcgu.o):(.debug_abbrev)
+    1c05     1c05       a7     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.4.rcgu.o):(.debug_abbrev)
+    1cac     1cac       83     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.7.rcgu.o):(.debug_abbrev)
+    1d2f     1d2f       5f     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.2.rcgu.o):(.debug_abbrev)
+    1d8e     1d8e       61     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.0.rcgu.o):(.debug_abbrev)
+    1def     1def       e6     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.1.rcgu.o):(.debug_abbrev)
+    1ed5     1ed5       ca     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.12.rcgu.o):(.debug_abbrev)
+    1f9f     1f9f       96     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.13.rcgu.o):(.debug_abbrev)
+    2035     2035       c9     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.6.rcgu.o):(.debug_abbrev)
+    20fe     20fe       fc     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libgeneric_array-4a8f554bcd470664.rlib(generic_array-4a8f554bcd470664.generic_array.cmcd62di-cgu.2.rcgu.o):(.debug_abbrev)
+    21fa     21fa       58     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libbare_metal-d0decc7a5fb6c4f5.rlib(bare_metal-d0decc7a5fb6c4f5.bare_metal.cjwwl3ar-cgu.0.rcgu.o):(.debug_abbrev)
+    2252     2252      20e     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.debug_abbrev)
+    2460     2460       c2     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.112.rcgu.o):(.debug_abbrev)
+    2522     2522       a0     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.116.rcgu.o):(.debug_abbrev)
+    25c2     25c2       93     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.1.rcgu.o):(.debug_abbrev)
+    2655     2655       53     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.131.rcgu.o):(.debug_abbrev)
+    26a8     26a8       a0     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.137.rcgu.o):(.debug_abbrev)
+    2748     2748       d3     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.171.rcgu.o):(.debug_abbrev)
+    281b     281b       53     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.176.rcgu.o):(.debug_abbrev)
+    286e     286e       a0     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.66.rcgu.o):(.debug_abbrev)
+    290e     290e       d3     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.67.rcgu.o):(.debug_abbrev)
+    29e1     29e1       d1     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.7.rcgu.o):(.debug_abbrev)
+    2ab2     2ab2       53     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.84.rcgu.o):(.debug_abbrev)
+    2b05     2b05       a3     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.97.rcgu.o):(.debug_abbrev)
+    2ba8     2ba8       14     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(divsi3.o):(.debug_abbrev)
+    2bbc     2bbc       14     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(udivmodsi4.o):(.debug_abbrev)
+    2bd0     2bd0       88     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(aeabi_div0.o):(.debug_abbrev)
+       0        0    2a612     1 .debug_info
+       0        0      864     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.1ys7e9re56t3yekn.rcgu.o:(.debug_info)
+     864      864      154     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.4cke3idfc6zfo80f.rcgu.o:(.debug_info)
+     9b8      9b8      1d8     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.qyho4y1g18clbed.rcgu.o:(.debug_info)
+     b90      b90     11b8     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.debug_info)
+    1d48     1d48      2fb     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.1.rcgu.o):(.debug_info)
+    2043     2043      315     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.10.rcgu.o):(.debug_info)
+    2358     2358      3d4     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.11.rcgu.o):(.debug_info)
+    272c     272c      1de     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.12.rcgu.o):(.debug_info)
+    290a     290a      618     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.13.rcgu.o):(.debug_info)
+    2f22     2f22      127     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.14.rcgu.o):(.debug_info)
+    3049     3049      60b     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.15.rcgu.o):(.debug_info)
+    3654     3654     1024     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.3.rcgu.o):(.debug_info)
+    4678     4678      4d6     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.debug_info)
+    4b4e     4b4e      96e     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.5.rcgu.o):(.debug_info)
+    54bc     54bc      2da     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.6.rcgu.o):(.debug_info)
+    5796     5796      2bc     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.7.rcgu.o):(.debug_info)
+    5a52     5a52      201     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.8.rcgu.o):(.debug_info)
+    5c53     5c53      4c7     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.2.rcgu.o):(.debug_info)
+    611a     611a      1fe     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.9.rcgu.o):(.debug_info)
+    6318     6318     206b     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libstm32f4-c3530fc99c970234.rlib(stm32f4-c3530fc99c970234.stm32f4.ebnjcbak-cgu.5.rcgu.o):(.debug_info)
+    8383     8383      407     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.1.rcgu.o):(.debug_info)
+    878a     878a       90     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.3.rcgu.o):(.debug_info)
+    881a     881a       95     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.5.rcgu.o):(.debug_info)
+    88af     88af      4a2     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.6.rcgu.o):(.debug_info)
+    8d51     8d51      1a4     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.8.rcgu.o):(.debug_info)
+    8ef5     8ef5      109     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.9.rcgu.o):(.debug_info)
+    8ffe     8ffe       f9     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.4.rcgu.o):(.debug_info)
+    90f7     90f7       f4     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.7.rcgu.o):(.debug_info)
+    91eb     91eb       a2     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.2.rcgu.o):(.debug_info)
+    928d     928d       99     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.0.rcgu.o):(.debug_info)
+    9326     9326      607     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.1.rcgu.o):(.debug_info)
+    992d     992d      1f0     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.12.rcgu.o):(.debug_info)
+    9b1d     9b1d      155     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.13.rcgu.o):(.debug_info)
+    9c72     9c72      24a     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.6.rcgu.o):(.debug_info)
+    9ebc     9ebc      493     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libgeneric_array-4a8f554bcd470664.rlib(generic_array-4a8f554bcd470664.generic_array.cmcd62di-cgu.2.rcgu.o):(.debug_info)
+    a34f     a34f       5c     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libbare_metal-d0decc7a5fb6c4f5.rlib(bare_metal-d0decc7a5fb6c4f5.bare_metal.cjwwl3ar-cgu.0.rcgu.o):(.debug_info)
+    a3ab     a3ab    1ebdd     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.debug_info)
+   28f88    28f88      22d     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.112.rcgu.o):(.debug_info)
+   291b5    291b5      236     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.116.rcgu.o):(.debug_info)
+   293eb    293eb      100     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.1.rcgu.o):(.debug_info)
+   294eb    294eb       70     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.131.rcgu.o):(.debug_info)
+   2955b    2955b      12a     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.137.rcgu.o):(.debug_info)
+   29685    29685      1c5     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.171.rcgu.o):(.debug_info)
+   2984a    2984a       70     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.176.rcgu.o):(.debug_info)
+   298ba    298ba      12a     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.66.rcgu.o):(.debug_info)
+   299e4    299e4      48c     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.67.rcgu.o):(.debug_info)
+   29e70    29e70      22d     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.7.rcgu.o):(.debug_info)
+   2a09d    2a09d       70     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.84.rcgu.o):(.debug_info)
+   2a10d    2a10d      3c4     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.97.rcgu.o):(.debug_info)
+   2a4d1    2a4d1       26     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(divsi3.o):(.debug_info)
+   2a4f7    2a4f7       26     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(udivmodsi4.o):(.debug_info)
+   2a51d    2a51d       f5     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(aeabi_div0.o):(.debug_info)
+       0        0     2448     8 .debug_aranges
+       0        0       40     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.1ys7e9re56t3yekn.rcgu.o:(.debug_aranges)
+      40       40       20     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.4cke3idfc6zfo80f.rcgu.o:(.debug_aranges)
+      60       60       20     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.qyho4y1g18clbed.rcgu.o:(.debug_aranges)
+      80       80       e8     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.debug_aranges)
+     168      168       20     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.1.rcgu.o):(.debug_aranges)
+     188      188       38     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.10.rcgu.o):(.debug_aranges)
+     1c0      1c0       50     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.11.rcgu.o):(.debug_aranges)
+     210      210       30     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.12.rcgu.o):(.debug_aranges)
+     240      240       78     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.13.rcgu.o):(.debug_aranges)
+     2b8      2b8       28     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.14.rcgu.o):(.debug_aranges)
+     2e0      2e0       38     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.15.rcgu.o):(.debug_aranges)
+     318      318       e0     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.3.rcgu.o):(.debug_aranges)
+     3f8      3f8       68     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.debug_aranges)
+     460      460       38     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.5.rcgu.o):(.debug_aranges)
+     498      498       50     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.6.rcgu.o):(.debug_aranges)
+     4e8      4e8       40     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.7.rcgu.o):(.debug_aranges)
+     528      528       38     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.8.rcgu.o):(.debug_aranges)
+     560      560       60     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.2.rcgu.o):(.debug_aranges)
+     5c0      5c0       30     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.9.rcgu.o):(.debug_aranges)
+     5f0      5f0      150     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libstm32f4-c3530fc99c970234.rlib(stm32f4-c3530fc99c970234.stm32f4.ebnjcbak-cgu.5.rcgu.o):(.debug_aranges)
+     740      740       70     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.1.rcgu.o):(.debug_aranges)
+     7b0      7b0       20     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.3.rcgu.o):(.debug_aranges)
+     7d0      7d0       20     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.5.rcgu.o):(.debug_aranges)
+     7f0      7f0       28     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.6.rcgu.o):(.debug_aranges)
+     818      818       30     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.8.rcgu.o):(.debug_aranges)
+     848      848       28     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.9.rcgu.o):(.debug_aranges)
+     870      870       20     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.4.rcgu.o):(.debug_aranges)
+     890      890       28     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.7.rcgu.o):(.debug_aranges)
+     8b8      8b8       20     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.2.rcgu.o):(.debug_aranges)
+     8d8      8d8       20     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.0.rcgu.o):(.debug_aranges)
+     8f8      8f8       78     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.1.rcgu.o):(.debug_aranges)
+     970      970       40     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.12.rcgu.o):(.debug_aranges)
+     9b0      9b0       28     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.13.rcgu.o):(.debug_aranges)
+     9d8      9d8       48     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.6.rcgu.o):(.debug_aranges)
+     a20      a20       28     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libgeneric_array-4a8f554bcd470664.rlib(generic_array-4a8f554bcd470664.generic_array.cmcd62di-cgu.2.rcgu.o):(.debug_aranges)
+     a48      a48       20     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libbare_metal-d0decc7a5fb6c4f5.rlib(bare_metal-d0decc7a5fb6c4f5.bare_metal.cjwwl3ar-cgu.0.rcgu.o):(.debug_aranges)
+     a68      a68     1718     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.debug_aranges)
+    2180     2180       20     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.112.rcgu.o):(.debug_aranges)
+    21a0     21a0       88     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.116.rcgu.o):(.debug_aranges)
+    2228     2228       20     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.1.rcgu.o):(.debug_aranges)
+    2248     2248       20     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.131.rcgu.o):(.debug_aranges)
+    2268     2268       20     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.137.rcgu.o):(.debug_aranges)
+    2288     2288       20     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.171.rcgu.o):(.debug_aranges)
+    22a8     22a8       20     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.176.rcgu.o):(.debug_aranges)
+    22c8     22c8       20     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.66.rcgu.o):(.debug_aranges)
+    22e8     22e8       80     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.67.rcgu.o):(.debug_aranges)
+    2368     2368       20     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.7.rcgu.o):(.debug_aranges)
+    2388     2388       20     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.84.rcgu.o):(.debug_aranges)
+    23a8     23a8       38     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.97.rcgu.o):(.debug_aranges)
+    23e0     23e0       20     8         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(divsi3.o):(.debug_aranges)
+    2400     2400       20     8         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(udivmodsi4.o):(.debug_aranges)
+    2420     2420       28     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(aeabi_div0.o):(.debug_aranges)
+       0        0    17478     1 .debug_ranges
+       0        0       20     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.1ys7e9re56t3yekn.rcgu.o:(.debug_ranges)
+      20       20      170     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.debug_ranges)
+     190      190       28     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.10.rcgu.o):(.debug_ranges)
+     1b8      1b8       30     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.11.rcgu.o):(.debug_ranges)
+     1e8      1e8       20     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.12.rcgu.o):(.debug_ranges)
+     208      208       68     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.13.rcgu.o):(.debug_ranges)
+     270      270       18     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.14.rcgu.o):(.debug_ranges)
+     288      288       28     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.15.rcgu.o):(.debug_ranges)
+     2b0      2b0      128     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.3.rcgu.o):(.debug_ranges)
+     3d8      3d8       58     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.debug_ranges)
+     430      430       28     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.5.rcgu.o):(.debug_ranges)
+     458      458       40     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.6.rcgu.o):(.debug_ranges)
+     498      498       30     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.7.rcgu.o):(.debug_ranges)
+     4c8      4c8       28     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.8.rcgu.o):(.debug_ranges)
+     4f0      4f0       50     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.2.rcgu.o):(.debug_ranges)
+     540      540       20     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.9.rcgu.o):(.debug_ranges)
+     560      560      130     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libstm32f4-c3530fc99c970234.rlib(stm32f4-c3530fc99c970234.stm32f4.ebnjcbak-cgu.5.rcgu.o):(.debug_ranges)
+     690      690       40     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.1.rcgu.o):(.debug_ranges)
+     6d0      6d0       18     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.6.rcgu.o):(.debug_ranges)
+     6e8      6e8       20     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.8.rcgu.o):(.debug_ranges)
+     708      708       18     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.9.rcgu.o):(.debug_ranges)
+     720      720       18     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.7.rcgu.o):(.debug_ranges)
+     738      738       68     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.1.rcgu.o):(.debug_ranges)
+     7a0      7a0       30     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.12.rcgu.o):(.debug_ranges)
+     7d0      7d0       18     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.13.rcgu.o):(.debug_ranges)
+     7e8      7e8       38     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.6.rcgu.o):(.debug_ranges)
+     820      820       18     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libgeneric_array-4a8f554bcd470664.rlib(generic_array-4a8f554bcd470664.generic_array.cmcd62di-cgu.2.rcgu.o):(.debug_ranges)
+     838      838    16568     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.debug_ranges)
+   16da0    16da0       70     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.112.rcgu.o):(.debug_ranges)
+   16e10    16e10      170     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.116.rcgu.o):(.debug_ranges)
+   16f80    16f80       18     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.1.rcgu.o):(.debug_ranges)
+   16f98    16f98       48     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.137.rcgu.o):(.debug_ranges)
+   16fe0    16fe0       80     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.171.rcgu.o):(.debug_ranges)
+   17060    17060       48     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.66.rcgu.o):(.debug_ranges)
+   170a8    170a8      208     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.67.rcgu.o):(.debug_ranges)
+   172b0    172b0       50     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.7.rcgu.o):(.debug_ranges)
+   17300    17300      160     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.97.rcgu.o):(.debug_ranges)
+   17460    17460       18     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(aeabi_div0.o):(.debug_ranges)
+       0        0    30f80     1 .debug_str
+       0        0    30f80     1         <internal>:(.debug_str)
+       0        0     b8b1     1 .debug_pubnames
+       0        0      1af     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.1ys7e9re56t3yekn.rcgu.o:(.debug_pubnames)
+     1af      1af       8b     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.4cke3idfc6zfo80f.rcgu.o:(.debug_pubnames)
+     23a      23a       b9     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.qyho4y1g18clbed.rcgu.o:(.debug_pubnames)
+     2f3      2f3      3ce     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.debug_pubnames)
+     6c1      6c1       6e     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.1.rcgu.o):(.debug_pubnames)
+     72f      72f      16b     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.10.rcgu.o):(.debug_pubnames)
+     89a      89a       fa     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.11.rcgu.o):(.debug_pubnames)
+     994      994       8b     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.12.rcgu.o):(.debug_pubnames)
+     a1f      a1f      309     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.13.rcgu.o):(.debug_pubnames)
+     d28      d28       60     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.14.rcgu.o):(.debug_pubnames)
+     d88      d88      124     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.15.rcgu.o):(.debug_pubnames)
+     eac      eac      24a     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.3.rcgu.o):(.debug_pubnames)
+    10f6     10f6      177     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.debug_pubnames)
+    126d     126d      162     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.5.rcgu.o):(.debug_pubnames)
+    13cf     13cf       c2     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.6.rcgu.o):(.debug_pubnames)
+    1491     1491       f3     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.7.rcgu.o):(.debug_pubnames)
+    1584     1584      115     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.8.rcgu.o):(.debug_pubnames)
+    1699     1699       9e     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.2.rcgu.o):(.debug_pubnames)
+    1737     1737       95     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.9.rcgu.o):(.debug_pubnames)
+    17cc     17cc      6a6     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libstm32f4-c3530fc99c970234.rlib(stm32f4-c3530fc99c970234.stm32f4.ebnjcbak-cgu.5.rcgu.o):(.debug_pubnames)
+    1e72     1e72      128     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.1.rcgu.o):(.debug_pubnames)
+    1f9a     1f9a       7c     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.3.rcgu.o):(.debug_pubnames)
+    2016     2016       7b     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.5.rcgu.o):(.debug_pubnames)
+    2091     2091       a2     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.6.rcgu.o):(.debug_pubnames)
+    2133     2133       93     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.8.rcgu.o):(.debug_pubnames)
+    21c6     21c6       5f     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.9.rcgu.o):(.debug_pubnames)
+    2225     2225       66     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.4.rcgu.o):(.debug_pubnames)
+    228b     228b       61     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.7.rcgu.o):(.debug_pubnames)
+    22ec     22ec       3f     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.2.rcgu.o):(.debug_pubnames)
+    232b     232b       4e     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.0.rcgu.o):(.debug_pubnames)
+    2379     2379      183     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.1.rcgu.o):(.debug_pubnames)
+    24fc     24fc       8a     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.12.rcgu.o):(.debug_pubnames)
+    2586     2586       63     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.13.rcgu.o):(.debug_pubnames)
+    25e9     25e9       96     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.6.rcgu.o):(.debug_pubnames)
+    267f     267f       9a     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libgeneric_array-4a8f554bcd470664.rlib(generic_array-4a8f554bcd470664.generic_array.cmcd62di-cgu.2.rcgu.o):(.debug_pubnames)
+    2719     2719       29     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libbare_metal-d0decc7a5fb6c4f5.rlib(bare_metal-d0decc7a5fb6c4f5.bare_metal.cjwwl3ar-cgu.0.rcgu.o):(.debug_pubnames)
+    2742     2742     842d     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.debug_pubnames)
+    ab6f     ab6f       f8     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.112.rcgu.o):(.debug_pubnames)
+    ac67     ac67      200     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.116.rcgu.o):(.debug_pubnames)
+    ae67     ae67       a6     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.1.rcgu.o):(.debug_pubnames)
+    af0d     af0d       47     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.131.rcgu.o):(.debug_pubnames)
+    af54     af54       d2     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.137.rcgu.o):(.debug_pubnames)
+    b026     b026       ae     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.171.rcgu.o):(.debug_pubnames)
+    b0d4     b0d4       47     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.176.rcgu.o):(.debug_pubnames)
+    b11b     b11b       d2     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.66.rcgu.o):(.debug_pubnames)
+    b1ed     b1ed      450     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.67.rcgu.o):(.debug_pubnames)
+    b63d     b63d       fa     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.7.rcgu.o):(.debug_pubnames)
+    b737     b737       4a     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.84.rcgu.o):(.debug_pubnames)
+    b781     b781      130     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.97.rcgu.o):(.debug_pubnames)
+       0        0     3b48     1 .debug_pubtypes
+       0        0      4b7     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.1ys7e9re56t3yekn.rcgu.o:(.debug_pubtypes)
+     4b7      4b7       bc     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.4cke3idfc6zfo80f.rcgu.o:(.debug_pubtypes)
+     573      573       c7     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.qyho4y1g18clbed.rcgu.o:(.debug_pubtypes)
+     63a      63a      493     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.debug_pubtypes)
+     acd      acd       7d     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.1.rcgu.o):(.debug_pubtypes)
+     b4a      b4a       d8     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.10.rcgu.o):(.debug_pubtypes)
+     c22      c22      23c     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.11.rcgu.o):(.debug_pubtypes)
+     e5e      e5e      186     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.12.rcgu.o):(.debug_pubtypes)
+     fe4      fe4      29d     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.13.rcgu.o):(.debug_pubtypes)
+    1281     1281       62     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.14.rcgu.o):(.debug_pubtypes)
+    12e3     12e3      311     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.15.rcgu.o):(.debug_pubtypes)
+    15f4     15f4      509     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.3.rcgu.o):(.debug_pubtypes)
+    1afd     1afd      1e0     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.debug_pubtypes)
+    1cdd     1cdd      433     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.5.rcgu.o):(.debug_pubtypes)
+    2110     2110       c0     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.6.rcgu.o):(.debug_pubtypes)
+    21d0     21d0      11f     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.7.rcgu.o):(.debug_pubtypes)
+    22ef     22ef       7f     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.8.rcgu.o):(.debug_pubtypes)
+    236e     236e       ae     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.2.rcgu.o):(.debug_pubtypes)
+    241c     241c       69     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.9.rcgu.o):(.debug_pubtypes)
+    2485     2485      98b     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libstm32f4-c3530fc99c970234.rlib(stm32f4-c3530fc99c970234.stm32f4.ebnjcbak-cgu.5.rcgu.o):(.debug_pubtypes)
+    2e10     2e10      17e     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.1.rcgu.o):(.debug_pubtypes)
+    2f8e     2f8e       26     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.3.rcgu.o):(.debug_pubtypes)
+    2fb4     2fb4       4b     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.5.rcgu.o):(.debug_pubtypes)
+    2fff     2fff      2c8     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.6.rcgu.o):(.debug_pubtypes)
+    32c7     32c7       68     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.8.rcgu.o):(.debug_pubtypes)
+    332f     332f       36     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.9.rcgu.o):(.debug_pubtypes)
+    3365     3365       4c     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.4.rcgu.o):(.debug_pubtypes)
+    33b1     33b1       42     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.7.rcgu.o):(.debug_pubtypes)
+    33f3     33f3       38     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.2.rcgu.o):(.debug_pubtypes)
+    342b     342b       33     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.0.rcgu.o):(.debug_pubtypes)
+    345e     345e      1a1     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.1.rcgu.o):(.debug_pubtypes)
+    35ff     35ff       67     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.12.rcgu.o):(.debug_pubtypes)
+    3666     3666       7e     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.13.rcgu.o):(.debug_pubtypes)
+    36e4     36e4       81     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.6.rcgu.o):(.debug_pubtypes)
+    3765     3765      2cc     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libgeneric_array-4a8f554bcd470664.rlib(generic_array-4a8f554bcd470664.generic_array.cmcd62di-cgu.2.rcgu.o):(.debug_pubtypes)
+    3a31     3a31       2d     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libbare_metal-d0decc7a5fb6c4f5.rlib(bare_metal-d0decc7a5fb6c4f5.bare_metal.cjwwl3ar-cgu.0.rcgu.o):(.debug_pubtypes)
+    3a5e     3a5e       12     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.debug_pubtypes)
+    3a70     3a70       12     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.112.rcgu.o):(.debug_pubtypes)
+    3a82     3a82       12     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.116.rcgu.o):(.debug_pubtypes)
+    3a94     3a94       12     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.1.rcgu.o):(.debug_pubtypes)
+    3aa6     3aa6       12     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.131.rcgu.o):(.debug_pubtypes)
+    3ab8     3ab8       12     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.137.rcgu.o):(.debug_pubtypes)
+    3aca     3aca       12     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.171.rcgu.o):(.debug_pubtypes)
+    3adc     3adc       12     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.176.rcgu.o):(.debug_pubtypes)
+    3aee     3aee       12     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.66.rcgu.o):(.debug_pubtypes)
+    3b00     3b00       12     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.67.rcgu.o):(.debug_pubtypes)
+    3b12     3b12       12     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.7.rcgu.o):(.debug_pubtypes)
+    3b24     3b24       12     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.84.rcgu.o):(.debug_pubtypes)
+    3b36     3b36       12     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.97.rcgu.o):(.debug_pubtypes)
+       0        0       3a     1 .ARM.attributes
+       0        0       3a     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.1ys7e9re56t3yekn.rcgu.o:(.ARM.attributes)
+       0        0     6f90     4 .debug_frame
+       0        0       60     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.1ys7e9re56t3yekn.rcgu.o:(.debug_frame)
+      60       60       28     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.4cke3idfc6zfo80f.rcgu.o:(.debug_frame)
+      88       88       30     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.qyho4y1g18clbed.rcgu.o:(.debug_frame)
+      b8       b8      2a0     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.debug_frame)
+     358      358       30     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.1.rcgu.o):(.debug_frame)
+     388      388       74     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.10.rcgu.o):(.debug_frame)
+     3fc      3fc       a0     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.11.rcgu.o):(.debug_frame)
+     49c      49c       50     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.12.rcgu.o):(.debug_frame)
+     4ec      4ec      144     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.13.rcgu.o):(.debug_frame)
+     630      630       3c     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.14.rcgu.o):(.debug_frame)
+     66c      66c       74     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.15.rcgu.o):(.debug_frame)
+     6e0      6e0      2b0     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.3.rcgu.o):(.debug_frame)
+     990      990      12c     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.debug_frame)
+     abc      abc       94     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.5.rcgu.o):(.debug_frame)
+     b50      b50       a8     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.6.rcgu.o):(.debug_frame)
+     bf8      bf8       80     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.7.rcgu.o):(.debug_frame)
+     c78      c78       84     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.8.rcgu.o):(.debug_frame)
+     cfc      cfc      108     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.2.rcgu.o):(.debug_frame)
+     e04      e04       68     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.9.rcgu.o):(.debug_frame)
+     e6c      e6c      420     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libstm32f4-c3530fc99c970234.rlib(stm32f4-c3530fc99c970234.stm32f4.ebnjcbak-cgu.5.rcgu.o):(.debug_frame)
+    128c     128c       cc     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.1.rcgu.o):(.debug_frame)
+    1358     1358       30     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.3.rcgu.o):(.debug_frame)
+    1388     1388       28     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.5.rcgu.o):(.debug_frame)
+    13b0     13b0       48     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.6.rcgu.o):(.debug_frame)
+    13f8     13f8       50     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.8.rcgu.o):(.debug_frame)
+    1448     1448       4c     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.9.rcgu.o):(.debug_frame)
+    1494     1494       30     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.4.rcgu.o):(.debug_frame)
+    14c4     14c4       44     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.7.rcgu.o):(.debug_frame)
+    1508     1508       30     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.2.rcgu.o):(.debug_frame)
+    1538     1538       28     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.0.rcgu.o):(.debug_frame)
+    1560     1560       30     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex-m-rt.o):(.debug_frame)
+    1590     1590      114     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.1.rcgu.o):(.debug_frame)
+    16a4     16a4       78     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.12.rcgu.o):(.debug_frame)
+    171c     171c       3c     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.13.rcgu.o):(.debug_frame)
+    1758     1758       9c     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.6.rcgu.o):(.debug_frame)
+    17f4     17f4       44     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libgeneric_array-4a8f554bcd470664.rlib(generic_array-4a8f554bcd470664.generic_array.cmcd62di-cgu.2.rcgu.o):(.debug_frame)
+    1838     1838       28     4         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libbare_metal-d0decc7a5fb6c4f5.rlib(bare_metal-d0decc7a5fb6c4f5.bare_metal.cjwwl3ar-cgu.0.rcgu.o):(.debug_frame)
+    1860     1860     512c     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.debug_frame)
+    698c     698c       38     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.112.rcgu.o):(.debug_frame)
+    69c4     69c4      14c     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.116.rcgu.o):(.debug_frame)
+    6b10     6b10       34     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.1.rcgu.o):(.debug_frame)
+    6b44     6b44       34     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.131.rcgu.o):(.debug_frame)
+    6b78     6b78       38     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.137.rcgu.o):(.debug_frame)
+    6bb0     6bb0       3c     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.171.rcgu.o):(.debug_frame)
+    6bec     6bec       34     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.176.rcgu.o):(.debug_frame)
+    6c20     6c20       38     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.66.rcgu.o):(.debug_frame)
+    6c58     6c58      1dc     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.67.rcgu.o):(.debug_frame)
+    6e34     6e34       40     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.7.rcgu.o):(.debug_frame)
+    6e74     6e74       30     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.84.rcgu.o):(.debug_frame)
+    6ea4     6ea4       9c     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.97.rcgu.o):(.debug_frame)
+    6f40     6f40       50     4         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(aeabi_div0.o):(.debug_frame)
+       0        0    28446     1 .debug_line
+       0        0      176     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.1ys7e9re56t3yekn.rcgu.o:(.debug_line)
+     176      176       ae     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.4cke3idfc6zfo80f.rcgu.o:(.debug_line)
+     224      224       ae     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/test-0d93327dc5511505.qyho4y1g18clbed.rcgu.o:(.debug_line)
+     2d2      2d2      9d2     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.debug_line)
+     ca4      ca4      1ea     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.1.rcgu.o):(.debug_line)
+     e8e      e8e      2aa     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.10.rcgu.o):(.debug_line)
+    1138     1138      126     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.11.rcgu.o):(.debug_line)
+    125e     125e      14a     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.12.rcgu.o):(.debug_line)
+    13a8     13a8      2c4     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.13.rcgu.o):(.debug_line)
+    166c     166c       cb     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.14.rcgu.o):(.debug_line)
+    1737     1737      211     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.15.rcgu.o):(.debug_line)
+    1948     1948      610     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.3.rcgu.o):(.debug_line)
+    1f58     1f58      32f     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.4.rcgu.o):(.debug_line)
+    2287     2287      1b9     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.5.rcgu.o):(.debug_line)
+    2440     2440      147     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.6.rcgu.o):(.debug_line)
+    2587     2587      10b     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.7.rcgu.o):(.debug_line)
+    2692     2692       f2     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.8.rcgu.o):(.debug_line)
+    2784     2784      23c     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.2.rcgu.o):(.debug_line)
+    29c0     29c0      171     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.9.rcgu.o):(.debug_line)
+    2b31     2b31      bda     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libstm32f4-c3530fc99c970234.rlib(stm32f4-c3530fc99c970234.stm32f4.ebnjcbak-cgu.5.rcgu.o):(.debug_line)
+    370b     370b      1a9     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.1.rcgu.o):(.debug_line)
+    38b4     38b4       c6     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.3.rcgu.o):(.debug_line)
+    397a     397a       a7     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.5.rcgu.o):(.debug_line)
+    3a21     3a21       d3     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.6.rcgu.o):(.debug_line)
+    3af4     3af4      175     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.8.rcgu.o):(.debug_line)
+    3c69     3c69      163     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.9.rcgu.o):(.debug_line)
+    3dcc     3dcc       d2     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.4.rcgu.o):(.debug_line)
+    3e9e     3e9e       c5     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.7.rcgu.o):(.debug_line)
+    3f63     3f63       ae     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.2.rcgu.o):(.debug_line)
+    4011     4011       b0     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m_rt-33efea8a9fa2e2e7.rlib(cortex_m_rt-33efea8a9fa2e2e7.cortex_m_rt.495rjrpz-cgu.0.rcgu.o):(.debug_line)
+    40c1     40c1      2b1     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.1.rcgu.o):(.debug_line)
+    4372     4372      10b     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.12.rcgu.o):(.debug_line)
+    447d     447d       d0     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.13.rcgu.o):(.debug_line)
+    454d     454d      1a2     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libcortex_m-374ccdf3cb72d64c.rlib(cortex_m-374ccdf3cb72d64c.cortex_m.ajpnrzj2-cgu.6.rcgu.o):(.debug_line)
+    46ef     46ef       d2     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libgeneric_array-4a8f554bcd470664.rlib(generic_array-4a8f554bcd470664.generic_array.cmcd62di-cgu.2.rcgu.o):(.debug_line)
+    47c1     47c1       8d     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/libbare_metal-d0decc7a5fb6c4f5.rlib(bare_metal-d0decc7a5fb6c4f5.bare_metal.cjwwl3ar-cgu.0.rcgu.o):(.debug_line)
+    484e     484e    215ba     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcore-51ce9d7217edcb4e.rlib(core-51ce9d7217edcb4e.core.bj3w3yzm-cgu.0.rcgu.o):(.debug_line)
+   25e08    25e08      252     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.112.rcgu.o):(.debug_line)
+   2605a    2605a      539     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.116.rcgu.o):(.debug_line)
+   26593    26593      188     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.1.rcgu.o):(.debug_line)
+   2671b    2671b       f6     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.131.rcgu.o):(.debug_line)
+   26811    26811      208     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.137.rcgu.o):(.debug_line)
+   26a19    26a19      168     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.171.rcgu.o):(.debug_line)
+   26b81    26b81       f6     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.176.rcgu.o):(.debug_line)
+   26c77    26c77      216     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.66.rcgu.o):(.debug_line)
+   26e8d    26e8d      a28     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.67.rcgu.o):(.debug_line)
+   278b5    278b5      24a     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.7.rcgu.o):(.debug_line)
+   27aff    27aff       fb     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.84.rcgu.o):(.debug_line)
+   27bfa    27bfa      6bd     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(compiler_builtins-233cf8ca59883b6e.compiler_builtins.ek4iehnz-cgu.97.rcgu.o):(.debug_line)
+   282b7    282b7       75     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(divsi3.o):(.debug_line)
+   2832c    2832c       7f     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(udivmodsi4.o):(.debug_line)
+   283ab    283ab       9b     1         /home/stefan/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/thumbv7em-none-eabihf/lib/libcompiler_builtins-233cf8ca59883b6e.rlib(aeabi_div0.o):(.debug_line)
+       0        0      12a     1 .debug_loc
+       0        0       87     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.0.rcgu.o):(.debug_loc)
+      87       87       7a     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.3.rcgu.o):(.debug_loc)
+     101      101       29     1         /home/stefan/embedded/bern/demo/kernel_next/target/thumbv7em-none-eabihf/debug/deps/librtt_target-06a565574f7cf3fb.rlib(rtt_target-06a565574f7cf3fb.rtt_target.4l9nfs19-cgu.5.rcgu.o):(.debug_loc)
+       0        0       6d     1 .comment
+       0        0       6d     1         <internal>:(.comment)
+       0        0     18c0     4 .symtab
+       0        0     18c0     4         <internal>:(.symtab)
+       0        0       f4     1 .shstrtab
+       0        0       f4     1         <internal>:(.shstrtab)
+       0        0     235e     1 .strtab
+       0        0     235e     1         <internal>:(.strtab)

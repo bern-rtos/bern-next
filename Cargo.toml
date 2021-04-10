@@ -1,32 +1,7 @@
-[package]
-name = "scheduler_demo"
-version = "0.1.0"
-authors = ["Stefan Lüthi <stefan.luethi@outlook.com>"]
-edition = "2018"
+[workspace]
 
-[dependencies]
-cortex-m-rt = "0.6.10"
-panic-halt = "0.2.0"
-panic-itm = "0.4.1"
-embedded-hal = "0.2.4"
-heapless = "0.6.1"
-
-[dependencies.cortex-m]
-version = "0.7.2"
-features = ["inline-asm"]
-
-[dependencies.stm32f4xx-hal]
-version = "0.8"
-features = ["rt", "stm32f446"]
-
-# this lets you use `cargo fix`!
-[[bin]]
-name = "scheduler_demo"
-test = false
-bench = false
-
-[profile.release]
-codegen-units = 1 # better optimizations
-debug = true # symbols are nice and they don't increase the size on Flash
-lto = true # better optimizations
-opt-level = "s"
+members = [
+    "bern_kernel",
+    "platform/st_nucleo_f446re",
+    "tests/armv7em",
+]

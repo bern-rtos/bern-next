@@ -1,10 +1,7 @@
 use super::scheduler;
 use super::scheduler::Scheduler;
-use super::boxed::Box;
-use core::ptr::NonNull;
-use core::mem::{size_of, size_of_val, transmute_copy};
+use core::mem::{size_of, size_of_val};
 use core::ptr;
-use core::borrow::BorrowMut;
 
 #[derive(Debug)]
 pub struct TaskError;
@@ -146,3 +143,4 @@ impl<'a> Task<'a>
         self.next_wut = scheduler::get_tick() + u64::from(ms);
     }
 }
+

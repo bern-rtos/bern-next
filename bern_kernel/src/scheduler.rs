@@ -2,7 +2,7 @@
 // cannot verify critical section, thus they have to marked as unsafe.
 #![allow(unsafe_code)]
 
-use super::task::{Task, TaskError};
+use super::task::Task;
 use cortex_m::peripheral::{
     syst::SystClkSource,
 };
@@ -150,7 +150,6 @@ fn SysTick() {
 
     // check if task is ready
     let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
-    let task = scheduler.tasks[1].as_mut().unwrap();
     for (i, task) in scheduler.tasks.iter_mut().enumerate() {
         if i == 0 || task.is_none() {
             continue; // idle task

@@ -1,0 +1,27 @@
+[package]
+authors = ["Stefan Lüthi <stefan.luethi@outlook.com"]
+name = "test-armv7e-m"
+publish = false
+edition = "2018"
+version = "0.1.0"
+
+[[test]]
+name = "test"
+harness = false
+
+[dependencies]
+bern-kernel = { version = "*", path= "../../bern_kernel" }
+
+cortex-m = "0.7.2"
+cortex-m-rt = "0.6.10"
+#panic-halt = "0.2.0"
+rtt-target = { version = "0.2.1", features = ["cortex-m"] }
+
+embedded-hal = "0.2.4"
+stm32f4xx-hal = { version = "0.8", features = ["rt", "stm32f446"] }
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"

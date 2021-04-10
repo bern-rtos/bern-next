@@ -1,31 +1,37 @@
-#![feature(unsize)]
-#![feature(asm)]
 //#![deny(unsafe_code)] todo: just for now
 #![no_main]
 #![no_std]
 
-mod kernel;
 
-use kernel::{
+use bern_kernel::{
     task::Task,
-    task::TaskError,
     scheduler::Scheduler,
-    scheduler,
 };
 
-#[allow(unused_extern_crates)]
-// Halt on panic and print the stack trace to SWO
-extern crate panic_itm;
 
+// dev profile: easier to debug panics; can put a breakpoint on `rust_begin_unwind`
+#[cfg(debug_assertions)]
+use panic_halt as _;
+//use panic_probe as _;
+
+// release profile: minimize the binary size of the application
+#[cfg(not(debug_assertions))]
+use panic_abort as _;
+
+// Halt on panic and print the stack trace to RTT
+//use panic_rtt_target as _;
+use rtt_target::{rprintln, rtt_init_print};
+
+use cortex_m;
 use cortex_m_rt::entry;
 use stm32f4xx_hal as hal;
 use crate::hal::{prelude::*, stm32};
-use embedded_hal;
-use core::mem::take;
-use core::pin::Pin;
 
 #[entry]
 fn main() -> ! {
+    rtt_init_print!(BlockIfFull);
+    rprintln!("Hello, world!");
+
     Scheduler::init();
     /* idle task */
     Task::spawn(move | | {
@@ -33,7 +39,7 @@ fn main() -> ! {
             cortex_m::asm::nop();
         }
     },
-        alloc_static_stack!(128)
+                bern_kernel::alloc_static_stack!(128)
     );
 
     // Take hardware peripherals
@@ -42,11 +48,11 @@ fn main() -> ! {
     // delay
     // Set up the system clock. We want to run at 48MHz for this one.
     let rcc = stm32_peripherals.RCC.constrain();
-    let clocks = rcc.cfgr.sysclk(48.mhz()).freeze();
+    let _clocks = rcc.cfgr.sysclk(48.mhz()).freeze();
 
     // gpio's
     let gpioa = stm32_peripherals.GPIOA.split();
-    let gpiob = stm32_peripherals.GPIOB.split();
+    let _gpiob = stm32_peripherals.GPIOB.split();
     let gpioc = stm32_peripherals.GPIOC.split();
 
     // itm output
@@ -72,7 +78,7 @@ fn main() -> ! {
             Scheduler::delay(100);
         }
     },
-        alloc_static_stack!(256)
+                bern_kernel::alloc_static_stack!(256)
     );
 
     /* task 2 */
@@ -84,9 +90,10 @@ fn main() -> ! {
             Scheduler::delay(50);
             led_6.set_low();
             Scheduler::delay(400);
+            //rprintln!("Hello, world!");
         }
     },
-        alloc_static_stack!(256)
+                bern_kernel::alloc_static_stack!(256)
     );
 
     Scheduler::start();
