@@ -6,22 +6,17 @@ edition = "2018"
 version = "0.1.0"
 
 [[test]]
-name = "test"
+name = "serial"
 harness = false
 
 [dependencies]
-bern-kernel = { version = "*", path= "../../bern_kernel" }
+bern-kernel = { version = "*", path = "../../bern_kernel" }
+bern-test = { version = "*", features = ["serial"], path = "../../bern_test" }
 
 cortex-m = "0.7.2"
 cortex-m-rt = "0.6.10"
-#panic-halt = "0.2.0"
+nb = "1.0.0"
 rtt-target = { version = "0.2.1", features = ["cortex-m"] }
 
 embedded-hal = "0.2.4"
 stm32f4xx-hal = { version = "0.8", features = ["rt", "stm32f446"] }
-
-[profile.dev]
-panic = "abort"
-
-[profile.release]
-panic = "abort"

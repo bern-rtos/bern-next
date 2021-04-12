@@ -41,6 +41,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "bern-test"
+version = "0.1.0"
+dependencies = [
+ "bern-test-macros",
+ "nb 1.0.0",
+]
+
+[[package]]
+name = "bern-test-macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "bitfield"
 version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -288,9 +305,11 @@ name = "test-armv7e-m"
 version = "0.1.0"
 dependencies = [
  "bern-kernel",
+ "bern-test",
  "cortex-m 0.7.2",
  "cortex-m-rt",
  "embedded-hal",
+ "nb 1.0.0",
  "rtt-target",
  "stm32f4xx-hal",
 ]

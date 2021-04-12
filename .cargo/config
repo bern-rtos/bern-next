@@ -35,6 +35,7 @@ rustflags = [
   "-C", "link-arg=--demangle",
   #"-C", "link-arg=--print-memory-usage",
   # "-Z", "print-link-args",
+  "-Z", "macro-backtrace",
 ]
 
 [build]

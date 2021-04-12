@@ -1,0 +1,12 @@
+[package]
+name = "bern-test"
+version = "0.1.0"
+authors = ["Stefan Lüthi <stefan.luethi@outlook.com>"]
+edition = "2018"
+
+[dependencies]
+bern-test-macros = { version = "0.1.0", path = "macros" }
+nb = "1.0.0"
+
+[features]
+serial = []
