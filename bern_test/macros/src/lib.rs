@@ -95,7 +95,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
             #(#imports)*
 
             // todo: fix
-            use bern_test::{println, sprintln, print, sprint};
+            use bern_test::{println, sprintln, print, sprint, term_green, term_red};
             use core::panic::PanicInfo;
             use core::sync::atomic::{AtomicBool, Ordering};
 
@@ -126,9 +126,9 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                         #calls();
                         /* if we get here the test did not panic */
                         if !#func_should_panic {
-                            println!("ok");
+                            println!(term_green!("ok"));
                         } else {
-                            println!("FAILED");
+                            println!(term_red!("FAILED"));
                             println!(" └─ did not panic");
                         }
                     },
@@ -139,9 +139,9 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
 
             pub fn panicked(info: &PanicInfo) {
                 if SHOULD_PANIC.load(Ordering::Relaxed) {
-                    println!("ok");
+                    println!(term_green!("ok"));
                 } else {
-                    println!("FAILED");
+                    println!(term_red!("FAILED"));
                     println!(" └─ {}", info);
                 }
                 println!(" └─ we're in the panic handler, waiting for reset ...");
