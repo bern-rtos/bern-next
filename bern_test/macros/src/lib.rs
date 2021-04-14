@@ -95,7 +95,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
             #(#imports)*
 
             // todo: fix
-            use bern_test::{println, sprintln, print, sprint, term_green, term_red, term_reset};
+            use bern_test::{println, print, term_green, term_red, term_reset};
             use core::panic::PanicInfo;
             use core::sync::atomic::{AtomicBool, Ordering};
 

@@ -11,7 +11,7 @@ pub use bern_test_macros::tests;
 macro_rules! println {
     ($($args:tt)*) => {
         {
-            sprintln!($($args)*);
+            $crate::sprintln!($($args)*);
         }
     }
 }
@@ -21,7 +21,7 @@ macro_rules! println {
 macro_rules! print {
     ($($args:tt)*) => {
         {
-            sprint!($($args)*);
+            $crate::sprint!($($args)*);
         }
     }
 }
