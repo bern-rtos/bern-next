@@ -30,7 +30,6 @@ fn main() -> ! {
 
     /* bidirectional serial port needed for test framework */
     let (mut tx, mut rx) = serial.split();
-
     Serial::set_write(move |b| {
         match tx.write(b) {
             Ok(_) => Ok(()),
@@ -40,7 +39,6 @@ fn main() -> ! {
             }
         }
     });
-
     Serial::set_read(move || {
         match rx.read() {
             Ok(b) => Ok(b),

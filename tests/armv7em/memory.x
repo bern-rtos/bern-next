@@ -33,3 +33,10 @@ MEMORY
        . = ALIGN(8);
      } > RAM
    } INSERT AFTER .bss;
+
+   SECTIONS {
+        .test_secret (NOLOAD) : ALIGN(4) {
+          *(.test_secret);
+          . = ALIGN(4);
+        } > RAM
+      } INSERT AFTER .bss;

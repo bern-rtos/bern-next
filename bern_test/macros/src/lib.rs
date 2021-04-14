@@ -85,7 +85,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
     let i = (0..calls.len()).map(syn::Index::from);
     let k = i.clone(); // meh
     let name_copy = name_strings.clone();
-    let n_tests = tests.len();
+    let n_tests = tests.len() as u8;
     /* Create test module containing:
      * - a test runner
      * - the test function implementations
@@ -102,8 +102,42 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
             static SHOULD_PANIC: AtomicBool = AtomicBool::new(false);
 
             pub fn runner() {
-                list_tests();
-                run(bern_test::console::handle_user_input());
+                if bern_test::autorun::is_enabled() {
+                    let test_index = bern_test::autorun::get_next_test();
+                    if test_index < #n_tests {
+                        bern_test::autorun::set_next_test(test_index + 1);
+                        run(test_index);
+                    } else {
+                        let successes = bern_test::autorun::get_success_count();
+                        let summary =  match successes {
+                            #n_tests => "ok",
+                            _ => "FAILED",
+                        };
+                        println!(
+                            "\ntest result: {}. {} passed; {} failed",
+                            summary,
+                            successes,
+                            #n_tests - successes,
+                        );
+                         bern_test::autorun::disable();
+                    }
+                } else {
+                    list_tests();
+                    let test_index = match bern_test::console::handle_user_input() {
+                        255 => {
+                            bern_test::autorun::enable();
+                            bern_test::autorun::set_next_test(1);
+                            println!("\nrunning {} tests", #n_tests);
+                            0
+                        },
+                        i => {
+                            println!("");
+                            i
+                        },
+                    };
+                    run(test_index);
+                    tear_down();
+                }
             }
 
             fn list_tests() {
@@ -113,6 +147,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                 #(
                     println!("[{}] {}::{}", #k, #module_name_string, #name_copy);
                 )*
+                println!("[255] run all tests");
                 println!("Select test [0..{}]:", #n_tests-1);
             }
 
@@ -127,9 +162,10 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                         /* if we get here the test did not panic */
                         if !#func_should_panic {
                             println!(term_green!("ok"));
+                            bern_test::autorun::test_succeeded();
                         } else {
                             println!(term_red!("FAILED"));
-                            println!(" └─ did not panic");
+                            //println!(" └─ did not panic");
                         }
                     },
                 )*
@@ -140,11 +176,16 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
             pub fn panicked(info: &PanicInfo) {
                 if SHOULD_PANIC.load(Ordering::Relaxed) {
                     println!(term_green!("ok"));
+                    bern_test::autorun::test_succeeded();
                 } else {
                     println!(term_red!("FAILED"));
-                    println!(" └─ {}", info);
+                    //println!(" └─ {}", info);
                 }
-                println!(" └─ we're in the panic handler, waiting for reset ...");
+                //println!(" └─ we're in the panic handler, waiting for reset ... ");
+                tear_down();
+            }
+
+            fn tear_down() {
                 #( #tear_down_code )*
             }
 

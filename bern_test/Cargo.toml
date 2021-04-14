@@ -10,3 +10,4 @@ nb = "1.0.0"
 
 [features]
 serial = []
+colored = []

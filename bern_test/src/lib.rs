@@ -2,6 +2,7 @@
 
 pub mod serial;
 pub mod console;
+pub mod autorun;
 
 pub use bern_test_macros::tests;
 

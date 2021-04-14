@@ -4,10 +4,20 @@
 mod common;
 use common::main;
 
+/* todo:
+ * - board init: super::super::tests::runner(some_struct);
+ */
+
 #[bern_test::tests]
 mod tests {
     #[tear_down]
     fn reset() {
+        // add a short delay to flush serial
+        // todo: add wait functionality
+        let mut i = 0;
+        while i < 1000 {
+            i += 1;
+        }
         cortex_m::peripheral::SCB::sys_reset();
     }
 

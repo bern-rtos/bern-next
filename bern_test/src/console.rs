@@ -39,17 +39,37 @@ pub fn handle_user_input() -> u8 {
     }
 }
 
+// todo: make nicer
 /* ansi terminal colors, see: https://github.com/l-tools/ansi-colors/blob/master/src/colors.rs */
-#[macro_export]
-macro_rules! term_green {
+#[cfg(feature = "colored")]
+# [macro_export]
+macro_rules ! term_green {
     ($string:expr) => {
         concat!("\x1B[32m", $string, "\x1B[97m")
     }
 }
 
-#[macro_export]
-macro_rules! term_red {
+#[cfg(feature = "colored")]
+# [macro_export]
+macro_rules ! term_red {
     ($string:expr) => {
         concat!("\x1B[31m", $string, "\x1B[97m")
+    }
+}
+
+
+#[cfg(not(feature = "colored"))]
+# [macro_export]
+macro_rules ! term_green {
+    ($string:expr) => {
+        $string
+    }
+}
+
+#[cfg(not(feature = "colored"))]
+# [macro_export]
+macro_rules ! term_red {
+    ($string:expr) => {
+        $string
     }
 }
