@@ -14,10 +14,7 @@ mod tests {
     fn reset() {
         // add a short delay to flush serial
         // todo: add wait functionality
-        let mut i = 0;
-        while i < 1000 {
-            i += 1;
-        }
+        super::common::stupid_wait(1000);
         cortex_m::peripheral::SCB::sys_reset();
     }
 

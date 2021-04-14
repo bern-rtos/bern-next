@@ -1,35 +1,31 @@
 use core::sync::atomic::{self, Ordering};
 
-use stm32f4xx_hal as hal;
-use hal::{prelude::*, stm32};
+use super::st_nucleo_f446::StNucleoF446;
+use stm32f4xx_hal::prelude::*;
 
 use bern_test::serial::{self, Serial};
 use nb::Error::{WouldBlock, Other};
 
 #[cortex_m_rt::entry]
 fn main() -> ! {
-    /* init board */
-    let stm32_peripherals = stm32::Peripherals::take().expect("cannot take stm32 peripherals");
+    let mut board = StNucleoF446::new();
 
-    // Set up the system clock. We want to run at 48MHz for this one.
-    let rcc = stm32_peripherals.RCC.constrain();
-    let clocks = rcc.cfgr.sysclk(48.mhz()).freeze();
+    let (tx, rx) = board.vcp.split();
+    bern_test_serial_uplink(tx);
+    bern_test_serial_downlink(rx);
 
-    // gpio's
-    let gpioa = stm32_peripherals.GPIOA.split();
+    super::super::tests::runner();
 
-    // uart
-    let txd = gpioa.pa2.into_alternate_af7();
-    let rxd = gpioa.pa3.into_alternate_af7();
-    let serial = hal::serial::Serial::usart2(
-        stm32_peripherals.USART2,
-        (txd, rxd),
-        hal::serial::config::Config::default().baudrate(115_200.bps()),
-        clocks
-    ).unwrap();
+    loop {
+        atomic::compiler_fence(Ordering::SeqCst);
+    }
+}
 
-    /* bidirectional serial port needed for test framework */
-    let (mut tx, mut rx) = serial.split();
+/// Current bern test only supports inefficient, blocking serial transfer.
+/// A communication interface must implement the embedded-hal serial trait.
+fn bern_test_serial_uplink<T>(mut tx: T)
+    where T: embedded_hal::serial::Write<u8> + 'static,
+{
     Serial::set_write(move |b| {
         match tx.write(b) {
             Ok(_) => Ok(()),
@@ -39,6 +35,11 @@ fn main() -> ! {
             }
         }
     });
+}
+
+fn bern_test_serial_downlink<R>(mut rx: R)
+    where R: embedded_hal::serial::Read<u8> + 'static,
+{
     Serial::set_read(move || {
         match rx.read() {
             Ok(b) => Ok(b),
@@ -48,10 +49,4 @@ fn main() -> ! {
             }
         }
     });
-
-    super::super::tests::runner();
-
-    loop {
-        atomic::compiler_fence(Ordering::SeqCst);
-    }
 }
