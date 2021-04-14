@@ -9,5 +9,6 @@ bern-test-macros = { version = "0.1.0", path = "macros" }
 nb = "1.0.0"
 
 [features]
+autorun = []
 serial = []
 colored = []

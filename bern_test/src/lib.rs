@@ -2,7 +2,7 @@
 
 pub mod serial;
 pub mod console;
-pub mod autorun;
+pub mod runall;
 
 pub use bern_test_macros::tests;
 
@@ -28,4 +28,11 @@ macro_rules! print {
 
 pub fn get_version() -> &'static str {
     env!("CARGO_PKG_VERSION")
+}
+
+pub fn is_autorun_enabled() -> bool {
+    #[cfg(feature = "autorun")]
+    return true;
+    #[cfg(not(feature = "autorun"))]
+    return false;
 }

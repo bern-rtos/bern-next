@@ -95,60 +95,79 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
             #(#imports)*
 
             // todo: fix
-            use bern_test::{println, sprintln, print, sprint, term_green, term_red};
+            use bern_test::{println, sprintln, print, sprint, term_green, term_red, term_reset};
             use core::panic::PanicInfo;
             use core::sync::atomic::{AtomicBool, Ordering};
 
             static SHOULD_PANIC: AtomicBool = AtomicBool::new(false);
 
             pub fn runner() {
-                if bern_test::autorun::is_enabled() {
-                    let test_index = bern_test::autorun::get_next_test();
-                    if test_index < #n_tests {
-                        bern_test::autorun::set_next_test(test_index + 1);
-                        run(test_index);
-                    } else {
-                        let successes = bern_test::autorun::get_success_count();
-                        let summary =  match successes {
-                            #n_tests => "ok",
-                            _ => "FAILED",
-                        };
-                        println!(
-                            "\ntest result: {}. {} passed; {} failed",
-                            summary,
-                            successes,
-                            #n_tests - successes,
-                        );
-                         bern_test::autorun::disable();
-                    }
-                } else {
+                if bern_test::is_autorun_enabled() && !bern_test::runall::is_enabled() {
+                    print_header();
+                    runall_initiate();
+                } else if !bern_test::runall::is_enabled() {
+                    // provide user interface
+                    print_header();
                     list_tests();
                     let test_index = match bern_test::console::handle_user_input() {
                         255 => {
-                            bern_test::autorun::enable();
-                            bern_test::autorun::set_next_test(1);
-                            println!("\nrunning {} tests", #n_tests);
-                            0
+                            runall_initiate();
                         },
                         i => {
                             println!("");
-                            i
+                            run(i);
+                            tear_down();
                         },
                     };
-                    run(test_index);
-                    tear_down();
+                }
+
+                if bern_test::runall::is_enabled() {
+                    runall();
                 }
             }
 
-            fn list_tests() {
-                println!("\n\n======== Bern Test v{} ========",
+            fn print_header() {
+                println!(term_reset!());
+                println!("~~~~~~~~~~~~~~ Bern Test v{} ~~~~~~~~~~~~~~",
                     bern_test::get_version(),
                 );
+            }
+
+            fn list_tests() {
                 #(
                     println!("[{}] {}::{}", #k, #module_name_string, #name_copy);
                 )*
                 println!("[255] run all tests");
                 println!("Select test [0..{}]:", #n_tests-1);
+            }
+
+            fn runall_initiate() {
+                bern_test::runall::enable();
+                bern_test::runall::set_next_test(0);
+                println!("\nrunning {} tests", #n_tests);
+            }
+
+            fn runall() {
+                let test_index = bern_test::runall::get_next_test();
+                if test_index < #n_tests {
+                    bern_test::runall::set_next_test(test_index + 1);
+                    run(test_index);
+                    tear_down();
+                } else {
+                    let successes = bern_test::runall::get_success_count();
+                    let summary =  match successes {
+                        #n_tests => term_green!("ok"),
+                        _ => term_red!("FAILED"),
+                    };
+                    println!(
+                        "\ntest result: {}. {} passed; {} failed",
+                        summary,
+                        successes,
+                        #n_tests - successes,
+                    );
+                    bern_test::runall::disable();
+                    cortex_m::asm::bkpt(); // todo: !
+                }
             }
 
             fn run(index: u8) {
@@ -162,7 +181,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                         /* if we get here the test did not panic */
                         if !#func_should_panic {
                             println!(term_green!("ok"));
-                            bern_test::autorun::test_succeeded();
+                            bern_test::runall::test_succeeded();
                         } else {
                             println!(term_red!("FAILED"));
                             //println!(" └─ did not panic");
@@ -176,7 +195,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
             pub fn panicked(info: &PanicInfo) {
                 if SHOULD_PANIC.load(Ordering::Relaxed) {
                     println!(term_green!("ok"));
-                    bern_test::autorun::test_succeeded();
+                    bern_test::runall::test_succeeded();
                 } else {
                     println!(term_red!("FAILED"));
                     //println!(" └─ {}", info);
