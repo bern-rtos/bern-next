@@ -46,6 +46,7 @@ version = "0.1.0"
 dependencies = [
  "bern-test-macros",
  "nb 1.0.0",
+ "rtt-target 0.3.0",
 ]
 
 [[package]]
@@ -218,6 +219,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "rtt-target"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "01a267556daa12832ffc20129af69a6db0a28af91bcf12b4468af21f48818f66"
+dependencies = [
+ "ufmt-write",
+]
+
+[[package]]
 name = "rustc_version"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -250,7 +260,7 @@ dependencies = [
  "cortex-m-rt",
  "embedded-hal",
  "panic-halt",
- "rtt-target",
+ "rtt-target 0.2.2",
  "stm32f4xx-hal",
 ]
 
@@ -310,7 +320,7 @@ dependencies = [
  "cortex-m-rt",
  "embedded-hal",
  "nb 1.0.0",
- "rtt-target",
+ "rtt-target 0.2.2",
  "stm32f4xx-hal",
 ]
 

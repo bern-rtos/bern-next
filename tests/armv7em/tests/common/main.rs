@@ -3,6 +3,7 @@ use core::sync::atomic::{self, Ordering};
 use super::st_nucleo_f446::StNucleoF446;
 use stm32f4xx_hal::prelude::*;
 
+//use rtt_target::{rtt_init_print, ChannelMode::BlockIfFull};
 use bern_test::serial::{self, Serial};
 use nb::Error::{WouldBlock, Other};
 
@@ -11,6 +12,7 @@ fn main() -> ! {
     let mut board = StNucleoF446::new();
 
     let (tx, rx) = board.vcp.split();
+    //rtt_init_print!(BlockIfFull);
     bern_test_serial_uplink(tx);
     bern_test_serial_downlink(rx);
 

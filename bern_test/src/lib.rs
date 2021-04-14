@@ -6,6 +6,9 @@ pub mod runall;
 
 pub use bern_test_macros::tests;
 
+#[cfg(feature = "rtt")]
+pub use rtt_target;
+
 #[cfg(feature = "serial")]
 #[macro_export]
 macro_rules! println {
@@ -22,6 +25,26 @@ macro_rules! print {
     ($($args:tt)*) => {
         {
             $crate::sprint!($($args)*);
+        }
+    }
+}
+
+#[cfg(feature = "rtt")]
+#[macro_export]
+macro_rules! println {
+    ($($args:tt)*) => {
+        {
+            rtt_target::rprintln!($($args)*);
+        }
+    }
+}
+
+#[cfg(feature = "rtt")]
+#[macro_export]
+macro_rules! print {
+    ($($args:tt)*) => {
+        {
+            rtt_target::rprint!($($args)*);
         }
     }
 }
