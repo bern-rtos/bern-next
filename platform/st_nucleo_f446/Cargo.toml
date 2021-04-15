@@ -1,0 +1,21 @@
+[package]
+name = "st-nucleo-f446"
+version = "0.1.0"
+authors = ["Stefan Lüthi <stefan.luethi@outlook.com>"]
+edition = "2018"
+
+[dependencies]
+cortex-m = "0.7.2"
+cortex-m-rt = "0.6.10"
+embedded-hal = "0.2.4"
+stm32f4xx-hal = { version = "0.8", features = ["rt", "stm32f446"] }
+
+[dev-dependencies]
+bern-kernel = { version = "*", path = "../../bern_kernel" }
+panic-halt = "0.2.0"
+
+[profile.release]
+codegen-units = 1 # better optimizations
+debug = 1 # symbols are nice and they don't increase the size on Flash
+lto = true # better optimizations
+opt-level = "s"

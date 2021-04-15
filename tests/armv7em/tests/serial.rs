@@ -2,7 +2,7 @@
 #![no_std]
 
 mod common;
-use common::main;
+use common::main as _;
 
 fn recursion(i: u32) {
     recursion(i+1);
@@ -33,9 +33,10 @@ mod tests {
 
     #[test]
     fn with_board(board: &mut StNucleoF446) {
-        board.led.set_high().ok();
+        let mut led = board.led.take().unwrap();
+        led.set_high().ok();
         board.shield.led_0.set_high().ok();
-        assert_eq!(board.led.is_high().unwrap(), true);
+        assert_eq!(led.is_high().unwrap(), true);
     }
 
     #[test]

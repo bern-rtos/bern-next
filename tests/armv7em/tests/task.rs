@@ -2,7 +2,7 @@
 #![no_std]
 
 mod common;
-use common::main;
+use common::main as _;
 
 #[bern_test::tests]
 mod tests {

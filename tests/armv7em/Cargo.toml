@@ -17,6 +17,7 @@ harness = false
 bern-kernel = { version = "*", path = "../../bern_kernel" }
 bern-test = { version = "*", features = ["autorun", "serial", "colored"], path = "../../bern_test" }
 #bern-test = { version = "*", features = ["autorun", "rtt", "colored"], path = "../../bern_test" }
+st-nucleo-f446 = { version = "*", path = "../../platform/st_nucleo_f446"}
 
 cortex-m = "0.7.2"
 cortex-m-rt = "0.6.10"

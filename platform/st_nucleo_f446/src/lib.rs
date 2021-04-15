@@ -1,5 +1,7 @@
+#![no_std]
+
 use stm32f4xx_hal as hal;
-use hal::{prelude::*, stm32};
+use hal::prelude::*;
 use hal::stm32::{
     Peripherals,
     USART2,
@@ -10,10 +12,6 @@ use hal::gpio::{
     gpioc::PC,
     *,
 };
-use hal::gpio::gpioa::{
-    PA2,
-    PA3,
-};
 use hal::serial::{
     Serial,
     Tx,
@@ -22,10 +20,6 @@ use hal::serial::{
 
 // todo: can we replace this type madness with a macro?
 
-trait Splittable {
-    type Parts;
-    fn split(self) -> Self::Parts;
-}
 
 pub struct Vcp {
     pub tx: Tx<USART2>,
@@ -53,7 +47,7 @@ pub struct StNucleoF446 {
 
 impl StNucleoF446 {
     pub fn new() -> Self {
-        let stm32_peripherals = stm32::Peripherals::take()
+        let stm32_peripherals = Peripherals::take()
             .expect("cannot take stm32 peripherals");
 
         /* system clock */
@@ -68,7 +62,7 @@ impl StNucleoF446 {
         /* Virtual Com Port (VCP) over debug adapter */
         let txd = gpioa.pa2.into_alternate_af7();
         let rxd = gpioa.pa3.into_alternate_af7();
-        let vcp = hal::serial::Serial::usart2(
+        let vcp = Serial::usart2(
             stm32_peripherals.USART2,
             (txd, rxd),
             hal::serial::config::Config::default().baudrate(115_200.bps()),

@@ -1,5 +1,5 @@
 pub mod main;
-pub mod st_nucleo_f446;
+pub use st_nucleo_f446;
 
 pub fn stupid_wait(iterations: usize) {
     let mut i = 0;

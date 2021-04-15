@@ -1,6 +1,6 @@
 use core::sync::atomic::{self, Ordering};
 
-use super::st_nucleo_f446::StNucleoF446;
+use st_nucleo_f446::StNucleoF446;
 use stm32f4xx_hal::prelude::*;
 
 //use rtt_target::{rtt_init_print, ChannelMode::BlockIfFull};

@@ -46,7 +46,7 @@ version = "0.1.0"
 dependencies = [
  "bern-test-macros",
  "nb 1.0.0",
- "rtt-target 0.3.0",
+ "rtt-target",
 ]
 
 [[package]]
@@ -210,16 +210,6 @@ checksum = "90bde5296fc891b0cef12a6d03ddccc162ce7b2aff54160af9338f8d40df6d19"
 
 [[package]]
 name = "rtt-target"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0869b4c5b6a6d8c5583fc473f9eb3423a170f77626b8c8a7fb18eddcda5770e2"
-dependencies = [
- "cortex-m 0.6.7",
- "ufmt-write",
-]
-
-[[package]]
-name = "rtt-target"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "01a267556daa12832ffc20129af69a6db0a28af91bcf12b4468af21f48818f66"
@@ -252,7 +242,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "388a1df253eca08550bef6c72392cfe7c30914bf41df5269b68cbd6ff8f570a3"
 
 [[package]]
-name = "st-nucleo-f446re"
+name = "st-nucleo-f446"
 version = "0.1.0"
 dependencies = [
  "bern-kernel",
@@ -260,7 +250,6 @@ dependencies = [
  "cortex-m-rt",
  "embedded-hal",
  "panic-halt",
- "rtt-target 0.2.2",
  "stm32f4xx-hal",
 ]
 
@@ -320,6 +309,7 @@ dependencies = [
  "cortex-m-rt",
  "embedded-hal",
  "nb 1.0.0",
+ "st-nucleo-f446",
  "stm32f4xx-hal",
 ]
 

@@ -121,7 +121,7 @@ impl fmt::Write for Serial
 #[macro_export]
 macro_rules! sprintln {
     ($fmt:expr) => {
-        $crate::serial::Serial::write_str(concat!($fmt, "\n"));
+        $crate::serial::Serial::write_str(concat!($fmt, "\r\n"));
     };
     ($fmt:expr, $($arg:tt)*) => {
         $crate::serial::Serial::write_fmt(format_args!(concat!($fmt, "\n"), $($arg)*));
