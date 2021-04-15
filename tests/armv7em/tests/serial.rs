@@ -4,21 +4,16 @@
 mod common;
 use common::main;
 
-
 fn recursion(i: u32) {
     recursion(i+1);
 }
-
-/* todo:
- * - board init: super::super::tests::runner(some_struct);
- */
 
 #[bern_test::tests]
 mod tests {
     use crate::common::st_nucleo_f446::StNucleoF446;
     use stm32f4xx_hal::prelude::*;
 
-    #[tear_down]
+    #[test_tear_down]
     fn reset() {
         // add a short delay to flush serial
         // todo: add wait functionality
@@ -26,8 +21,13 @@ mod tests {
         cortex_m::peripheral::SCB::sys_reset();
     }
 
+    #[tear_down]
+    fn stop() {
+        cortex_m::asm::bkpt();
+    }
+
     #[test]
-    fn should_fail(board: &mut StNucleoF446) {
+    fn should_fail() {
         assert!(1 == 0, "wrong");
     }
 
@@ -39,7 +39,7 @@ mod tests {
 
     #[test]
     #[ignored]
-    fn stack_overflow(board: &mut StNucleoF446) {
+    fn stack_overflow() {
         super::recursion(0);
     }
 
@@ -51,7 +51,7 @@ mod tests {
 
     #[test]
     #[ignored]
-    fn a_third_test(board: &mut StNucleoF446) {
+    fn a_third_test() {
         assert!(42 == 42, "wow");
     }
 }

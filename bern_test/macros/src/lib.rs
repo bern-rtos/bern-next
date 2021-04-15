@@ -11,7 +11,6 @@ use std::borrow::Borrow;
 
 #[proc_macro_attribute]
 pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
-
     let module: ItemMod = syn::parse(input).unwrap();
 
     let items = if let Some(content) = module.content {
@@ -28,6 +27,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
     /* parse user test module */
     let mut tests = vec![];
     let mut imports = vec![];
+    let mut test_tear_down_code = vec![];
     let mut tear_down_code = vec![];
     let mut test_param_names = vec![];
     let mut test_param_types = vec![];
@@ -38,6 +38,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                 let mut should_panic = false;
                 let mut ignored = false;
                 let mut set_up = false;
+                let mut test_tear_down = false;
                 let mut tear_down = false;
 
                 let name = func.sig.ident.clone();
@@ -48,6 +49,8 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                         should_panic = true;
                     } else if attr.path.is_ident("ignored") {
                         ignored = true;
+                    } else if attr.path.is_ident("test_tear_down") {
+                        test_tear_down = true;
                     } else if attr.path.is_ident("tear_down") {
                         tear_down = true;
                     }
@@ -81,6 +84,8 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                         func,
                         should_panic,
                     });
+                } else if test_tear_down {
+                    test_tear_down_code = func.block.stmts;
                 } else if tear_down {
                     tear_down_code = func.block.stmts;
                 }
@@ -156,7 +161,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                         i => {
                             println!("");
                             run(i, #test_input_call);
-                            tear_down();
+                            test_tear_down();
                         },
                     };
                 }
@@ -192,7 +197,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                 if test_index < #n_tests {
                     bern_test::runall::set_next_test(test_index + 1);
                     run(test_index, #test_input_call);
-                    tear_down();
+                    test_tear_down();
                 } else {
                     let successes = bern_test::runall::get_success_count();
                     let summary =  match successes {
@@ -206,7 +211,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                         #n_tests - successes,
                     );
                     bern_test::runall::disable();
-                    cortex_m::asm::bkpt(); // todo: !
+                    tear_down();
                 }
             }
 
@@ -224,7 +229,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                             bern_test::runall::test_succeeded();
                         } else {
                             println!(term_red!("FAILED"));
-                            //println!(" └─ did not panic");
+                            println!(" └─ did not panic");
                         }
                     },
                 )*
@@ -240,10 +245,15 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                     println!(term_red!("FAILED"));
                     println!(" └─ {}", info);
                 }
-                //println!(" └─ we're in the panic handler, waiting for reset ... ");
-                tear_down();
+                test_tear_down();
             }
 
+            // runs after every test
+            fn test_tear_down() {
+                #( #test_tear_down_code )*
+            }
+
+            // runs after all tests
             fn tear_down() {
                 #( #tear_down_code )*
             }
