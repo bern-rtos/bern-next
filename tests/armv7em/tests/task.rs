@@ -4,13 +4,27 @@
 mod common;
 use common::main;
 
-/* todo:
- * - board init: super::super::tests::runner(some_struct);
- */
-
 #[bern_test::tests]
 mod tests {
-    #[tear_down]
+    use crate::common::st_nucleo_f446::StNucleoF446;
+    use stm32f4xx_hal::prelude::*;
+    use bern_kernel::scheduler::Scheduler;
+    use bern_kernel::{alloc_static_stack, task::{Task}};
+
+    #[test_set_up]
+    fn init_scheduler() {
+        Scheduler::init();
+        /* idle task */
+        Task::spawn(move | | {
+            loop {
+                cortex_m::asm::nop();
+            }
+        },
+            alloc_static_stack!(128)
+        );
+    }
+
+    #[test_tear_down]
     fn reset() {
         // add a short delay to flush serial
         // todo: add wait functionality
@@ -18,8 +32,26 @@ mod tests {
         cortex_m::peripheral::SCB::sys_reset();
     }
 
+    #[tear_down]
+    fn stop() {
+        cortex_m::asm::bkpt();
+    }
+
     #[test]
-    fn first_test() {
-        assert!(1 == 1, "wrong");
+    fn first_task(board: &mut StNucleoF446) {
+        let mut led = board.led.take().unwrap();
+
+        Task::spawn(move | | {
+            led.toggle().ok();
+            Scheduler::delay(100);
+
+            assert_eq!(0,1);
+        },
+            alloc_static_stack!(2048) // need enough memory for panic handler...
+        );
+        Scheduler::start();
+        loop {
+            // todo: implement join() to wait for a thread to finish
+        }
     }
 }

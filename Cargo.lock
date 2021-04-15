@@ -320,7 +320,6 @@ dependencies = [
  "cortex-m-rt",
  "embedded-hal",
  "nb 1.0.0",
- "rtt-target 0.2.2",
  "stm32f4xx-hal",
 ]
 

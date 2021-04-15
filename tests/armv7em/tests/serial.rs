@@ -28,13 +28,14 @@ mod tests {
 
     #[test]
     fn should_fail() {
-        assert!(1 == 0, "wrong");
+        assert_eq!(1, 0);
     }
 
     #[test]
     fn with_board(board: &mut StNucleoF446) {
         board.led.set_high().ok();
         board.shield.led_0.set_high().ok();
+        assert_eq!(board.led.is_high().unwrap(), true);
     }
 
     #[test]
@@ -45,13 +46,19 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn another_test() {
-        assert!(1 == 0, "wrong");
+    fn should_panic() {
+        assert_eq!(1, 0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn should_panic_but_does_not() {
+        assert_eq!(1, 1);
     }
 
     #[test]
     #[ignored]
     fn a_third_test() {
-        assert!(42 == 42, "wow");
+        assert_eq!(1, 1);
     }
 }

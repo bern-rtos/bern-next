@@ -27,10 +27,11 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
     /* parse user test module */
     let mut tests = vec![];
     let mut imports = vec![];
+    let mut test_set_up_code = vec![];
     let mut test_tear_down_code = vec![];
     let mut tear_down_code = vec![];
-    let mut test_param_names = vec![];
-    let mut test_param_types = vec![];
+    let mut test_input_idents = vec![];
+    let mut test_input_types = vec![];
     for item in items {
         match item {
             Item::Fn(mut func) => {
@@ -38,6 +39,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                 let mut should_panic = false;
                 let mut ignored = false;
                 let mut set_up = false;
+                let mut test_set_up = false;
                 let mut test_tear_down = false;
                 let mut tear_down = false;
 
@@ -49,6 +51,8 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                         should_panic = true;
                     } else if attr.path.is_ident("ignored") {
                         ignored = true;
+                    } else if attr.path.is_ident("test_set_up") {
+                        test_set_up = true;
                     } else if attr.path.is_ident("test_tear_down") {
                         test_tear_down = true;
                     } else if attr.path.is_ident("tear_down") {
@@ -62,17 +66,17 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                     let mut types = vec![];
                     for arg in func.sig.inputs.iter() {
                         if let FnArg::Typed(pat) = arg {
-                            if let Pat::Ident(ident) = *pat.pat.clone() {
-                                idents.push(ident);
+                            if let Pat::Ident(patid) = *pat.pat.clone() {
+                                idents.push(patid);
                                 types.push(*pat.ty.clone());
                             }
                         } else {
                             // self not supported
                         }
                     }
-                    if test_param_types.len() == 0 {
-                        test_param_types = types;
-                        test_param_names = idents;
+                    if test_input_types.len() == 0 {
+                        test_input_types = types;
+                        test_input_idents = idents;
                     } else {
                         // todo: check params
                     }
@@ -84,6 +88,8 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                         func,
                         should_panic,
                     });
+                } else if test_set_up {
+                    test_set_up_code = func.block.stmts;
                 } else if test_tear_down {
                     test_tear_down_code = func.block.stmts;
                 } else if tear_down {
@@ -114,10 +120,13 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
 
 
     let test_input_declaration = quote! {
-        #(#test_param_names: #test_param_types,)*
+        #(#test_input_idents: #test_input_types,)*
     };
+    let test_input_names = test_input_idents.iter().map(|i| {
+        &i.ident
+    });
     let test_input_call = quote! {
-        #(#test_param_names,)*
+        #(#test_input_names,)*
     };
     let test_calls = tests.iter().map(|t| {
         let call = &t.name;
@@ -140,7 +149,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
         mod #module_name {
             #(#imports)*
 
-            use bern_test::{println, print, term_green, term_red, term_reset};
+            use bern_test::{println, print, term_green, term_red, term_reset, term_gray};
             use core::panic::PanicInfo;
             use core::sync::atomic::{AtomicBool, Ordering};
 
@@ -160,6 +169,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                         },
                         i => {
                             println!("");
+                            test_set_up();
                             run(i, #test_input_call);
                             test_tear_down();
                         },
@@ -196,6 +206,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                 let test_index = bern_test::run_all::get_next_test();
                 if test_index < #n_tests {
                     bern_test::run_all::set_next_test(test_index + 1);
+                    test_set_up();
                     run(test_index, #test_input_call);
                     test_tear_down();
                 } else {
@@ -243,9 +254,14 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                     bern_test::run_all::test_succeeded();
                 } else {
                     println!(term_red!("FAILED"));
-                    println!(" └─ {}", info);
+                    println!(" └─ stdout:\n{}", info);
                 }
                 test_tear_down();
+            }
+
+            // runs before every test
+            fn test_set_up() {
+                #( #test_set_up_code )*
             }
 
             // runs after every test

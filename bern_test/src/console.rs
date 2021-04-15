@@ -65,27 +65,27 @@ macro_rules! term_red {
     }
 }
 
-
-#[cfg(not(feature = "colored"))]
+#[cfg(feature = "colored")]
 # [macro_export]
-macro_rules ! term_red {
-    () => {
-        ""
-    }
-}
-
-#[cfg(not(feature = "colored"))]
-# [macro_export]
-macro_rules ! term_green {
+macro_rules! term_gray {
     ($string:expr) => {
-        $string
+        concat!("\x1B[90m", $string, "\x1B[m")
     }
 }
 
+
 #[cfg(not(feature = "colored"))]
 # [macro_export]
-macro_rules ! term_red {
-    ($string:expr) => {
-        $string
-    }
-}
+macro_rules ! term_reset { () => { "" } }
+
+#[cfg(not(feature = "colored"))]
+# [macro_export]
+macro_rules ! term_red { () => { "" } }
+
+#[cfg(not(feature = "colored"))]
+# [macro_export]
+macro_rules ! term_green { () => { "" } }
+
+#[cfg(not(feature = "colored"))]
+# [macro_export]
+macro_rules ! term_gray { () => { "" } }

@@ -45,7 +45,7 @@ pub struct ShieldBfh {
 }
 
 pub struct StNucleoF446 {
-    pub led: PA<Output<PushPull>>,
+    pub led: Option<PA<Output<PushPull>>>,
     pub button: PC<Input<Floating>>,
     pub vcp: Option<Vcp>, // allow taking vcp and passing the board on, not optimal
     pub shield: ShieldBfh,
@@ -92,7 +92,7 @@ impl StNucleoF446 {
 
         /* assemble... */
         StNucleoF446 {
-            led,
+            led: Some(led),
             button,
             vcp: Some(Vcp {
                 tx: vcp_tx,
