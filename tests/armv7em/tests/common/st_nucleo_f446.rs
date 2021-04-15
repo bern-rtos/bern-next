@@ -10,12 +10,27 @@ use hal::gpio::{
     gpioc::PC,
     *,
 };
-use stm32f4xx_hal::gpio::gpioa::{
+use hal::gpio::gpioa::{
     PA2,
     PA3,
 };
+use hal::serial::{
+    Serial,
+    Tx,
+    Rx,
+};
 
 // todo: can we replace this type madness with a macro?
+
+trait Splittable {
+    type Parts;
+    fn split(self) -> Self::Parts;
+}
+
+pub struct Vcp {
+    pub tx: Tx<USART2>,
+    pub rx: Rx<USART2>,
+}
 
 pub struct ShieldBfh {
     //pub buttons: [PC<Input<Floating>>;8],
@@ -32,7 +47,7 @@ pub struct ShieldBfh {
 pub struct StNucleoF446 {
     pub led: PA<Output<PushPull>>,
     pub button: PC<Input<Floating>>,
-    pub vcp: hal::serial::Serial<USART2,(PA2<Alternate<AF7>>, PA3<Alternate<AF7>>)>,
+    pub vcp: Option<Vcp>, // allow taking vcp and passing the board on, not optimal
     pub shield: ShieldBfh,
 }
 
@@ -59,6 +74,7 @@ impl StNucleoF446 {
             hal::serial::config::Config::default().baudrate(115_200.bps()),
             clocks
         ).unwrap();
+        let (vcp_tx, vcp_rx) = vcp.split();
 
         /* board IOs */
         let led = gpioa.pa5.into_push_pull_output().downgrade();
@@ -78,7 +94,10 @@ impl StNucleoF446 {
         StNucleoF446 {
             led,
             button,
-            vcp,
+            vcp: Some(Vcp {
+                tx: vcp_tx,
+                rx: vcp_rx,
+            }),
             shield: ShieldBfh {
                 led_0: shield_led_0,
                 led_1: shield_led_1,

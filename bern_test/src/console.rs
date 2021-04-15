@@ -45,7 +45,7 @@ pub fn handle_user_input() -> u8 {
 # [macro_export]
 macro_rules! term_reset {
     () => {
-        "\x1B[97m"
+        "\x1B[m"
     }
 }
 
@@ -53,7 +53,7 @@ macro_rules! term_reset {
 # [macro_export]
 macro_rules! term_green {
     ($string:expr) => {
-        concat!("\x1B[32m", $string, "\x1B[97m")
+        concat!("\x1B[32m", $string, "\x1B[m")
     }
 }
 
@@ -61,7 +61,7 @@ macro_rules! term_green {
 # [macro_export]
 macro_rules! term_red {
     ($string:expr) => {
-        concat!("\x1B[31m", $string, "\x1B[97m")
+        concat!("\x1B[31m", $string, "\x1B[m")
     }
 }
 

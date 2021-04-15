@@ -7,21 +7,22 @@ use stm32f4xx_hal::prelude::*;
 use bern_test::serial::{self, Serial};
 use nb::Error::{WouldBlock, Other};
 
+
 #[cortex_m_rt::entry]
 fn main() -> ! {
     let mut board = StNucleoF446::new();
-
-    let (tx, rx) = board.vcp.split();
     //rtt_init_print!(BlockIfFull);
-    bern_test_serial_uplink(tx);
-    bern_test_serial_downlink(rx);
+    let vcp = board.vcp.take().unwrap();
+    bern_test_serial_uplink(vcp.tx);
+    bern_test_serial_downlink(vcp.rx);
 
-    super::super::tests::runner();
+    super::super::tests::runner(&mut board);
 
     loop {
         atomic::compiler_fence(Ordering::SeqCst);
     }
 }
+
 
 /// Current bern test only supports inefficient, blocking serial transfer.
 /// A communication interface must implement the embedded-hal serial trait.
