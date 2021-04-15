@@ -147,10 +147,10 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
             static SHOULD_PANIC: AtomicBool = AtomicBool::new(false);
 
             pub fn runner(#test_input_declaration) {
-                if bern_test::is_autorun_enabled() && !bern_test::runall::is_enabled() {
+                if bern_test::is_autorun_enabled() && !bern_test::run_all::is_active() {
                     print_header();
                     runall_initiate();
-                } else if !bern_test::runall::is_enabled() {
+                } else if !bern_test::run_all::is_active() {
                     // provide user interface
                     print_header();
                     list_tests();
@@ -166,7 +166,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                     };
                 }
 
-                if bern_test::runall::is_enabled() {
+                if bern_test::run_all::is_active() {
                     runall(#test_input_call);
                 }
             }
@@ -187,19 +187,19 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
             }
 
             fn runall_initiate() {
-                bern_test::runall::enable();
-                bern_test::runall::set_next_test(0);
+                bern_test::run_all::activate();
+                bern_test::run_all::set_next_test(0);
                 println!("\nrunning {} tests", #n_tests);
             }
 
             fn runall(#test_input_declaration) {
-                let test_index = bern_test::runall::get_next_test();
+                let test_index = bern_test::run_all::get_next_test();
                 if test_index < #n_tests {
-                    bern_test::runall::set_next_test(test_index + 1);
+                    bern_test::run_all::set_next_test(test_index + 1);
                     run(test_index, #test_input_call);
                     test_tear_down();
                 } else {
-                    let successes = bern_test::runall::get_success_count();
+                    let successes = bern_test::run_all::get_success_count();
                     let summary =  match successes {
                         #n_tests => term_green!("ok"),
                         _ => term_red!("FAILED"),
@@ -210,7 +210,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                         successes,
                         #n_tests - successes,
                     );
-                    bern_test::runall::disable();
+                    bern_test::run_all::deactivate();
                     tear_down();
                 }
             }
@@ -226,7 +226,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                         /* if we get here the test did not panic */
                         if !#test_should_panic {
                             println!(term_green!("ok"));
-                            bern_test::runall::test_succeeded();
+                            bern_test::run_all::test_succeeded();
                         } else {
                             println!(term_red!("FAILED"));
                             println!(" └─ did not panic");
@@ -240,7 +240,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
             pub fn panicked(info: &PanicInfo) {
                 if SHOULD_PANIC.load(Ordering::Relaxed) {
                     println!(term_green!("ok"));
-                    bern_test::runall::test_succeeded();
+                    bern_test::run_all::test_succeeded();
                 } else {
                     println!(term_red!("FAILED"));
                     println!(" └─ {}", info);

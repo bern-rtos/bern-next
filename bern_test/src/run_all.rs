@@ -1,5 +1,3 @@
-use core::sync::atomic::{AtomicBool, AtomicU32};
-
 /* these must be put in a linker section that does get initialized */
 #[link_section = ".test_secret"]
 static mut TEST_SECRET: u32 = 0;
@@ -10,17 +8,17 @@ static mut TEST_SUCCESSFUL: u8 = 0;
 
 const SECRET_NUMBER: u32 = 0x12345678;
 
-pub fn enable() {
+pub fn activate() {
     unsafe {
         TEST_SECRET = SECRET_NUMBER;
         TEST_SUCCESSFUL = 0;
     }
 }
-pub fn disable() {
+pub fn deactivate() {
     unsafe { TEST_SECRET = 0; }
 }
 
-pub fn is_enabled() -> bool {
+pub fn is_active() -> bool {
     unsafe { TEST_SECRET == SECRET_NUMBER }
 }
 

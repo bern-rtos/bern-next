@@ -2,7 +2,7 @@
 
 pub mod serial;
 pub mod console;
-pub mod runall;
+pub mod run_all;
 
 pub use bern_test_macros::tests;
 
