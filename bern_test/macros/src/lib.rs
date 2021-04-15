@@ -29,8 +29,8 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut tests = vec![];
     let mut imports = vec![];
     let mut tear_down_code = vec![];
-    let mut test_param_name: Option<PatIdent> = None;
-    let mut test_param_type: Option<Type> = None;
+    let mut test_param_names = vec![];
+    let mut test_param_types = vec![];
     for item in items {
         match item {
             Item::Fn(mut func) => {
@@ -53,17 +53,25 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                     }
                 }
 
+                /* parse test input parameter list */
                 if test {
+                    let mut idents = vec![];
+                    let mut types = vec![];
                     for arg in func.sig.inputs.iter() {
                         if let FnArg::Typed(pat) = arg {
-                            test_param_type = Some(*pat.ty.clone());
-                            if let Pat::Ident(id) = *pat.pat.clone() {
-                                test_param_name = Some(id);
+                            if let Pat::Ident(ident) = *pat.pat.clone() {
+                                idents.push(ident);
+                                types.push(*pat.ty.clone());
                             }
-                            break;
                         } else {
                             // self not supported
                         }
+                    }
+                    if test_param_types.len() == 0 {
+                        test_param_types = types;
+                        test_param_names = idents;
+                    } else {
+                        // todo: check params
                     }
                 }
 
@@ -98,23 +106,27 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
     let test_blocks = tests.iter().map(|t| &t.func.block);
     let test_should_panic = tests.iter().map(|t| &t.should_panic);
     let test_sig = tests.iter().map(|t| &t.func.sig);
-    let calls = test_idents.clone();
 
-    let name_strings = tests.iter().map(|t| format!("{}", &t.name));
-    let i = (0..calls.len()).map(syn::Index::from);
-    let k = i.clone(); // meh
-    let name_copy = name_strings.clone();
-    let n_tests = tests.len() as u8;
-    let test_param_type = test_param_type.unwrap();
-    let test_param_name = test_param_name.unwrap();
 
+    let test_input_declaration = quote! {
+        #(#test_param_names: #test_param_types,)*
+    };
+    let test_input_call = quote! {
+        #(#test_param_names,)*
+    };
     let test_calls = tests.iter().map(|t| {
         let call = &t.name;
         match t.func.sig.inputs.len() {
             0 => quote! { #call(); },
-            _ => quote! { #call(#test_param_name); },
+            _ => quote! { #call(#test_input_call); },
         }
     });
+
+    let name_strings = tests.iter().map(|t| format!("{}", &t.name));
+    let i = (0..test_calls.len()).map(syn::Index::from);
+    let k = i.clone(); // meh
+    let name_copy = name_strings.clone();
+    let n_tests = tests.len() as u8;
     /* Create test module containing:
      * - a test runner
      * - the test function implementations
@@ -129,7 +141,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
 
             static SHOULD_PANIC: AtomicBool = AtomicBool::new(false);
 
-            pub fn runner(#test_param_name: #test_param_type) {
+            pub fn runner(#test_input_declaration) {
                 if bern_test::is_autorun_enabled() && !bern_test::runall::is_enabled() {
                     print_header();
                     runall_initiate();
@@ -143,14 +155,14 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                         },
                         i => {
                             println!("");
-                            run(i, #test_param_name);
+                            run(i, #test_input_call);
                             tear_down();
                         },
                     };
                 }
 
                 if bern_test::runall::is_enabled() {
-                    runall(#test_param_name);
+                    runall(#test_input_call);
                 }
             }
 
@@ -175,11 +187,11 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                 println!("\nrunning {} tests", #n_tests);
             }
 
-            fn runall(#test_param_name: #test_param_type) {
+            fn runall(#test_input_declaration) {
                 let test_index = bern_test::runall::get_next_test();
                 if test_index < #n_tests {
                     bern_test::runall::set_next_test(test_index + 1);
-                    run(test_index, #test_param_name);
+                    run(test_index, #test_input_call);
                     tear_down();
                 } else {
                     let successes = bern_test::runall::get_success_count();
@@ -198,7 +210,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                 }
             }
 
-            fn run(index: u8, #test_param_name: #test_param_type) {
+            fn run(index: u8, #test_input_declaration) {
                 match index {
                 #(
                     #i => {
