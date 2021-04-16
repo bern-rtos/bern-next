@@ -13,7 +13,7 @@ macro_rules! alloc_static_stack {
     ($size:expr) => {
         {
             #[link_section = ".taskstack"]
-            static mut STACK: [u8; $size] = [0; $size]; // will not be initialized -> linker scritp
+            static mut STACK: [u8; $size] = [0; $size]; // will not be initialized -> linker script
             unsafe{ // stack pattern for debugging
                 for byte in STACK.iter_mut() {
                     *byte = 0xAA;
@@ -22,6 +22,55 @@ macro_rules! alloc_static_stack {
             unsafe { STACK.as_mut() }
         }
     };
+}
+
+/* adapted from cortex-m crate */
+
+/// CPU registers pushed/popped by the hardware
+#[repr(C)]
+pub struct StackFrameException {
+    /// (General purpose) Register 0
+    pub r0: u32,
+    /// (General purpose) Register 1
+    pub r1: u32,
+    /// (General purpose) Register 2
+    pub r2: u32,
+    /// (General purpose) Register 3
+    pub r3: u32,
+    /// (General purpose) Register 12
+    pub r12: u32,
+    /// Linker Register
+    pub lr: u32,
+    /// Program Counter
+    pub pc: u32,
+    /// Program Status Register
+    pub xpsr: u32,
+}
+
+/// CPU registers the software must push/pop to/from the stack
+#[repr(C)]
+pub struct StackFrameExtension {
+    /// (General purpose) Register 4
+    pub r4: u32,
+    /// (General purpose) Register 5
+    pub r5: u32,
+    /// (General purpose) Register 6
+    pub r6: u32,
+    /// (General purpose) Register 7
+    pub r7: u32,
+    /// (General purpose) Register 8
+    pub r8: u32,
+    /// (General purpose) Register 9
+    pub r9: u32,
+    /// (General purpose) Register 10
+    pub r10: u32,
+    /// (General purpose) Register 11
+    pub r11: u32,
+}
+
+/// CPU registers used by the floating point unit
+#[repr(C)]
+pub struct StackFrameFpu {
 }
 
 /// Issue with closures and static tasks
@@ -43,12 +92,11 @@ type RunnableResult = (); // todo: replace with '!' when possible
 // todo: manage lifetime of stack & runnable
 pub struct Task<'a>
 {
-
     runnable: &'a mut (dyn FnMut() -> RunnableResult + 'static), // todo: remove
-    runnable_stack_ptr: *mut usize,
+    runnable_ptr: *mut usize,
     next_wut: u64,
+    stack_top_ptr: *mut usize,
     stack_ptr: *mut usize,
-    reg_psp: *mut usize,
 }
 
 impl<'a> Task<'a>
@@ -83,38 +131,45 @@ impl<'a> Task<'a>
 
         // set task stack pointer
         let mut alignment = unsafe { stack.as_mut_ptr().offset(runnable_pos as isize) as usize} % 8;
-        if alignment == 0 { // ensure that stack pointer is a least decreased by one
-            alignment = 4; // todo: check that again
-        } else {
-            alignment += 4;
-        }
         let proc_stack_pos = runnable_pos - alignment; // align to double word (ARM recommendation)
         let mut proc_sp = unsafe { stack.as_ptr().offset(proc_stack_pos as isize)} as *mut usize;
 
         let mut task = Task {
             runnable,
-            runnable_stack_ptr: unsafe { stack.as_mut_ptr().offset(runnable_pos as isize) as *mut usize },
+            runnable_ptr: unsafe { stack.as_mut_ptr().offset(runnable_pos as isize) as *mut usize },
             next_wut: 0,
-            stack_ptr: stack.as_mut_ptr() as *mut usize, // todo: replace with stack object
-            reg_psp: proc_sp,
+            stack_top_ptr: stack.as_mut_ptr() as *mut usize, // todo: replace with stack object
+            stack_ptr: proc_sp,
 
         };
 
-        // create initial stack frame
-        task.bootstrap_stack();
-
+        task.init_stack_frame();
         Scheduler::add(task);
         // todo: task handle?
     }
 
-    /// We need to set up the process stack before we can use it
-    fn bootstrap_stack(&mut self) {
+    /// We need to set up the task stack before we can use it
+    fn init_stack_frame(&mut self) {
+        let stack_frame = StackFrameException {
+            r0: self.runnable_ptr as u32,
+            r1: 0,
+            r2: 0,
+            r3: 0,
+            r12: 0,
+            lr: 0xaaaaaaaa, // this will hardfault for now
+            pc: Self::entry as u32,
+            xpsr: 0x01000000,
+        };
+        let stack_frame_offset = size_of::<StackFrameException>() / size_of::<usize>();
         unsafe {
-            // todo: set exit function in LR
-            *self.reg_psp = 0x01000000; // xPSR
-            *self.reg_psp.offset(-1) = Self::entry as usize; // PC
-            *self.reg_psp.offset(-7) = self.runnable_stack_ptr as usize; // R0 -> runnable_ptr of entry()
-            self.reg_psp =  self.reg_psp.offset(-15); // exception frame (8 regs) + r4-r11 (8 regs)
+            ptr::copy_nonoverlapping(
+                &stack_frame,
+                self.stack_ptr.offset(-(stack_frame_offset as isize)) as *mut _,
+                1
+            );
+            let stack_ptr_offset =
+                (size_of::<StackFrameException>() + size_of::<StackFrameExtension>()) / size_of::<usize>();
+            self.stack_ptr =  self.stack_ptr.offset(-(stack_ptr_offset as isize));
         }
     }
 
@@ -125,10 +180,10 @@ impl<'a> Task<'a>
     }
 
     pub fn get_psp(&self) -> *mut usize {
-        self.reg_psp
+        self.stack_ptr
     }
     pub fn set_psp(&mut self, psp: *mut usize) {
-        self.reg_psp = psp;
+        self.stack_ptr = psp;
     }
 
     pub fn run(&mut self) -> RunnableResult {
