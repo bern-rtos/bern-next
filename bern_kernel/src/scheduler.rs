@@ -18,15 +18,15 @@ static mut SCHEDULER: Option<Scheduler> = None;
 
 // todo: lock sched
 // todo: replace with single linked list
-pub struct Scheduler<'a>
+pub struct Scheduler
 {
-    tasks: [Option<Task<'a>>; 5],
+    tasks: [Option<Task>; 5],
     core: Peripherals,
-    current_task: Option<*mut Task<'a>>, // todo: I'm not fighting the borrow checker until I use a linked list
-    next_task: Option<*mut Task<'a>>,
+    current_task: Option<*mut Task>, // todo: I'm not fighting the borrow checker until I use a linked list
+    next_task: Option<*mut Task>,
 }
 
-impl<'a> Scheduler<'a>
+impl Scheduler
 {
     pub fn init() {
         // init systick -> 1ms
@@ -45,7 +45,7 @@ impl<'a> Scheduler<'a>
         };
     }
 
-    pub fn add(mut task: Task<'static>) {
+    pub fn add(mut task: Task) {
         let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
 
         for _task in scheduler.tasks.iter_mut() {
@@ -90,7 +90,7 @@ impl<'a> Scheduler<'a>
         // todo: unsafe -> already &mut in exec
         let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
         unsafe { scheduler.current_task.as_mut().unwrap().as_mut().unwrap() }.delay(ms);
-        unsafe { scheduler.current_task.as_mut().unwrap().as_mut().unwrap() }.get_psp();
+        unsafe { scheduler.current_task.as_mut().unwrap().as_mut().unwrap() }.get_stack_ptr();
 
         SCB::set_pendsv();
     }
@@ -119,11 +119,11 @@ fn PendSV() {
         );
     }
     let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
-    unsafe { scheduler.current_task.as_mut().unwrap().as_mut().unwrap() }.set_psp(psp as *mut usize);
+    unsafe { scheduler.current_task.as_mut().unwrap().as_mut().unwrap() }.set_stack_ptr(psp as *mut usize);
 
     // load next task
     let task = scheduler.next_task.take().unwrap();
-    let psp = unsafe { task.as_mut().unwrap() }.get_psp();
+    let psp = unsafe { task.as_mut().unwrap() }.get_stack_ptr();
     scheduler.current_task = Some(task);
     scheduler.next_task = Some(scheduler.tasks[0].as_mut().unwrap()); // if in doubt -> idle
     unsafe {
@@ -156,7 +156,7 @@ fn SysTick() {
         }
         if task.as_mut().unwrap().get_next_wut() <= unsafe { COUNT } {
             // todo: find better comparison between tasks
-            if task.as_mut().unwrap().get_psp() != unsafe { scheduler.current_task.as_mut().unwrap().as_mut().unwrap() }.get_psp() {
+            if task.as_mut().unwrap().get_stack_ptr() != unsafe { scheduler.current_task.as_mut().unwrap().as_mut().unwrap() }.get_stack_ptr() {
                 scheduler.next_task = Some(task.as_mut().unwrap());
                 SCB::set_pendsv();
             }

@@ -73,6 +73,16 @@ pub struct StackFrameExtension {
 pub struct StackFrameFpu {
 }
 
+
+enum State {
+    Suspended,
+    Ready,
+    Running,
+    Blocked,
+    Faulty,
+}
+
+
 /// Issue with closures and static tasks
 /// ------------------------------------
 /// Every closure has its own anonymous type. A closure can only be stored in a
@@ -90,16 +100,15 @@ pub struct StackFrameFpu {
 type RunnableResult = (); // todo: replace with '!' when possible
 
 // todo: manage lifetime of stack & runnable
-pub struct Task<'a>
+pub struct Task
 {
-    runnable: &'a mut (dyn FnMut() -> RunnableResult + 'static), // todo: remove
     runnable_ptr: *mut usize,
     next_wut: u64,
     stack_top_ptr: *mut usize,
     stack_ptr: *mut usize,
 }
 
-impl<'a> Task<'a>
+impl Task
 {
     // todo: replace stack with own type
     // todo: prevent a *static* task from being spawned twice (stack)
@@ -113,33 +122,30 @@ impl<'a> Task<'a>
         let closure_len = size_of::<F>();
         let closure_pos = stack_len - closure_len;
         let mut runnable: &mut (dyn FnMut() -> RunnableResult + 'static);
-        let mut runnable2: &mut (dyn FnMut() -> RunnableResult + 'static);
         unsafe {
             ptr::write(stack.as_mut_ptr().offset(closure_pos as isize) as *mut _, closure);
             // create trait object pointing to closure on stack
             let mut closure_stacked = stack.as_mut_ptr().offset(closure_pos as isize) as *mut F;
             runnable = &mut (*closure_stacked);
-            runnable2 = &mut (*closure_stacked);
         }
 
         // copy runnable trait object to stack
         let runnable_len = size_of_val(&runnable);
         let runnable_pos = stack_len - closure_len - runnable_len;
         unsafe {
-            ptr::write(stack.as_mut_ptr().offset(runnable_pos as isize) as *mut _, runnable2);
+            ptr::write(stack.as_mut_ptr().offset(runnable_pos as isize) as *mut _, runnable);
         }
 
         // set task stack pointer
         let mut alignment = unsafe { stack.as_mut_ptr().offset(runnable_pos as isize) as usize} % 8;
-        let proc_stack_pos = runnable_pos - alignment; // align to double word (ARM recommendation)
-        let mut proc_sp = unsafe { stack.as_ptr().offset(proc_stack_pos as isize)} as *mut usize;
+        let task_stack_pos = runnable_pos - alignment; // align to double word (ARM recommendation)
+        let mut task_sp = unsafe { stack.as_ptr().offset(task_stack_pos as isize)} as *mut usize;
 
         let mut task = Task {
-            runnable,
             runnable_ptr: unsafe { stack.as_mut_ptr().offset(runnable_pos as isize) as *mut usize },
             next_wut: 0,
             stack_top_ptr: stack.as_mut_ptr() as *mut usize, // todo: replace with stack object
-            stack_ptr: proc_sp,
+            stack_ptr: task_sp,
 
         };
 
@@ -179,15 +185,11 @@ impl<'a> Task<'a>
         (runnable)();
     }
 
-    pub fn get_psp(&self) -> *mut usize {
+    pub fn get_stack_ptr(&self) -> *mut usize {
         self.stack_ptr
     }
-    pub fn set_psp(&mut self, psp: *mut usize) {
+    pub fn set_stack_ptr(&mut self, psp: *mut usize) {
         self.stack_ptr = psp;
-    }
-
-    pub fn run(&mut self) -> RunnableResult {
-        (self.runnable)()
     }
 
     pub fn get_next_wut(&self) -> u64 {
