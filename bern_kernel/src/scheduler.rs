@@ -19,6 +19,7 @@ use core::ptr::NonNull;
 use core::cell::RefCell;
 use core::mem::MaybeUninit;
 use crate::boxed::Box;
+use core::sync::atomic::{AtomicU32, Ordering};
 
 type TaskPool = StaticListPool<Task, 16>;
 static TASK_POOL: TaskPool = StaticListPool::new([None; 16]);
@@ -132,7 +133,7 @@ fn PendSV() {
 
     if scheduler.task_idle.is_some() {
         let pausing = scheduler.task_running.take().unwrap();
-        if pausing.inner().next_wut() <= unsafe { COUNT } { // todo: make more efficient with syscalls
+        if pausing.inner().next_wut() <= tick() { // todo: make more efficient with syscalls
             scheduler.tasks_ready.push_back(pausing);
         } else {
             scheduler.tasks_pending.push_back(pausing);
@@ -162,20 +163,19 @@ fn SVCall() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-static mut COUNT: u64 = 0;
+static COUNT: AtomicU32 = AtomicU32::new(0); // todo: replace with u64
 
 #[exception]
 fn SysTick() {
-    // `COUNT` has transformed to type `&mut u32` and it's safe to use
-    unsafe { COUNT += 1; }
-    let current = unsafe { COUNT };
+    COUNT.fetch_add(1, Ordering::Relaxed);
+    let current = tick();
 
     // check if task is ready
     let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
 
     let mut cursor = scheduler.tasks_pending.cursor_front_mut();
     while let Some(task) = cursor.inner() {
-        if task.next_wut() <= current {
+        if task.next_wut() <= current as u64 {
             let node = cursor.take().unwrap();
             scheduler.tasks_ready.push_back(node);
             SCB::set_pendsv();
@@ -185,5 +185,5 @@ fn SysTick() {
 }
 
 pub fn tick() -> u64 {
-    unsafe { COUNT }
+    COUNT.load(Ordering::Relaxed) as u64
 }
