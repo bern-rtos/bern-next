@@ -37,7 +37,7 @@ fn main() -> ! {
             Scheduler::delay(100);
         }
     },
-                bern_kernel::alloc_static_stack!(256)
+                bern_kernel::alloc_static_stack!(512)
     );
 
     /* task 2 */
@@ -50,7 +50,7 @@ fn main() -> ! {
             Scheduler::delay(400);
         }
     },
-                bern_kernel::alloc_static_stack!(256)
+                bern_kernel::alloc_static_stack!(512)
     );
 
     Scheduler::start();

@@ -5,5 +5,5 @@
 pub mod error;
 pub mod task;
 pub mod scheduler;
-mod linked_list;
-mod boxed;
+mod collection;
+mod sync;
