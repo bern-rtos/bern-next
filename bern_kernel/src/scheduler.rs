@@ -2,6 +2,7 @@
 // cannot verify critical section, thus they have to marked as unsafe.
 #![allow(unsafe_code)]
 
+// `use crate::` is confusing CLion
 use super::task::Task;
 use super::collection::linked_list::*;
 use super::collection::boxed::Box;
@@ -21,14 +22,14 @@ use core::ptr::NonNull;
 use core::cell::RefCell;
 use core::mem::MaybeUninit;
 use core::sync::atomic::{AtomicU32, Ordering};
+use crate::task::{StackFrameExtension, StackFrameException};
+use core::mem;
 
 type TaskPool = StaticListPool<Task, 16>;
 static TASK_POOL: TaskPool = StaticListPool::new([None; 16]);
 
 static SCHEDULER: SimpleMutex<Option<Scheduler>> = SimpleMutex::new(None);
 
-// todo: lock sched
-// todo: replace with single linked list
 pub struct Scheduler
 {
     core: Peripherals,
@@ -183,7 +184,26 @@ fn PendSV() {
 
 #[exception]
 fn SVCall() {
-    asm::bkpt();
+    unsafe {asm!(
+        "bl syscall_handler",
+        //"TST lr, #4",
+        //"ITE EQ",
+        //"MRSEQ r2, MSP",
+        //"MRSNE r2, PSP",
+        //"LDR r3, [r2, #5]",
+        //"bl syscall_handler",
+    )};
+}
+
+#[no_mangle]
+fn syscall_handler(service: u8, r1: u32, r2: u32) {
+    match service {
+        1 => Scheduler::delay(r1),
+        42 => {
+            asm::bkpt()
+        },
+        _ => asm::bkpt(),
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

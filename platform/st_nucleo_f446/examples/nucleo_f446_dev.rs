@@ -5,6 +5,7 @@
 use bern_kernel::{
     task::Task,
     scheduler::Scheduler,
+    syscalls,
 };
 
 use panic_halt as _;
@@ -31,7 +32,7 @@ fn main() -> ! {
 
     /* task 1 */
     let mut led = board.shield.led_7;
-    Task::spawn(move | | {
+    Task::spawn(move || {
         loop {
             led.toggle().ok();
             Scheduler::delay(100);
@@ -42,16 +43,29 @@ fn main() -> ! {
 
     /* task 2 */
     let mut another_led = board.shield.led_6;
-    Task::spawn(move | | {
+    Task::spawn(move || {
         loop {
+            another_led.set_high().ok();
+            syscalls::delay(50);
+            another_led.set_low().ok();
+            syscalls::delay(400);
+        }
+    },
+                bern_kernel::alloc_static_stack!(512)
+    );
+
+    /*
+    let mut another_led = board.shield.led_6;
+    let mut a = 0;
+    syscalls::spawn(move || {
+        loop {
+            a += 1;
             another_led.set_high().ok();
             Scheduler::delay(50);
             another_led.set_low().ok();
             Scheduler::delay(400);
         }
-    },
-                bern_kernel::alloc_static_stack!(512)
-    );
+    });*/
 
     Scheduler::start();
     loop {

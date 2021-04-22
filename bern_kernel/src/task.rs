@@ -9,7 +9,6 @@ use core::ptr;
 pub struct TaskError;
 
 // todo: enforce alignment and size restrictions
-// todo: add a stack section to memory
 #[macro_export]
 macro_rules! alloc_static_stack {
     ($size:expr) => {
