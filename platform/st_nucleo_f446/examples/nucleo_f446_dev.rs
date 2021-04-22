@@ -16,6 +16,7 @@ use stm32f4xx_hal::prelude::*;
 
 #[entry]
 fn main() -> ! {
+    cortex_m::asm::bkpt();
     let board = StNucleoF446::new();
 
     Scheduler::init();
