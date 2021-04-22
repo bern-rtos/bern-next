@@ -2,7 +2,7 @@
 
 use super::scheduler;
 use super::scheduler::Scheduler;
-use super::syscalls;
+use super::syscall;
 use core::mem::{size_of, size_of_val};
 use core::ptr;
 
@@ -154,7 +154,7 @@ impl Task
 
         task.init_stack_frame();
         //Scheduler::add(task);
-        syscalls::spawn(task);
+        syscall::spawn(task);
         // todo: task handle?
     }
 
