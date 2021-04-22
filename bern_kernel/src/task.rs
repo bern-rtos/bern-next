@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use super::scheduler;
 use super::scheduler::Scheduler;
 use core::mem::{size_of, size_of_val};
@@ -100,6 +102,7 @@ enum State {
 type RunnableResult = (); // todo: replace with '!' when possible
 
 // todo: manage lifetime of stack & runnable
+#[derive(Copy, Clone)]
 pub struct Task
 {
     runnable_ptr: *mut usize,
@@ -185,19 +188,19 @@ impl Task
         (runnable)();
     }
 
-    pub fn get_stack_ptr(&self) -> *mut usize {
+    pub fn stack_ptr(&self) -> *mut usize {
         self.stack_ptr
     }
     pub fn set_stack_ptr(&mut self, psp: *mut usize) {
         self.stack_ptr = psp;
     }
 
-    pub fn get_next_wut(&self) -> u64 {
+    pub fn next_wut(&self) -> u64 {
         self.next_wut
     }
 
     pub fn delay(&mut self, ms: u32) {
-        self.next_wut = scheduler::get_tick() + u64::from(ms);
+        self.next_wut = scheduler::tick() + u64::from(ms);
     }
 }
 

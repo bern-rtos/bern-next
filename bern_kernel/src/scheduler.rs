@@ -3,6 +3,8 @@
 #![allow(unsafe_code)]
 
 use super::task::Task;
+use super::linked_list::*;
+
 use cortex_m::peripheral::{
     syst::SystClkSource,
 };
@@ -13,6 +15,13 @@ use cortex_m::{
     interrupt::*,
 };
 use cortex_m_rt::exception;
+use core::ptr::NonNull;
+use core::cell::RefCell;
+use core::mem::MaybeUninit;
+use crate::boxed::Box;
+
+type TaskPool = StaticListPool<Task, 16>;
+static TASK_POOL: TaskPool = StaticListPool::new([None; 16]);
 
 static mut SCHEDULER: Option<Scheduler> = None;
 
@@ -20,10 +29,11 @@ static mut SCHEDULER: Option<Scheduler> = None;
 // todo: replace with single linked list
 pub struct Scheduler
 {
-    tasks: [Option<Task>; 5],
     core: Peripherals,
-    current_task: Option<*mut Task>, // todo: I'm not fighting the borrow checker until I use a linked list
-    next_task: Option<*mut Task>,
+    task_running: Option<Box<Node<Task>>>,
+    task_idle: Option<Box<Node<Task>>>, // todo: remove option, there must always be an idle task
+    tasks_ready: LinkedList<Task, TaskPool>,
+    tasks_pending: LinkedList<Task, TaskPool>,
 }
 
 impl Scheduler
@@ -37,29 +47,29 @@ impl Scheduler
         core.SYST.clear_current();
 
         unsafe { SCHEDULER = Some(Scheduler {
-                tasks: [None, None, None, None, None],
-                core,
-                current_task: None,
-                next_task: None,
-            })
-        };
+            core,
+            task_running: None,
+            task_idle: None,
+            tasks_ready: LinkedList::new(&TASK_POOL),
+            tasks_pending: LinkedList::new(&TASK_POOL),
+        })};
     }
 
     pub fn add(mut task: Task) {
-        let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
+         let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
+         scheduler.tasks_ready.insert_back(task).ok();
+    }
 
-        for _task in scheduler.tasks.iter_mut() {
-            if _task.is_none() {
-                *_task = Some(task);
-                break;
-            }
-        }
+    pub fn replace_idle(mut task: Task) {
+
     }
 
     pub fn start() {
         let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
-        scheduler.current_task = Some(scheduler.tasks[1].as_mut().unwrap());
-        scheduler.next_task = Some(scheduler.tasks[0].as_mut().unwrap());
+
+        scheduler.task_idle = scheduler.tasks_ready.pop_front();
+        let task = scheduler.tasks_ready.pop_front();
+        scheduler.task_running = task;
 
         scheduler.core.SYST.enable_counter();
         scheduler.core.SYST.enable_interrupt();
@@ -72,14 +82,14 @@ impl Scheduler
         // start first task
         unsafe {
             asm!(
-            "msr   psp, {1}", // set process stack pointer -> task stack
+            "msr   psp, {1}",     // set process stack pointer -> task stack
             "msr   control, {0}", // switch to thread mode
-            "isb", // recommended by ARM
-            "pop   {{r4-r11}}", // pop register we initialized
+            "isb",                // recommended by ARM
+            "pop   {{r4-r11}}",   // pop register we initialized
             "pop   {{r0-r3,r12,lr}}", // force function entry
-            "pop   {{pc}}", // 'jump' to the task entry function we put on the stack
+            "pop   {{pc}}",       // 'jump' to the task entry function we put on the stack
             in(reg) 0x2,
-            in(reg) scheduler.current_task.as_mut().unwrap().as_mut().unwrap().get_psp() as u32,
+            in(reg) scheduler.task_running.as_ref().unwrap().inner().stack_ptr() as u32,
             options(noreturn),
             );
         }
@@ -89,8 +99,7 @@ impl Scheduler
         // todo: replace with system call
         // todo: unsafe -> already &mut in exec
         let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
-        unsafe { scheduler.current_task.as_mut().unwrap().as_mut().unwrap() }.delay(ms);
-        unsafe { scheduler.current_task.as_mut().unwrap().as_mut().unwrap() }.get_stack_ptr();
+        scheduler.task_running.as_mut().unwrap().inner_mut().delay(ms);
 
         SCB::set_pendsv();
     }
@@ -119,13 +128,25 @@ fn PendSV() {
         );
     }
     let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
-    unsafe { scheduler.current_task.as_mut().unwrap().as_mut().unwrap() }.set_stack_ptr(psp as *mut usize);
+    scheduler.task_running.as_mut().unwrap().inner_mut().set_stack_ptr(psp as *mut usize);
+
+    if scheduler.task_idle.is_some() {
+        let pausing = scheduler.task_running.take().unwrap();
+        if pausing.inner().next_wut() <= unsafe { COUNT } { // todo: make more efficient with syscalls
+            scheduler.tasks_ready.push_back(pausing);
+        } else {
+            scheduler.tasks_pending.push_back(pausing);
+        }
+    } else {
+        scheduler.task_idle = scheduler.task_running.take();
+    }
 
     // load next task
-    let task = scheduler.next_task.take().unwrap();
-    let psp = unsafe { task.as_mut().unwrap() }.get_stack_ptr();
-    scheduler.current_task = Some(task);
-    scheduler.next_task = Some(scheduler.tasks[0].as_mut().unwrap()); // if in doubt -> idle
+    scheduler.task_running = match scheduler.tasks_ready.pop_front() {
+        Some(task) => Some(task),
+        None => scheduler.task_idle.take(),
+    };
+    let psp = scheduler.task_running.as_ref().unwrap().inner().stack_ptr();
     unsafe {
         asm!(
             "ldmia r0!, {{r4-r11}}",
@@ -147,23 +168,22 @@ static mut COUNT: u64 = 0;
 fn SysTick() {
     // `COUNT` has transformed to type `&mut u32` and it's safe to use
     unsafe { COUNT += 1; }
+    let current = unsafe { COUNT };
 
     // check if task is ready
     let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
-    for (i, task) in scheduler.tasks.iter_mut().enumerate() {
-        if i == 0 || task.is_none() {
-            continue; // idle task
+
+    let mut cursor = scheduler.tasks_pending.cursor_front_mut();
+    while let Some(task) = cursor.inner() {
+        if task.next_wut() <= current {
+            let node = cursor.take().unwrap();
+            scheduler.tasks_ready.push_back(node);
+            SCB::set_pendsv();
         }
-        if task.as_mut().unwrap().get_next_wut() <= unsafe { COUNT } {
-            // todo: find better comparison between tasks
-            if task.as_mut().unwrap().get_stack_ptr() != unsafe { scheduler.current_task.as_mut().unwrap().as_mut().unwrap() }.get_stack_ptr() {
-                scheduler.next_task = Some(task.as_mut().unwrap());
-                SCB::set_pendsv();
-            }
-        }
+        cursor.move_next();
     }
 }
 
-pub fn get_tick() -> u64 {
+pub fn tick() -> u64 {
     unsafe { COUNT }
 }

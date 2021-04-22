@@ -1,26 +1,37 @@
-use core::marker::{PhantomData, Unsize};
-use core::ptr;
-use core::mem::size_of;
+#![allow(unused)]
 
-pub struct Box<T>
-    where T: ?Sized,
-{
-    _data: PhantomData<T>,
+use core::ptr::NonNull;
+use core::ops::{Deref, DerefMut};
+
+#[derive(Debug)]
+pub struct Box<T> {
+    value: NonNull<T>,
 }
-impl<T> Box<T>
-    where T: ?Sized,
-{
-    pub fn new<V>(val: V, memory: &mut [u8]) -> &'static mut T
-        where V: 'static + Unsize<T>,
-    {
-        unsafe {
-            // todo: select to put variable at beginning or end!
-            // copy to static memory
-            let offset = (memory.len() - size_of::<V>()) as isize;
-            ptr::write(memory.as_mut_ptr().offset(offset) as *mut _, val);
-            // create trait object referencing to static memory
-            let mut bla_ptr = memory.as_mut_ptr().offset(offset) as *mut V;
-            &mut (*bla_ptr) as &mut T
+
+impl<T> Box<T> {
+
+    // todo: add ref to allocator to create and drop memory
+    pub fn from_raw(pointer: NonNull<T>) -> Self {
+        Box {
+            value: pointer,
         }
+    }
+
+    pub fn into_nonnull(self) -> Option<NonNull<T>> {
+        Some(self.value)
+    }
+}
+
+impl<T> Deref for Box<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        unsafe { self.value.as_ref() }
+    }
+}
+
+impl<T> DerefMut for Box<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        unsafe { self.value.as_mut() }
     }
 }
