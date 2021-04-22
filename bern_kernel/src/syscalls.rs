@@ -1,6 +1,8 @@
 use core::mem::size_of;
 use core::mem::size_of_val;
+use super::task::Task;
 
+/*
 pub fn spawn<F>(closure: F)
     where F: 'static + Sync + FnMut() {
     //let size = size_of::<F>();
@@ -13,12 +15,21 @@ pub fn spawn<F>(closure: F)
         in("r4") &closure as *const _ as usize,
         in("r5") size,
     )};
+}*/
+
+pub fn spawn(task: Task) {
+    unsafe { asm!(
+        "mov r1, r4",
+        "mov r0, 2", // service id for now
+        "svc 0",
+        in("r4") &task as *const _ as usize,
+    )};
 }
 
 pub fn delay(ms: u32) {
     unsafe { asm!(
         "mov r1, r4",
-        "mov r0, 1", // service id
+        "mov r0, 1", // service id for now
         "svc 0",
         in("r4") ms,
     )};

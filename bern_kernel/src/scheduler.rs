@@ -199,6 +199,10 @@ fn SVCall() {
 fn syscall_handler(service: u8, r1: u32, r2: u32) {
     match service {
         1 => Scheduler::delay(r1),
+        2 => {
+            let task: Task = unsafe { mem::transmute_copy(&*(r1 as *const Task)) };
+            Scheduler::add(task);
+        },
         42 => {
             asm::bkpt()
         },
