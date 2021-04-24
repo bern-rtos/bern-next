@@ -136,22 +136,33 @@ pub fn idle() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#[exception]
-fn PendSV() {
-
+#[no_mangle]
+#[naked] // todo: move to separate assembly file and introduce at link time
+extern "C" fn PendSV() {
     // Source: Definitive Guide to Cortex-M3/4, p. 342
     // store stack of current task
-    let mut psp: u32;
     unsafe {
         asm!(
             "mrs   r0, psp",
             "stmdb r0!, {{r4-r11}}",
-            out("r0") psp
-        );
+            "push  {{lr}}",
+            "bl    switch_task",
+            "pop   {{lr}}",
+            "mov   r3, #2",        // todo: read from function
+            "msr   control, r3",   // switch to thread mode
+            "ldmia r0!, {{r4-r11}}",
+            "msr   psp, r0",
+            "bx    lr",
+            options(noreturn),
+        )
     }
+}
+
+#[no_mangle]
+fn switch_task(psp: u32) -> u32 {
     let mut sched = match SCHEDULER.lock() {
         Some(sched) => sched.as_mut().unwrap(),
-        None => return, // todo: error handling
+        None => return 0, // todo: error handling
     };
     sched.task_running.as_mut().unwrap().inner_mut().set_stack_ptr(psp as *mut usize);
 
@@ -173,36 +184,51 @@ fn PendSV() {
     };
     let psp = sched.task_running.as_ref().unwrap().inner().stack_ptr();
     SCHEDULER.release();
-    unsafe {
-        asm!(
-            "ldmia r0!, {{r4-r11}}",
-            "msr   psp, r0",
-            in("r0") psp as u32,
-        )
-    }
+    psp as u32
 }
 
+/// Extract and prepare system call for Rust handler.
+/// r0 is used to store the service id, r1-r3 can contain call parameter.
+///
+/// The system call service id (`svc xy`) is not passed on, we have to
+/// retrieve it from code memory. Thus we load the stack pointer from the
+/// callee and read the link register. The link register is pointing to
+/// instruction just after the system call, the system call service id is
+/// placed two bytes before that.
+///
+/// The exception link register tells SVC which privlege mode the calle used
+/// | EXC_RETURN (lr) | Privilege Mode     | Stack |
+/// |-----------------|--------------------|------ |
+/// | 0xFFFFFFF1      | Handler Mode       | MSP   |
+/// | 0xFFFFFFF9      | Thread Mode        | MSP   |
+/// | 0xFFFFFFFD      | Thread Mode        | PSP   |
+/// | 0xFFFFFFE1      | Handler Mode (FPU) | MSP   |
+/// | 0xFFFFFFE9      | Thread Mode (FPU)  | MSP   |
+/// | 0xFFFFFFED      | Thread Mode (FPU)  | PSP   |
 #[exception]
 fn SVCall() {
     unsafe {asm!(
+        "push {{r4-r5}}",
+        "tst lr, #4",         // check which stack was used
+        "itte eq",
+        "mrseq r4, msp",      // load main stack
+        "addeq r4, #16",       // r4-r5 + the compiler pushes r7, lr
+        "mrsne r4, psp",      // or load process tack
+        "ldr r5, [r4, #24]",  // get callee link register (6 words offset)
+        "ldrb r0, [r5, #-2]", // load the service id from code
         "bl syscall_handler",
-        //"TST lr, #4",
-        //"ITE EQ",
-        //"MRSEQ r2, MSP",
-        //"MRSNE r2, PSP",
-        //"LDR r3, [r2, #5]",
-        //"bl syscall_handler",
+        "pop {{r4-r5}}",
     )};
 }
 
 #[no_mangle]
 fn syscall_handler(service: u8, r1: u32, r2: u32) {
     match service {
-        1 => Scheduler::delay(r1),
-        2 => {
+        1 => {
             let task: Task = unsafe { mem::transmute_copy(&*(r1 as *const Task)) };
             Scheduler::add(task);
         },
+        2 => Scheduler::delay(r1),
         42 => {
             asm::bkpt()
         },

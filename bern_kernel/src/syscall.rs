@@ -20,8 +20,7 @@ pub fn spawn<F>(closure: F)
 pub fn spawn(task: Task) {
     unsafe { asm!(
         "mov r1, r4",
-        "mov r0, 2", // service id for now
-        "svc 0",
+        "svc 1",
         in("r4") &task as *const _ as usize,
     )};
 }
@@ -29,8 +28,11 @@ pub fn spawn(task: Task) {
 pub fn delay(ms: u32) {
     unsafe { asm!(
         "mov r1, r4",
-        "mov r0, 1", // service id for now
-        "svc 0",
+        "svc 2",
         in("r4") ms,
     )};
+}
+
+pub fn task_exit() {
+    cortex_m::asm::bkpt();
 }
