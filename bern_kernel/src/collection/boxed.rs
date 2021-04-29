@@ -17,8 +17,8 @@ impl<T> Box<T> {
         }
     }
 
-    pub fn into_nonnull(self) -> Option<NonNull<T>> {
-        Some(self.value)
+    pub fn into_nonnull(self) -> NonNull<T> {
+        self.value
     }
 }
 

@@ -67,7 +67,7 @@ impl<T,P> LinkedList<T,P>
         }
     }
 
-    pub fn insert_back(&mut self, element: T) -> Result<(), Error> {
+    pub fn emplace_back(&mut self, element: T) -> Result<(), Error> {
         let node = self.pool.insert(Node::new(element));
         node.map(|n| {
             self.push_back(n);
@@ -77,7 +77,7 @@ impl<T,P> LinkedList<T,P>
     pub fn push_back(&mut self, mut node: Box<Node<T>>) {
         node.prev = self.tail;
 
-        let link = node.into_nonnull();
+        let link = Some(node.into_nonnull());
         // NOTE(unsafe):  we check tail is Some()
         unsafe {
             match self.tail {
@@ -108,6 +108,36 @@ impl<T,P> LinkedList<T,P>
             },
             None => None,
         }
+    }
+
+    pub fn insert(&mut self, mut node: Box<Node<T>>, mut new_node: Box<Node<T>>) {
+        let mut node = node.into_nonnull();
+        let mut new_node = new_node.into_nonnull();
+        unsafe {
+            match node.as_mut().prev {
+                Some(mut prev) => prev.as_mut().next = Some(new_node),
+                None => self.head = Some(new_node),
+            }
+            node.as_mut().prev = Some(new_node);
+            new_node.as_mut().next = Some(node);
+        }
+        self.len += 1;
+    }
+
+    pub fn insert_when(&mut self, mut node: Box<Node<T>>, criteria: impl Fn(&T, &T) -> bool) {
+        if let Some(mut current) = self.head {
+            loop { unsafe {
+                if criteria(node.inner(), current.as_ref().inner()) {
+                    self.insert(Box::from_raw(current), node);
+                    return;
+                }
+                current = match current.as_ref().next {
+                    Some(node) => node,
+                    None => break,
+                }
+            }}
+        }
+        self.push_back(node);
     }
 
     pub fn front(&self) -> Option<&T> {
@@ -323,7 +353,7 @@ mod tests {
         assert_eq!(list.len(), 0);
         list.pop_front();
         assert_eq!(list.len(), 0);
-        list.insert_back(MyStruct { id: 42 });
+        list.emplace_back(MyStruct { id: 42 });
         assert_eq!(list.len(), 1);
         list.pop_front();
         assert_eq!(list.len(), 0);
@@ -334,11 +364,11 @@ mod tests {
         static POOL: StaticListPool<MyStruct,16> = StaticListPool::new([None; 16]);
 
         let mut list = LinkedList::new(&POOL);
-        list.insert_back(MyStruct { id: 42 });
-        list.insert_back(MyStruct { id: 43 });
+        list.emplace_back(MyStruct { id: 42 });
+        list.emplace_back(MyStruct { id: 43 });
 
         let mut another_list = LinkedList::new(&POOL);
-        list.insert_back(MyStruct { id: 44 });
+        list.emplace_back(MyStruct { id: 44 });
 
         let mut front = list.pop_front();
         assert_eq!(front.as_mut().unwrap().inner().id, 42);
@@ -353,9 +383,9 @@ mod tests {
 
         let mut list = LinkedList::new(&POOL);
         for i in 0..16 {
-            assert_eq!(list.insert_back(MyStruct { id: i }), Ok(()));
+            assert_eq!(list.emplace_back(MyStruct { id: i }), Ok(()));
         }
-        assert_eq!(list.insert_back(MyStruct { id: 16 }), Err(Error::OutOfMemory));
+        assert_eq!(list.emplace_back(MyStruct { id: 16 }), Err(Error::OutOfMemory));
     }
 
     #[test]

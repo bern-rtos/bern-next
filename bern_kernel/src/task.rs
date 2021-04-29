@@ -151,7 +151,7 @@ impl Task
         self.next_wut
     }
 
-    pub fn delay(&mut self, ms: u32) {
+    pub fn sleep(&mut self, ms: u32) {
         self.next_wut = time::tick() + u64::from(ms);
     }
 }

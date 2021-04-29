@@ -37,7 +37,8 @@ pub struct Scheduler
     task_running: Option<Box<Node<Task>>>,
     task_idle: Option<Box<Node<Task>>>,
     tasks_ready: LinkedList<Task, TaskPool>,
-    tasks_pending: LinkedList<Task, TaskPool>,
+    tasks_suspended: LinkedList<Task, TaskPool>,
+    tasks_terminated: LinkedList<Task, TaskPool>,
 }
 
 impl Scheduler
@@ -56,7 +57,8 @@ impl Scheduler
                 task_running: None,
                 task_idle: None,
                 tasks_ready: LinkedList::new(&TASK_POOL),
-                tasks_pending: LinkedList::new(&TASK_POOL),
+                tasks_suspended: LinkedList::new(&TASK_POOL),
+                tasks_terminated: LinkedList::new(&TASK_POOL),
             });
         } else {
             // todo: we're screwed
@@ -66,7 +68,7 @@ impl Scheduler
 
     pub fn add(mut task: Task) {
         if let Some(sched) = SCHEDULER.lock() {
-            sched.as_mut().unwrap().tasks_ready.insert_back(task).ok();
+            sched.as_mut().unwrap().tasks_ready.emplace_back(task).ok();
         } else {
             // todo
         }
@@ -119,10 +121,17 @@ impl Scheduler
             None => return, // todo: error handling
         };
 
-        sched.task_running.as_mut().unwrap().inner_mut().delay(ms);
+        sched.task_running.as_mut().unwrap().inner_mut().sleep(ms);
         SCHEDULER.release();
 
         SCB::set_pendsv();
+    }
+
+    pub fn task_terminate() {
+        let mut sched = match SCHEDULER.lock() {
+            Some(sched) => sched.as_mut().unwrap(),
+            None => return, // todo: error handling
+        };
     }
 
     pub fn schedule() {
@@ -132,20 +141,23 @@ impl Scheduler
             None => return, // todo: error handling
         };
         // update pending -> ready list
-        let mut cursor = sched.tasks_pending.cursor_front_mut();
-        let mut new_read = false;
+        let mut trigger_switch = false;
+        let mut cursor = sched.tasks_suspended.cursor_front_mut();
         while let Some(task) = cursor.inner() {
-            // todo: sort list so we don't have to look through the whole list
             if task.next_wut() <= now as u64 {
+                // todo: this is inefficient, we know that node exists
                 if let Some(node) = cursor.take() {
                     sched.tasks_ready.push_back(node);
-                    new_read = true;
+                    trigger_switch = true;
                 }
+            } else {
+                break; // the is sorted, we can abort early
             }
             cursor.move_next();
         }
+
         SCHEDULER.release();
-        if new_read {
+        if trigger_switch {
             SCB::set_pendsv();
         }
     }
@@ -195,7 +207,9 @@ fn switch_task(psp: u32) -> u32 {
         if pausing.inner().next_wut() <= time::tick() { // todo: make more efficient with syscalls
             sched.tasks_ready.push_back(pausing);
         } else {
-            sched.tasks_pending.push_back(pausing);
+            sched.tasks_suspended.insert_when(pausing, | pausing, task | {
+                pausing.next_wut() < task.next_wut()
+            });
         }
     } else {
         sched.task_idle = sched.task_running.take();
