@@ -2,10 +2,11 @@
 #![no_main]
 #![no_std]
 
-use bern_kernel::{
-    task::Task,
+use bern_kernel as kernel;
+use kernel::{
+    task,
     scheduler::Scheduler,
-    syscall,
+    Syscall,
 };
 
 use panic_halt as _;
@@ -22,62 +23,61 @@ fn main() -> ! {
 
     Scheduler::init();
     /* idle task */
-    Task::spawn(move | | {
+    task::spawn(move | | {
         loop {
             cortex_m::asm::nop();
         }
     },
-                bern_kernel::alloc_static_stack!(128)
+                kernel::alloc_static_stack!(128)
     );
 
     /* task 1 */
     let mut led = board.shield.led_7;
-    Task::spawn(move || {
+    task::spawn(move || {
         loop {
             led.toggle().ok();
-            Scheduler::delay(100);
+            kernel::Core::sleep(100);
         }
     },
-                bern_kernel::alloc_static_stack!(512)
+                kernel::alloc_static_stack!(512)
     );
 
     /* task 2 */
     let mut another_led = board.shield.led_6;
-    Task::spawn(move || {
+    task::spawn(move || {
         /* spawn a new task while the system is running */
-        Task::spawn(move || {
+        task::spawn(move || {
             loop {
-                syscall::delay(800);
+                kernel::Core::sleep(800);
             }
         },
-            bern_kernel::alloc_static_stack!(256)
+                    kernel::alloc_static_stack!(256)
         );
 
         loop {
             another_led.set_high().ok();
-            syscall::delay(50);
+            kernel::Core::sleep(50);
             another_led.set_low().ok();
-            syscall::delay(400);
+            kernel::Core::sleep(400);
         }
     },
-                bern_kernel::alloc_static_stack!(512)
+                kernel::alloc_static_stack!(1024)
     );
 
-    /*
-    let mut another_led = board.shield.led_6;
+
+    let mut yet_another_led = board.shield.led_1;
     let mut a = 0;
-    syscalls::spawn(move || {
+    task::spawn(move || {
         loop {
             a += 1;
-            another_led.set_high().ok();
-            Scheduler::delay(50);
-            another_led.set_low().ok();
-            Scheduler::delay(400);
+            yet_another_led.set_high().ok();
+            kernel::Core::sleep(50);
+            yet_another_led.set_low().ok();
+            kernel::Core::sleep(950);
         }
-    });*/
+    },
+                kernel::alloc_static_stack!(512)
+    );
 
     Scheduler::start();
-    loop {
-        panic!("We should have never arrived here!");
-    }
 }

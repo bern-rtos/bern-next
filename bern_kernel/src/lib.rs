@@ -6,6 +6,11 @@
 pub mod error;
 pub mod task;
 pub mod scheduler;
+pub mod api;
 mod collection;
 mod sync;
 pub mod syscall;
+pub mod time;
+
+pub use crate::syscall::ArmCortexM as Core;
+pub use crate::api::syscall::Syscall;

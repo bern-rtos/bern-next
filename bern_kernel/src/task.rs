@@ -2,9 +2,11 @@
 
 use super::scheduler;
 use super::scheduler::Scheduler;
-use super::syscall;
 use core::mem::{size_of, size_of_val};
 use core::ptr;
+use crate::Core;
+use crate::api::syscall::Syscall;
+use crate::time;
 
 #[derive(Debug)]
 pub struct TaskError;
@@ -121,7 +123,7 @@ impl Task
             r2: 0,
             r3: 0,
             r12: 0,
-            lr: syscall::task_exit as u32,
+            lr: Core::task_exit as u32,
             pc: entry as u32,
             xpsr: 0x01000000,
         };
@@ -150,7 +152,7 @@ impl Task
     }
 
     pub fn delay(&mut self, ms: u32) {
-        self.next_wut = scheduler::tick() + u64::from(ms);
+        self.next_wut = time::tick() + u64::from(ms);
     }
 }
 
@@ -194,8 +196,7 @@ pub fn spawn<F>(closure: F, stack: &mut [u8])
     };
 
     task.init_stack_frame();
-    //Scheduler::add(task);
-    syscall::spawn(task);
+    Core::spawn(task);
     // todo: task handle?
 }
 

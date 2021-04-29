@@ -3,10 +3,11 @@
 #![allow(unsafe_code)]
 
 // `use crate::` is confusing CLion
-use super::task::Task;
-use super::collection::linked_list::*;
-use super::collection::boxed::Box;
-use super::sync::simple_mutex::SimpleMutex;
+use crate::task::Task;
+use crate::time;
+use crate::collection::linked_list::*;
+use crate::collection::boxed::Box;
+use crate::sync::simple_mutex::SimpleMutex;
 
 use cortex_m::peripheral::{
     syst::SystClkSource,
@@ -76,10 +77,10 @@ impl Scheduler
 
     }
 
-    pub fn start() {
+    pub fn start() -> ! {
         let mut sched = match SCHEDULER.lock() {
             Some(sched) => sched.as_mut().unwrap(),
-            None => return, // todo: error handling
+            None => panic!("oops"), // todo: error handling
         };
 
         sched.task_idle = sched.tasks_ready.pop_front();
@@ -112,9 +113,7 @@ impl Scheduler
         }
     }
 
-    pub fn delay(ms: u32) {
-        // todo: replace with system call
-        // todo: unsafe -> already &mut in exec
+    pub fn sleep(ms: u32) {
         let mut sched = match SCHEDULER.lock() {
             Some(sched) => sched.as_mut().unwrap(),
             None => return, // todo: error handling
@@ -124,6 +123,31 @@ impl Scheduler
         SCHEDULER.release();
 
         SCB::set_pendsv();
+    }
+
+    pub fn schedule() {
+        let now = time::tick();
+        let mut sched = match SCHEDULER.lock() {
+            Some(sched) => sched.as_mut().unwrap(),
+            None => return, // todo: error handling
+        };
+        // update pending -> ready list
+        let mut cursor = sched.tasks_pending.cursor_front_mut();
+        let mut new_read = false;
+        while let Some(task) = cursor.inner() {
+            // todo: sort list so we don't have to look through the whole list
+            if task.next_wut() <= now as u64 {
+                if let Some(node) = cursor.take() {
+                    sched.tasks_ready.push_back(node);
+                    new_read = true;
+                }
+            }
+            cursor.move_next();
+        }
+        SCHEDULER.release();
+        if new_read {
+            SCB::set_pendsv();
+        }
     }
 }
 
@@ -168,7 +192,7 @@ fn switch_task(psp: u32) -> u32 {
 
     if sched.task_idle.is_some() {
         let pausing = sched.task_running.take().unwrap();
-        if pausing.inner().next_wut() <= tick() { // todo: make more efficient with syscalls
+        if pausing.inner().next_wut() <= time::tick() { // todo: make more efficient with syscalls
             sched.tasks_ready.push_back(pausing);
         } else {
             sched.tasks_pending.push_back(pausing);
@@ -185,90 +209,4 @@ fn switch_task(psp: u32) -> u32 {
     let psp = sched.task_running.as_ref().unwrap().inner().stack_ptr();
     SCHEDULER.release();
     psp as u32
-}
-
-/// Extract and prepare system call for Rust handler.
-/// r0 is used to store the service id, r1-r3 can contain call parameter.
-///
-/// The system call service id (`svc xy`) is not passed on, we have to
-/// retrieve it from code memory. Thus we load the stack pointer from the
-/// callee and read the link register. The link register is pointing to
-/// instruction just after the system call, the system call service id is
-/// placed two bytes before that.
-///
-/// The exception link register tells SVC which privlege mode the calle used
-/// | EXC_RETURN (lr) | Privilege Mode     | Stack |
-/// |-----------------|--------------------|------ |
-/// | 0xFFFFFFF1      | Handler Mode       | MSP   |
-/// | 0xFFFFFFF9      | Thread Mode        | MSP   |
-/// | 0xFFFFFFFD      | Thread Mode        | PSP   |
-/// | 0xFFFFFFE1      | Handler Mode (FPU) | MSP   |
-/// | 0xFFFFFFE9      | Thread Mode (FPU)  | MSP   |
-/// | 0xFFFFFFED      | Thread Mode (FPU)  | PSP   |
-#[exception]
-fn SVCall() {
-    unsafe {asm!(
-        "push {{r4-r5}}",
-        "tst lr, #4",         // check which stack was used
-        "itte eq",
-        "mrseq r4, msp",      // load main stack
-        "addeq r4, #16",       // r4-r5 + the compiler pushes r7, lr
-        "mrsne r4, psp",      // or load process tack
-        "ldr r5, [r4, #24]",  // get callee link register (6 words offset)
-        "ldrb r0, [r5, #-2]", // load the service id from code
-        "bl syscall_handler",
-        "pop {{r4-r5}}",
-    )};
-}
-
-#[no_mangle]
-fn syscall_handler(service: u8, r1: u32, r2: u32) {
-    match service {
-        1 => {
-            let task: Task = unsafe { mem::transmute_copy(&*(r1 as *const Task)) };
-            Scheduler::add(task);
-        },
-        2 => Scheduler::delay(r1),
-        42 => {
-            asm::bkpt()
-        },
-        _ => asm::bkpt(),
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-static COUNT: AtomicU32 = AtomicU32::new(0); // todo: replace with u64
-
-#[exception]
-fn SysTick() {
-    COUNT.fetch_add(1, Ordering::Relaxed);
-    let current = tick();
-
-
-    let mut sched = match SCHEDULER.lock() {
-        Some(sched) => sched.as_mut().unwrap(),
-        None => return, // todo: error handling
-    };
-    // update pending -> ready list
-    let mut cursor = sched.tasks_pending.cursor_front_mut();
-    let mut new_read = false;
-    while let Some(task) = cursor.inner() {
-        // todo: sort list so we don't have to look through the whole list
-        if task.next_wut() <= current as u64 {
-            if let Some(node) = cursor.take() {
-                sched.tasks_ready.push_back(node);
-                new_read = true;
-            }
-        }
-        cursor.move_next();
-    }
-    SCHEDULER.release();
-    if new_read {
-        SCB::set_pendsv();
-    }
-}
-
-pub fn tick() -> u64 {
-    COUNT.load(Ordering::Relaxed) as u64
 }
