@@ -74,6 +74,9 @@ fn main() -> ! {
             kernel::Core::sleep(50);
             yet_another_led.set_low().ok();
             kernel::Core::sleep(950);
+            if a >= 60 {
+                kernel::Core::task_exit();
+            }
         }
     },
                 kernel::alloc_static_stack!(512)

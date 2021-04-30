@@ -77,13 +77,13 @@ pub struct StackFrameExtension {
 pub struct StackFrameFpu {
 }
 
-
-enum State {
-    Suspended,
-    Ready,
-    Running,
-    Blocked,
-    Faulty,
+#[derive(Copy, Clone)]
+#[repr(u8)]
+pub enum Transition {
+    None,
+    Suspending,
+    Resuming,
+    Terminating,
 }
 
 
@@ -107,6 +107,7 @@ type RunnableResult = (); // todo: replace with '!' when possible
 #[derive(Copy, Clone)]
 pub struct Task
 {
+    transition: Transition,
     runnable_ptr: *mut usize,
     next_wut: u64,
     stack_top_ptr: *mut usize,
@@ -150,9 +151,15 @@ impl Task
     pub fn next_wut(&self) -> u64 {
         self.next_wut
     }
-
     pub fn sleep(&mut self, ms: u32) {
         self.next_wut = time::tick() + u64::from(ms);
+    }
+
+    pub fn transition(&self) -> &Transition {
+        &self.transition
+    }
+    pub fn set_transition(&mut self, transition: Transition) {
+        self.transition = transition;
     }
 }
 
@@ -188,6 +195,7 @@ pub fn spawn<F>(closure: F, stack: &mut [u8])
     let mut task_sp = unsafe { stack.as_ptr().offset(task_stack_pos as isize)} as *mut usize;
 
     let mut task = Task {
+        transition: Transition::None,
         runnable_ptr: unsafe { stack.as_mut_ptr().offset(runnable_pos as isize) as *mut usize },
         next_wut: 0,
         stack_top_ptr: stack.as_mut_ptr() as *mut usize, // todo: replace with stack object

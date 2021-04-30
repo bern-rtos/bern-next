@@ -61,9 +61,7 @@ fn syscall_handler(service: Service, arg0: u32, arg1: u32) {
             Scheduler::add(task);
         },
         Service::TaskDelay => Scheduler::sleep(arg0),
-        Service::TaskExit => {
-            asm::bkpt()
-        },
+        Service::TaskExit => Scheduler::task_terminate(),
         _ => asm::bkpt(),
     }
 }

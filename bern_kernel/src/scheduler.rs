@@ -2,7 +2,11 @@
 // cannot verify critical section, thus they have to marked as unsafe.
 #![allow(unsafe_code)]
 
-// `use crate::` is confusing CLion
+
+/// # Basic Concept
+/// Keep interrupt latency as short as possible, move work to PendSV.
+
+
 use crate::task::Task;
 use crate::time;
 use crate::collection::linked_list::*;
@@ -23,7 +27,7 @@ use core::ptr::NonNull;
 use core::cell::RefCell;
 use core::mem::MaybeUninit;
 use core::sync::atomic::{AtomicU32, Ordering};
-use crate::task::{StackFrameExtension, StackFrameException};
+use crate::task::{StackFrameExtension, StackFrameException, Transition};
 use core::mem;
 
 type TaskPool = StaticListPool<Task, 16>;
@@ -61,28 +65,16 @@ impl Scheduler
                 tasks_terminated: LinkedList::new(&TASK_POOL),
             });
         } else {
-            // todo: we're screwed
+            panic!("Scheduler already locked, init called at wrong place");
         }
         SCHEDULER.release();
     }
 
-    pub fn add(mut task: Task) {
-        if let Some(sched) = SCHEDULER.lock() {
-            sched.as_mut().unwrap().tasks_ready.emplace_back(task).ok();
-        } else {
-            // todo
-        }
-        SCHEDULER.release();
-    }
-
-    pub fn replace_idle(mut task: Task) {
-
-    }
 
     pub fn start() -> ! {
         let mut sched = match SCHEDULER.lock() {
             Some(sched) => sched.as_mut().unwrap(),
-            None => panic!("oops"), // todo: error handling
+            None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
         };
 
         sched.task_idle = sched.tasks_ready.pop_front();
@@ -115,13 +107,30 @@ impl Scheduler
         }
     }
 
+    pub fn add(mut task: Task) {
+        let mut sched = match SCHEDULER.lock() {
+            Some(sched) => {
+                sched.as_mut().unwrap().tasks_ready.emplace_back(task).ok();
+            },
+            None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
+        };
+        SCHEDULER.release();
+    }
+
+    pub fn replace_idle(mut task: Task) {
+
+    }
+
+
     pub fn sleep(ms: u32) {
         let mut sched = match SCHEDULER.lock() {
             Some(sched) => sched.as_mut().unwrap(),
-            None => return, // todo: error handling
+            None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
         };
 
-        sched.task_running.as_mut().unwrap().inner_mut().sleep(ms);
+        let task = sched.task_running.as_mut().unwrap().inner_mut();
+        task.sleep(ms);
+        task.set_transition(Transition::Suspending);
         SCHEDULER.release();
 
         SCB::set_pendsv();
@@ -130,15 +139,21 @@ impl Scheduler
     pub fn task_terminate() {
         let mut sched = match SCHEDULER.lock() {
             Some(sched) => sched.as_mut().unwrap(),
-            None => return, // todo: error handling
+            None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
         };
+
+        let task = sched.task_running.as_mut().unwrap().inner_mut();
+        task.set_transition(Transition::Terminating);
+        SCHEDULER.release();
+
+        SCB::set_pendsv();
     }
 
-    pub fn schedule() {
+    pub fn tick_update() {
         let now = time::tick();
         let mut sched = match SCHEDULER.lock() {
             Some(sched) => sched.as_mut().unwrap(),
-            None => return, // todo: error handling
+            None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
         };
         // update pending -> ready list
         let mut trigger_switch = false;
@@ -198,18 +213,25 @@ extern "C" fn PendSV() {
 fn switch_task(psp: u32) -> u32 {
     let mut sched = match SCHEDULER.lock() {
         Some(sched) => sched.as_mut().unwrap(),
-        None => return 0, // todo: error handling
+        None => panic!("Scheduler already locked, (todo reetrant scheduler)"),
     };
     sched.task_running.as_mut().unwrap().inner_mut().set_stack_ptr(psp as *mut usize);
 
     if sched.task_idle.is_some() {
-        let pausing = sched.task_running.take().unwrap();
-        if pausing.inner().next_wut() <= time::tick() { // todo: make more efficient with syscalls
-            sched.tasks_ready.push_back(pausing);
-        } else {
-            sched.tasks_suspended.insert_when(pausing, | pausing, task | {
-                pausing.next_wut() < task.next_wut()
-            });
+        let mut pausing = sched.task_running.take().unwrap();
+        match pausing.inner().transition() {
+            Transition::None => sched.tasks_ready.push_back(pausing),
+            Transition::Suspending => {
+                pausing.inner_mut().set_transition(Transition::None);
+                sched.tasks_suspended.insert_when(pausing, | pausing, task | {
+                    pausing.next_wut() < task.next_wut()
+                });
+            },
+            Transition::Terminating => {
+                pausing.inner_mut().set_transition(Transition::None);
+                sched.tasks_terminated.push_back(pausing);
+            },
+            _ => (),
         }
     } else {
         sched.task_idle = sched.task_running.take();
