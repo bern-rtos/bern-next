@@ -9,7 +9,8 @@
 
 use core::sync::atomic::{self, Ordering};
 
-use crate::task::{Task, Transition};
+use crate::task::{self, Task, Transition};
+use crate::syscall;
 use crate::time;
 use crate::collection::linked_list::*;
 use crate::collection::boxed::Box;
@@ -72,9 +73,18 @@ pub fn start() -> ! {
     Arch::start_first_task(stack_ptr);
 }
 
-pub fn add(task: Task) {
+pub fn add(mut task: Task) {
     match SCHEDULER.lock() {
         Some(sched) => {
+            unsafe {
+                let stack_ptr = Arch::init_task_stack(
+                    task.stack_ptr(),
+                    task::entry as *const usize,
+                    task.runnable_ptr(),
+                    syscall::task_exit as *const usize
+                );
+                task.set_stack_ptr(stack_ptr);
+            }
             sched.as_mut().unwrap().tasks_ready.emplace_back(task).ok();
             SCHEDULER.release();
         },
@@ -143,7 +153,7 @@ pub fn tick_update() {
 }
 
 
-pub fn idle() {
+fn idle() {
     loop {
         atomic::compiler_fence(Ordering::SeqCst);
     }

@@ -1,6 +1,9 @@
+use core::mem;
+use cortex_m::peripheral::SCB;
+
 use crate::scheduler::IScheduler;
 use crate::arch::Arch;
-use cortex_m::peripheral::SCB;
+use crate::arch::register::{StackFrame, StackFrameExtension};
 
 #[no_mangle]
 #[naked] // todo: move to separate assembly file and introduce at link time
@@ -44,5 +47,23 @@ impl IScheduler for Arch {
             options(noreturn),
             );
         }
+    }
+
+    ///
+    /// # Safety
+    /// - The stack must be large enough for the initial stack frame
+    unsafe fn init_task_stack(stack_ptr: *mut usize, entry: *const usize, arg: *const usize, exit: *const usize) -> *mut usize {
+        let stack_frame_offset = mem::size_of::<StackFrame>() / mem::size_of::<usize>();
+        //let mut stack_frame: &mut StackFrame = mem::transmute(*(stack_ptr.offset(-(stack_frame_offset as isize)) as *const StackFrame));
+        let mut stack_frame: &mut StackFrame = mem::transmute(&mut *stack_ptr.offset(-(stack_frame_offset as isize)));
+        stack_frame.r0 = arg as u32;
+        stack_frame.lr = exit as u32;
+        stack_frame.pc = entry as u32;
+        stack_frame.xpsr = 0x01000000; // todo: document
+
+        let stack_ptr_offset =
+            (mem::size_of::<StackFrame>() + mem::size_of::<StackFrameExtension>()) /
+                mem::size_of::<usize>();
+        stack_ptr.offset(-(stack_ptr_offset as isize))
     }
 }

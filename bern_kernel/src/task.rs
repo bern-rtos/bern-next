@@ -26,55 +26,6 @@ macro_rules! alloc_static_stack {
     };
 }
 
-/* adapted from cortex-m crate */
-
-/// CPU registers pushed/popped by the hardware
-#[repr(C)]
-pub struct StackFrame {
-    /// (General purpose) Register 0
-    pub r0: u32,
-    /// (General purpose) Register 1
-    pub r1: u32,
-    /// (General purpose) Register 2
-    pub r2: u32,
-    /// (General purpose) Register 3
-    pub r3: u32,
-    /// (General purpose) Register 12
-    pub r12: u32,
-    /// Linker Register
-    pub lr: u32,
-    /// Program Counter
-    pub pc: u32,
-    /// Program Status Register
-    pub xpsr: u32,
-}
-
-/// CPU registers the software must push/pop to/from the stack
-#[repr(C)]
-pub struct StackFrameExtension {
-    /// (General purpose) Register 4
-    pub r4: u32,
-    /// (General purpose) Register 5
-    pub r5: u32,
-    /// (General purpose) Register 6
-    pub r6: u32,
-    /// (General purpose) Register 7
-    pub r7: u32,
-    /// (General purpose) Register 8
-    pub r8: u32,
-    /// (General purpose) Register 9
-    pub r9: u32,
-    /// (General purpose) Register 10
-    pub r10: u32,
-    /// (General purpose) Register 11
-    pub r11: u32,
-}
-
-/// CPU registers used by the floating point unit
-#[repr(C)]
-pub struct StackFrameFpu {
-}
-
 #[derive(Copy, Clone)]
 #[repr(u8)]
 pub enum Transition {
@@ -114,29 +65,8 @@ pub struct Task
 
 impl Task
 {
-    /// We need to set up the task stack before we can use it
-    fn init_stack_frame(&mut self) {
-        let stack_frame = StackFrame {
-            r0: self.runnable_ptr as u32,
-            r1: 0,
-            r2: 0,
-            r3: 0,
-            r12: 0,
-            lr: syscall::task_exit as u32,
-            pc: entry as u32,
-            xpsr: 0x01000000,
-        };
-        let stack_frame_offset = size_of::<StackFrame>() / size_of::<usize>();
-        unsafe {
-            ptr::copy_nonoverlapping(
-                &stack_frame,
-                self.stack_ptr.offset(-(stack_frame_offset as isize)) as *mut _,
-                1
-            );
-            let stack_ptr_offset =
-                (size_of::<StackFrame>() + size_of::<StackFrameExtension>()) / size_of::<usize>();
-            self.stack_ptr =  self.stack_ptr.offset(-(stack_ptr_offset as isize));
-        }
+    pub fn runnable_ptr(&self) -> *const usize {
+        self.runnable_ptr
     }
 
     pub fn stack_ptr(&self) -> *mut usize {
@@ -201,13 +131,12 @@ pub fn spawn<F>(closure: F, stack: &mut [u8])
 
     };
 
-    task.init_stack_frame();
     syscall::spawn(task);
     // todo: task handle?
 }
 
 /// *Note* don't be fooled by the `&mut &mut` the first one is a reference
 /// and second one is part of the trait object type
-fn entry(runnable: &mut &mut (dyn FnMut() -> RunnableResult)) {
+pub fn entry(runnable: &mut &mut (dyn FnMut() -> RunnableResult)) {
     (runnable)();
 }

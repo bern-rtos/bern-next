@@ -1,7 +1,8 @@
 pub mod syscall;
+pub mod core;
 mod scheduler;
 mod tick;
-pub mod core;
+mod register;
 
 pub struct Arch;
 
