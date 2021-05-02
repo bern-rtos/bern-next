@@ -2,6 +2,7 @@
 
 members = [
     "bern_kernel",
+    "bern_arch",
     "bern_test",
     "platform/st_nucleo_f446",
     "tests/armv7em",

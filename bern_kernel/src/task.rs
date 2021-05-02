@@ -4,8 +4,7 @@ use super::scheduler;
 use super::scheduler::Scheduler;
 use core::mem::{size_of, size_of_val};
 use core::ptr;
-use crate::Core;
-use crate::api::syscall::Syscall;
+use crate::syscall;
 use crate::time;
 
 #[derive(Debug)]
@@ -32,7 +31,7 @@ macro_rules! alloc_static_stack {
 
 /// CPU registers pushed/popped by the hardware
 #[repr(C)]
-pub struct StackFrameException {
+pub struct StackFrame {
     /// (General purpose) Register 0
     pub r0: u32,
     /// (General purpose) Register 1
@@ -118,17 +117,17 @@ impl Task
 {
     /// We need to set up the task stack before we can use it
     fn init_stack_frame(&mut self) {
-        let stack_frame = StackFrameException {
+        let stack_frame = StackFrame {
             r0: self.runnable_ptr as u32,
             r1: 0,
             r2: 0,
             r3: 0,
             r12: 0,
-            lr: Core::task_exit as u32,
+            lr: syscall::task_exit as u32,
             pc: entry as u32,
             xpsr: 0x01000000,
         };
-        let stack_frame_offset = size_of::<StackFrameException>() / size_of::<usize>();
+        let stack_frame_offset = size_of::<StackFrame>() / size_of::<usize>();
         unsafe {
             ptr::copy_nonoverlapping(
                 &stack_frame,
@@ -136,7 +135,7 @@ impl Task
                 1
             );
             let stack_ptr_offset =
-                (size_of::<StackFrameException>() + size_of::<StackFrameExtension>()) / size_of::<usize>();
+                (size_of::<StackFrame>() + size_of::<StackFrameExtension>()) / size_of::<usize>();
             self.stack_ptr =  self.stack_ptr.offset(-(stack_ptr_offset as isize));
         }
     }
@@ -204,7 +203,7 @@ pub fn spawn<F>(closure: F, stack: &mut [u8])
     };
 
     task.init_stack_frame();
-    Core::spawn(task);
+    syscall::spawn(task);
     // todo: task handle?
 }
 

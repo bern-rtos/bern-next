@@ -1,9 +1,9 @@
 [package]
-name = "bern-kernel"
-version = "0.0.1"
+name = "bern-arch"
+version = "0.1.0"
 authors = ["Stefan Lüthi <stefan.luethi@outlook.com>"]
 edition = "2018"
 
 [dependencies]
-bern-arch = { version = "*", path = "../bern_arch" }
+cortex-m-rt = "0.6.10"
 cortex-m = { version = "0.7.2", features = ["inline-asm"] }

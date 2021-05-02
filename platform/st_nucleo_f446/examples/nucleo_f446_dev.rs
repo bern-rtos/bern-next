@@ -6,7 +6,6 @@ use bern_kernel as kernel;
 use kernel::{
     task,
     scheduler::Scheduler,
-    Syscall,
 };
 
 use panic_halt as _;
@@ -36,7 +35,7 @@ fn main() -> ! {
     task::spawn(move || {
         loop {
             led.toggle().ok();
-            kernel::Core::sleep(100);
+            kernel::sleep(100);
         }
     },
                 kernel::alloc_static_stack!(512)
@@ -48,7 +47,7 @@ fn main() -> ! {
         /* spawn a new task while the system is running */
         task::spawn(move || {
             loop {
-                kernel::Core::sleep(800);
+                kernel::sleep(800);
             }
         },
                     kernel::alloc_static_stack!(256)
@@ -56,9 +55,9 @@ fn main() -> ! {
 
         loop {
             another_led.set_high().ok();
-            kernel::Core::sleep(50);
+            kernel::sleep(50);
             another_led.set_low().ok();
-            kernel::Core::sleep(400);
+            kernel::sleep(400);
         }
     },
                 kernel::alloc_static_stack!(1024)
@@ -71,11 +70,11 @@ fn main() -> ! {
         loop {
             a += 1;
             yet_another_led.set_high().ok();
-            kernel::Core::sleep(50);
+            kernel::sleep(50);
             yet_another_led.set_low().ok();
-            kernel::Core::sleep(950);
+            kernel::sleep(950);
             if a >= 60 {
-                kernel::Core::task_exit();
+                kernel::task_exit();
             }
         }
     },

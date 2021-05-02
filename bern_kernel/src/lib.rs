@@ -6,11 +6,11 @@
 pub mod error;
 pub mod task;
 pub mod scheduler;
-pub mod api;
-mod collection;
-mod sync;
 pub mod syscall;
 pub mod time;
+mod collection;
+mod sync;
 
-pub use crate::syscall::ArmCortexM as Core;
-pub use crate::api::syscall::Syscall;
+pub use crate::syscall::*;
+#[allow(unused_imports)]
+use bern_arch::arch as _;

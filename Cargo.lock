@@ -33,11 +33,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "bern-kernel"
-version = "0.0.1"
+name = "bern-arch"
+version = "0.1.0"
 dependencies = [
  "cortex-m 0.7.2",
  "cortex-m-rt",
+]
+
+[[package]]
+name = "bern-kernel"
+version = "0.0.1"
+dependencies = [
+ "bern-arch",
+ "cortex-m 0.7.2",
 ]
 
 [[package]]

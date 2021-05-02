@@ -14,6 +14,10 @@ stm32f4xx-hal = { version = "0.8", features = ["rt", "stm32f446"] }
 bern-kernel = { version = "*", path = "../../bern_kernel" }
 panic-halt = "0.2.0"
 
+# Optimize all dependencies
+#[profile.dev.package."*"]
+#opt-level = "s"
+
 [profile.release]
 codegen-units = 1 # better optimizations
 debug = 1 # symbols are nice and they don't increase the size on Flash
