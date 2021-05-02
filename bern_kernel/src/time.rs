@@ -1,5 +1,5 @@
 use core::sync::atomic::{AtomicU32, Ordering};
-use crate::scheduler::Scheduler;
+use crate::scheduler;
 
 static COUNT: AtomicU32 = AtomicU32::new(0); // todo: replace with u64
 
@@ -7,7 +7,7 @@ static COUNT: AtomicU32 = AtomicU32::new(0); // todo: replace with u64
 #[inline(always)]
 fn system_tick_update() {
     COUNT.fetch_add(1, Ordering::Relaxed);
-    Scheduler::tick_update();
+    scheduler::tick_update();
 }
 
 pub fn tick() -> u64 {

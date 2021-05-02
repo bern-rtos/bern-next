@@ -1,4 +1,4 @@
-use crate::core::Core;
+use crate::core::ICore;
 use cortex_m::Peripherals;
 use cortex_m::peripheral::syst::SystClkSource;
 use cortex_m::peripheral::scb;
@@ -7,7 +7,7 @@ pub struct ArchCore {
     peripherals: Peripherals,
 }
 
-impl Core for ArchCore {
+impl ICore for ArchCore {
     fn new() -> Self {
         // NOTE(unsafe): we must be able to take the peripherals or else the
         // system is doomed

@@ -1,7 +1,6 @@
 #![allow(unused)]
 
 use super::scheduler;
-use super::scheduler::Scheduler;
 use core::mem::{size_of, size_of_val};
 use core::ptr;
 use crate::syscall;

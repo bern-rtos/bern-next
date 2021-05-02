@@ -1,4 +1,4 @@
-use crate::context_switch::ContextSwitch;
+use crate::scheduler::IScheduler;
 use crate::arch::Arch;
 use cortex_m::peripheral::SCB;
 
@@ -24,7 +24,7 @@ extern "C" fn PendSV() {
     }
 }
 
-impl ContextSwitch for Arch {
+impl IScheduler for Arch {
     #[inline]
     fn trigger_context_switch() {
         SCB::set_pendsv();

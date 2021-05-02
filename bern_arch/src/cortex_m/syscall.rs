@@ -1,7 +1,7 @@
 use crate::arch::Arch;
-use crate::syscall::Syscall;
+use crate::syscall::ISyscall;
 
-impl Syscall for Arch {
+impl ISyscall for Arch {
     #[inline(always)]
     fn syscall(service: u8, arg0: usize, arg1: usize, arg2: usize) {
         // we need to move the arguments to the correct registers, because the

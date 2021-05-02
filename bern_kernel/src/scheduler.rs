@@ -15,7 +15,7 @@ use crate::collection::linked_list::*;
 use crate::collection::boxed::Box;
 use crate::sync::simple_mutex::SimpleMutex;
 
-use bern_arch::{Core, ContextSwitch};
+use bern_arch::{ICore, IScheduler};
 use bern_arch::arch::{ArchCore, Arch};
 
 
@@ -34,113 +34,111 @@ pub struct Scheduler
     tasks_terminated: LinkedList<Task, TaskPool>,
 }
 
-impl Scheduler
-{
-    pub fn init() {
-        let core = ArchCore::new();
 
-        if let Some(sched) = SCHEDULER.lock() {
-            sched.replace(Scheduler {
-                core,
-                task_running: None,
-                task_idle: None,
-                tasks_ready: LinkedList::new(&TASK_POOL),
-                tasks_suspended: LinkedList::new(&TASK_POOL),
-                tasks_terminated: LinkedList::new(&TASK_POOL),
-            });
-        } else {
-            panic!("Scheduler already locked, init called at wrong place");
-        }
-        SCHEDULER.release();
+pub fn init() {
+    let core = ArchCore::new();
+
+    if let Some(sched) = SCHEDULER.lock() {
+        sched.replace(Scheduler {
+            core,
+            task_running: None,
+            task_idle: None,
+            tasks_ready: LinkedList::new(&TASK_POOL),
+            tasks_suspended: LinkedList::new(&TASK_POOL),
+            tasks_terminated: LinkedList::new(&TASK_POOL),
+        });
+    } else {
+        panic!("Scheduler already locked, init called at wrong place");
     }
+    SCHEDULER.release();
+}
 
 
-    pub fn start() -> ! {
-        let mut sched = match SCHEDULER.lock() {
-            Some(sched) => sched.as_mut().unwrap(),
-            None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
-        };
+pub fn start() -> ! {
+    let mut sched = match SCHEDULER.lock() {
+        Some(sched) => sched.as_mut().unwrap(),
+        None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
+    };
 
-        sched.task_idle = sched.tasks_ready.pop_front();
-        let task = sched.tasks_ready.pop_front();
-        sched.task_running = task;
+    sched.task_idle = sched.tasks_ready.pop_front();
+    let task = sched.tasks_ready.pop_front();
+    sched.task_running = task;
 
-        sched.core.start();
+    sched.core.start();
 
-        let stack_ptr = sched.task_running.as_ref().unwrap().inner().stack_ptr();
-        SCHEDULER.release();
+    let stack_ptr = sched.task_running.as_ref().unwrap().inner().stack_ptr();
+    SCHEDULER.release();
 
-        Arch::start_first_task(stack_ptr);
-    }
+    Arch::start_first_task(stack_ptr);
+}
 
-    pub fn add(task: Task) {
-        match SCHEDULER.lock() {
-            Some(sched) => {
-                sched.as_mut().unwrap().tasks_ready.emplace_back(task).ok();
-                SCHEDULER.release();
-            },
-            None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
-        };
-    }
+pub fn add(task: Task) {
+    match SCHEDULER.lock() {
+        Some(sched) => {
+            sched.as_mut().unwrap().tasks_ready.emplace_back(task).ok();
+            SCHEDULER.release();
+        },
+        None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
+    };
+}
 
-    pub fn replace_idle(_task: Task) {
+pub fn replace_idle(_task: Task) {
 
-    }
+}
 
 
-    pub fn sleep(ms: u32) {
-        let sched = match SCHEDULER.lock() {
-            Some(sched) => sched.as_mut().unwrap(),
-            None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
-        };
+pub fn sleep(ms: u32) {
+    let sched = match SCHEDULER.lock() {
+        Some(sched) => sched.as_mut().unwrap(),
+        None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
+    };
 
-        let task = sched.task_running.as_mut().unwrap().inner_mut();
-        task.sleep(ms);
-        task.set_transition(Transition::Suspending);
-        SCHEDULER.release();
+    let task = sched.task_running.as_mut().unwrap().inner_mut();
+    task.sleep(ms);
+    task.set_transition(Transition::Suspending);
+    SCHEDULER.release();
 
-        Arch::trigger_context_switch();
-    }
+    Arch::trigger_context_switch();
+}
 
-    pub fn task_terminate() {
-        let sched = match SCHEDULER.lock() {
-            Some(sched) => sched.as_mut().unwrap(),
-            None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
-        };
+pub fn task_terminate() {
+    let sched = match SCHEDULER.lock() {
+        Some(sched) => sched.as_mut().unwrap(),
+        None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
+    };
 
-        let task = sched.task_running.as_mut().unwrap().inner_mut();
-        task.set_transition(Transition::Terminating);
-        SCHEDULER.release();
+    let task = sched.task_running.as_mut().unwrap().inner_mut();
+    task.set_transition(Transition::Terminating);
+    SCHEDULER.release();
 
-        Arch::trigger_context_switch();
-    }
+    Arch::trigger_context_switch();
+}
 
-    pub fn tick_update() {
-        let now = time::tick();
-        let sched = match SCHEDULER.lock() {
-            Some(sched) => sched.as_mut().unwrap(),
-            None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
-        };
-        // update pending -> ready list
-        let mut trigger_switch = false;
-        let mut cursor = sched.tasks_suspended.cursor_front_mut();
-        while let Some(task) = cursor.inner() {
-            if task.next_wut() <= now as u64 {
-                // todo: this is inefficient, we know that node exists
-                if let Some(node) = cursor.take() {
-                    sched.tasks_ready.push_back(node);
-                    trigger_switch = true;
-                }
-            } else {
-                break; // the list is sorted by wake-up time, we can abort early
+pub fn tick_update() {
+    let now = time::tick();
+    let sched = match SCHEDULER.lock() {
+        Some(sched) => sched.as_mut().unwrap(),
+        None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
+    };
+    // update pending -> ready list
+    let mut trigger_switch = false;
+    let mut cursor = sched.tasks_suspended.cursor_front_mut();
+    while let Some(task) = cursor.inner() {
+        if task.next_wut() <= now as u64 {
+            // todo: this is inefficient, we know that node exists
+            if let Some(node) = cursor.take() {
+                sched.tasks_ready.push_back(node);
+                trigger_switch = true;
             }
-            cursor.move_next();
+        } else {
+            break; // the list is sorted by wake-up time, we can abort early
         }
+        cursor.move_next();
+    }
 
-        SCHEDULER.release();
-        if trigger_switch {
-            Arch::trigger_context_switch();
-        }
+    SCHEDULER.release();
+    if trigger_switch {
+        Arch::trigger_context_switch();
     }
 }
 

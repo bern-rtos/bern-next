@@ -5,7 +5,7 @@
 use bern_kernel as kernel;
 use kernel::{
     task,
-    scheduler::Scheduler,
+    scheduler,
 };
 
 use panic_halt as _;
@@ -20,7 +20,7 @@ fn main() -> ! {
     cortex_m::asm::bkpt();
     let board = StNucleoF446::new();
 
-    Scheduler::init();
+    scheduler::init();
     /* idle task */
     task::spawn(move | | {
         loop {
@@ -81,5 +81,5 @@ fn main() -> ! {
                 kernel::alloc_static_stack!(512)
     );
 
-    Scheduler::start();
+    scheduler::start();
 }

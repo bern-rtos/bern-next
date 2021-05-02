@@ -1,8 +1,8 @@
 use super::task::Task;
 use core::mem;
-use crate::scheduler::Scheduler;
+use crate::scheduler;
 use cortex_m::asm;
-use bern_arch::{arch::Arch, Syscall};
+use bern_arch::{arch::Arch, ISyscall};
 
 
 #[repr(u8)]
@@ -20,10 +20,6 @@ impl Service {
     }
 }
 
-pub mod scheduler {
-    use super::*;
-
-}
 
 
 pub fn spawn(task: Task) {
@@ -59,10 +55,13 @@ fn syscall_handler(service: Service, arg0: usize, arg1: usize, arg2: usize) {
     match service {
         Service::TaskSpawn => {
             let task: Task = unsafe { mem::transmute(*(arg0 as *const Task)) };
-            Scheduler::add(task);
+            scheduler::add(task);
         },
-        Service::TaskSleep => Scheduler::sleep(arg0 as u32),
-        Service::TaskExit => Scheduler::task_terminate(),
+        Service::TaskSleep => {
+            let ms: u32 = arg0 as u32;
+            scheduler::sleep(ms);
+        },
+        Service::TaskExit => scheduler::task_terminate(),
         _ => asm::bkpt(),
     }
 }

@@ -1,5 +1,5 @@
 pub mod syscall;
-mod context_switch;
+mod scheduler;
 mod tick;
 pub mod core;
 

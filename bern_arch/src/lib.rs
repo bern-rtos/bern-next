@@ -5,12 +5,12 @@
 pub mod cortex_m;
 pub mod syscall;
 pub mod core;
-pub mod context_switch;
+pub mod scheduler;
 
 // re-exports
-pub use crate::context_switch::ContextSwitch;
-pub use crate::syscall::Syscall;
-pub use crate::core::Core;
+pub use crate::scheduler::IScheduler;
+pub use crate::syscall::ISyscall;
+pub use crate::core::ICore;
 
 
 
