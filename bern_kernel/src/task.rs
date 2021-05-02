@@ -1,30 +1,16 @@
 #![allow(unused)]
-
-use super::scheduler;
-use core::mem::{size_of, size_of_val};
+use core::mem;
 use core::ptr;
+use core::ops::Deref;
+
+use crate::scheduler;
 use crate::syscall;
 use crate::time;
+use crate::stack::Stack;
+
 
 #[derive(Debug)]
 pub struct TaskError;
-
-// todo: enforce alignment and size restrictions
-#[macro_export]
-macro_rules! alloc_static_stack {
-    ($size:expr) => {
-        {
-            #[link_section = ".taskstack"]
-            static mut STACK: [u8; $size] = [0; $size]; // will not be initialized -> linker script
-            unsafe{ // stack pattern for debugging
-                for byte in STACK.iter_mut() {
-                    *byte = 0xAA;
-                }
-            }
-            unsafe { STACK.as_mut() }
-        }
-    };
-}
 
 #[derive(Copy, Clone)]
 #[repr(u8)]
@@ -50,30 +36,118 @@ pub enum Transition {
 /// out of scope.
 
 //type RunnableResult = Result<(), TaskError>;
-type RunnableResult = (); // todo: replace with '!' when possible
+pub type RunnableResult = (); // todo: replace with '!' when possible
+
+pub struct TaskBuilder {
+    stack: Option<Stack>,
+}
+
+impl TaskBuilder {
+    pub fn static_stack(&mut self, stack: Stack) -> &mut Self {
+        self.stack = Some(stack);
+        self
+    }
+
+    // todo: return result
+    ///
+    /// A task cannot access another tasks stack, thus all stack initialization
+    /// must be handled via syscalls
+    pub fn spawn<F>(&mut self, closure: F)
+        where F: 'static + Sync + FnMut() -> RunnableResult
+    {
+        syscall::move_closure_to_stack(closure, self);
+        let mut stack = match self.stack.as_mut() {
+            Some(stack) => stack,
+            None => panic!("todo: allocate stack"),
+        };
+
+        // create trait object pointing to closure on stack
+        let mut runnable: &mut (dyn FnMut() -> RunnableResult);
+        unsafe {
+            runnable = &mut *(stack.ptr as *mut F);
+        }
+
+        syscall::task_spawn(self, &runnable);
+    }
+
+    // userland barrier ////////////////////////////////////////////////////////
+
+    pub(crate) fn move_closure_to_stack(&mut self, closure: *const u8, size_bytes: usize) {
+        // todo: check stack size otherwise this is pretty insecure
+        let mut stack = match self.stack.as_mut() {
+            Some(stack) => stack,
+            None => panic!("todo: return error"),
+        };
+
+        unsafe {
+            let mut ptr = stack.ptr as *mut u8;
+            ptr = ptr.offset(-(size_bytes as isize));
+            ptr::copy_nonoverlapping(closure, ptr, size_bytes);
+            stack.ptr = ptr as *mut usize;
+        }
+    }
+
+    pub(crate) fn build(&mut self, runnable: &&mut (dyn FnMut() -> RunnableResult)) {
+        // todo: check stack size otherwise this is pretty insecure
+        let mut stack = match self.stack.as_mut() {
+            Some(stack) => stack,
+            None => panic!("todo: return error"),
+        };
+        let mut ptr = stack.ptr as *mut u8;
+
+        // copy runnable trait object to stack
+        let runnable_len = mem::size_of_val(runnable);
+        unsafe {
+            ptr = ptr.offset(-(runnable_len as isize));
+            ptr::write(ptr as *mut _, runnable.deref());
+        }
+        let runnable_ptr = ptr as *mut usize;
+
+        // align task stack to double word
+        let mut alignment = ptr as usize % 8;
+        unsafe {
+            ptr = ptr.offset(-(alignment as isize));
+        }
+        stack.ptr = ptr as *mut usize;
+
+        let mut task = Task {
+            transition: Transition::None,
+            runnable_ptr,
+            next_wut: 0,
+            stack: self.stack.take().unwrap(),
+        };
+        scheduler::add(task)
+    }
+}
+
 
 // todo: manage lifetime of stack & runnable
 #[derive(Copy, Clone)]
-pub struct Task
-{
+pub struct Task {
     transition: Transition,
     runnable_ptr: *mut usize,
     next_wut: u64,
-    stack_top_ptr: *mut usize,
-    stack_ptr: *mut usize,
+    stack: Stack,
 }
 
-impl Task
-{
+impl Task {
+    pub fn new() -> TaskBuilder {
+        TaskBuilder {
+            stack: None,
+        }
+    }
+
+    // userland barrier ////////////////////////////////////////////////////////
+
     pub fn runnable_ptr(&self) -> *const usize {
         self.runnable_ptr
     }
 
     pub fn stack_ptr(&self) -> *mut usize {
-        self.stack_ptr
+        self.stack.ptr
     }
     pub fn set_stack_ptr(&mut self, psp: *mut usize) {
-        self.stack_ptr = psp;
+        self.stack.ptr = psp;
     }
 
     pub fn next_wut(&self) -> u64 {
@@ -91,52 +165,9 @@ impl Task
     }
 }
 
-// todo: replace stack with own type
-// todo: prevent a *static* task from being spawned twice (stack)
-// todo: clean up the mess
-pub fn spawn<F>(closure: F, stack: &mut [u8])
-    where F: 'static + Sync + FnMut() -> RunnableResult
-{
-    let stack_len = stack.len();
-
-    // copy closure to stack
-    let closure_len = size_of::<F>();
-    let closure_pos = stack_len - closure_len;
-    let mut runnable: &mut (dyn FnMut() -> RunnableResult + 'static);
-    unsafe {
-        ptr::write(stack.as_mut_ptr().offset(closure_pos as isize) as *mut _, closure);
-        // create trait object pointing to closure on stack
-        let mut closure_stacked = stack.as_mut_ptr().offset(closure_pos as isize) as *mut F;
-        runnable = &mut (*closure_stacked);
-    }
-
-    // copy runnable trait object to stack
-    let runnable_len = size_of_val(&runnable);
-    let runnable_pos = stack_len - closure_len - runnable_len;
-    unsafe {
-        ptr::write(stack.as_mut_ptr().offset(runnable_pos as isize) as *mut _, runnable);
-    }
-
-    // set task stack pointer
-    let mut alignment = unsafe { stack.as_mut_ptr().offset(runnable_pos as isize) as usize} % 8;
-    let task_stack_pos = runnable_pos - alignment; // align to double word (ARM recommendation)
-    let mut task_sp = unsafe { stack.as_ptr().offset(task_stack_pos as isize)} as *mut usize;
-
-    let mut task = Task {
-        transition: Transition::None,
-        runnable_ptr: unsafe { stack.as_mut_ptr().offset(runnable_pos as isize) as *mut usize },
-        next_wut: 0,
-        stack_top_ptr: stack.as_mut_ptr() as *mut usize, // todo: replace with stack object
-        stack_ptr: task_sp,
-
-    };
-
-    syscall::spawn(task);
-    // todo: task handle?
-}
-
 /// *Note* don't be fooled by the `&mut &mut` the first one is a reference
 /// and second one is part of the trait object type
 pub fn entry(runnable: &mut &mut (dyn FnMut() -> RunnableResult)) {
     (runnable)();
 }
+

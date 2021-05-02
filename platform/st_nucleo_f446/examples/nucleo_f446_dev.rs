@@ -4,7 +4,7 @@
 
 use bern_kernel as kernel;
 use kernel::{
-    task,
+    task::Task,
     scheduler,
 };
 
@@ -22,64 +22,64 @@ fn main() -> ! {
 
     scheduler::init();
     /* idle task */
-    task::spawn(move | | {
-        loop {
-            cortex_m::asm::nop();
-        }
-    },
-                kernel::alloc_static_stack!(128)
-    );
+    Task::new()
+        .static_stack(kernel::alloc_static_stack!(128))
+        .spawn(move || {
+            loop {
+                cortex_m::asm::nop();
+            }
+        });
 
     /* task 1 */
     let mut led = board.shield.led_7;
-    task::spawn(move || {
-        loop {
-            led.toggle().ok();
-            kernel::sleep(100);
-        }
-    },
-                kernel::alloc_static_stack!(512)
-    );
+    Task::new()
+        .static_stack(kernel::alloc_static_stack!(512))
+        .spawn(move || {
+            loop {
+                led.toggle().ok();
+                kernel::sleep(100);
+            }
+        });
 
     /* task 2 */
     let mut another_led = board.shield.led_6;
-    task::spawn(move || {
-        /* spawn a new task while the system is running */
-        task::spawn(move || {
-            loop {
-                kernel::sleep(800);
-            }
-        },
-                    kernel::alloc_static_stack!(256)
-        );
+    Task::new()
+        .static_stack(kernel::alloc_static_stack!(1024))
+        .spawn(move || {
+            /* spawn a new task while the system is running */
+            Task::new()
+                .static_stack(kernel::alloc_static_stack!(512))
+                .spawn(move || {
+                    loop {
+                        kernel::sleep(800);
+                    }
+                });
 
-        loop {
-            another_led.set_high().ok();
-            kernel::sleep(50);
-            another_led.set_low().ok();
-            kernel::sleep(400);
-        }
-    },
-                kernel::alloc_static_stack!(1024)
-    );
+            loop {
+                another_led.set_high().ok();
+                kernel::sleep(50);
+                another_led.set_low().ok();
+                kernel::sleep(400);
+            }
+        });
 
 
     let mut yet_another_led = board.shield.led_1;
-    let mut a = 0;
-    task::spawn(move || {
-        loop {
-            a += 1;
-            yet_another_led.set_high().ok();
-            kernel::sleep(50);
-            yet_another_led.set_low().ok();
-            kernel::sleep(950);
-            if a >= 60 {
-                kernel::task_exit();
+    let mut a = 10;
+    Task::new()
+        .static_stack(kernel::alloc_static_stack!(512))
+        .spawn(move || {
+            loop {
+                a += 1;
+                yet_another_led.set_high().ok();
+                kernel::sleep(50);
+                yet_another_led.set_low().ok();
+                kernel::sleep(950);
+                if a >= 60 {
+                    kernel::task_exit();
+                }
             }
-        }
-    },
-                kernel::alloc_static_stack!(512)
-    );
+        });
 
     scheduler::start();
 }

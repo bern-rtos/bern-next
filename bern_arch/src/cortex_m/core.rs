@@ -1,5 +1,5 @@
 use crate::core::ICore;
-use cortex_m::Peripherals;
+use cortex_m::{Peripherals, asm};
 use cortex_m::peripheral::syst::SystClkSource;
 use cortex_m::peripheral::scb;
 
@@ -30,5 +30,9 @@ impl ICore for ArchCore {
         unsafe {
             self.peripherals.SCB.set_priority(scb::SystemHandler::PendSV, 0xFF);
         }
+    }
+
+    fn bkpt() {
+        asm::bkpt();
     }
 }

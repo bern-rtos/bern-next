@@ -152,7 +152,7 @@ pub fn tick_update() {
     }
 }
 
-
+#[allow(dead_code)]
 fn idle() {
     loop {
         atomic::compiler_fence(Ordering::SeqCst);

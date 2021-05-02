@@ -8,6 +8,7 @@ pub mod task;
 pub mod scheduler;
 pub mod syscall;
 pub mod time;
+pub mod stack;
 mod collection;
 mod sync;
 

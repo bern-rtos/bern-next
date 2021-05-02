@@ -28,9 +28,22 @@ extern "C" fn PendSV() {
 }
 
 impl IScheduler for Arch {
-    #[inline]
-    fn trigger_context_switch() {
-        SCB::set_pendsv();
+    ///
+    /// # Safety
+    /// - The stack must be large enough for the initial stack frame
+    unsafe fn init_task_stack(stack_ptr: *mut usize, entry: *const usize, arg: *const usize, exit: *const usize) -> *mut usize {
+        let stack_frame_offset = mem::size_of::<StackFrame>() / mem::size_of::<usize>();
+        let mut stack_frame: &mut StackFrame =
+            mem::transmute(&mut *stack_ptr.offset(-(stack_frame_offset as isize)));
+        stack_frame.r0 = arg as u32;
+        stack_frame.lr = exit as u32;
+        stack_frame.pc = entry as u32;
+        stack_frame.xpsr = 0x01000000; // todo: document
+
+        let stack_ptr_offset =
+            (mem::size_of::<StackFrame>() + mem::size_of::<StackFrameExtension>()) /
+                mem::size_of::<usize>();
+        stack_ptr.offset(-(stack_ptr_offset as isize))
     }
 
     fn start_first_task(stack_ptr: *const usize) -> ! {
@@ -49,21 +62,8 @@ impl IScheduler for Arch {
         }
     }
 
-    ///
-    /// # Safety
-    /// - The stack must be large enough for the initial stack frame
-    unsafe fn init_task_stack(stack_ptr: *mut usize, entry: *const usize, arg: *const usize, exit: *const usize) -> *mut usize {
-        let stack_frame_offset = mem::size_of::<StackFrame>() / mem::size_of::<usize>();
-        //let mut stack_frame: &mut StackFrame = mem::transmute(*(stack_ptr.offset(-(stack_frame_offset as isize)) as *const StackFrame));
-        let mut stack_frame: &mut StackFrame = mem::transmute(&mut *stack_ptr.offset(-(stack_frame_offset as isize)));
-        stack_frame.r0 = arg as u32;
-        stack_frame.lr = exit as u32;
-        stack_frame.pc = entry as u32;
-        stack_frame.xpsr = 0x01000000; // todo: document
-
-        let stack_ptr_offset =
-            (mem::size_of::<StackFrame>() + mem::size_of::<StackFrameExtension>()) /
-                mem::size_of::<usize>();
-        stack_ptr.offset(-(stack_ptr_offset as isize))
+    #[inline]
+    fn trigger_context_switch() {
+        SCB::set_pendsv();
     }
 }

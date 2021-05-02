@@ -3,20 +3,22 @@ use crate::syscall::ISyscall;
 
 impl ISyscall for Arch {
     #[inline(always)]
-    fn syscall(service: u8, arg0: usize, arg1: usize, arg2: usize) {
+    fn syscall(service: u8, arg0: usize, arg1: usize, arg2: usize) -> usize {
         // we need to move the arguments to the correct registers, because the
         // function is inlined
+        let ret;
         unsafe { asm!(
-            "mov r0, {}",
-            "mov r1, {}",
-            "mov r2, {}",
-            "mov r3, {}",
+            "push {{r4}}",
             "svc 0",
-            in(reg) service,
-            in(reg) arg0,
-            in(reg) arg1,
-            in(reg) arg2,
+            "mov r0, r4",
+            "pop {{r4}}",
+            in("r0") service,
+            in("r1") arg0,
+            in("r2") arg1,
+            in("r3") arg2,
+            lateout("r0") ret,
         )}
+        ret
     }
 }
 
@@ -42,16 +44,10 @@ impl ISyscall for Arch {
 #[naked]
 unsafe extern "C" fn SVCall() {
     asm!(
-    "push {{r4-r5,lr}}",
-    //"tst lr, #4",         // check which stack was used
-    //"itte eq",
-    //"mrseq r4, msp",      // load main stack
-    //"addeq r4, #12",      // we pushed r4-r5 + lr
-    //"mrsne r4, psp",      // or load process tack
-    //"ldr r5, [r4, #24]",  // get callee link register (6 words offset)
-    //"ldrb r0, [r5, #-2]", // load the service id from code
+    "push {{lr}}",
     "bl syscall_handler",
-    "pop {{r4-r5,lr}}",
+    "mov r4, r0", // let's use r4 as return value, because r0 is popped from stack
+    "pop {{lr}}",
     "bx lr",
     options(noreturn),
     );
