@@ -171,3 +171,37 @@ pub fn entry(runnable: &mut &mut (dyn FnMut() -> RunnableResult)) {
     (runnable)();
 }
 
+#[cfg(all(test, not(target_os = "none")))]
+mod tests {
+    use super::*;
+    use bern_arch::mock::MockArch;
+
+    #[test]
+    fn example_test() {
+        let mut call_index = 0;
+        let ctx = MockArch::syscall_context();
+        ctx.expect()
+            .times(2)
+            .returning(move |id, arg0, arg1, arg2| {
+                match call_index {
+                    0 => {
+                        assert_eq!(id, syscall::Service::MoveClosureToStack.service_id());
+                    },
+                    1 => {
+                        assert_eq!(id, syscall::Service::TaskSpawn.service_id());
+                    },
+                    _ => (),
+                }
+                call_index += 1;
+                0
+            });
+
+        Task::new()
+            .static_stack(crate::alloc_static_stack!(512))
+            .spawn(move || {
+                loop { }
+            });
+
+        ctx.checkpoint();
+    }
+}

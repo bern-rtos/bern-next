@@ -7,3 +7,9 @@ members = [
     "platform/st_nucleo_f446",
     "tests/armv7em",
 ]
+
+[profile.release]
+codegen-units = 1 # better optimizations
+debug = 1 # symbols are nice and they don't increase the size on Flash
+lto = true # better optimizations
+opt-level = "s"

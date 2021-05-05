@@ -6,4 +6,3 @@ edition = "2018"
 
 [dependencies]
 bern-arch = { version = "*", path = "../bern_arch" }
-cortex-m = { version = "0.7.2", features = ["inline-asm"] }

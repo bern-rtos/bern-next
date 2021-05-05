@@ -1,8 +1,8 @@
-#![cfg_attr(all(not(test), not(target_arch = "thumb")), no_std)]
+#![cfg_attr(target_os = "none", no_std)]
 #![feature(asm)]
 #![feature(naked_functions)]
+#![feature(never_type)] // for mock only
 
-pub mod cortex_m;
 pub mod syscall;
 pub mod core;
 pub mod scheduler;
@@ -13,6 +13,13 @@ pub use crate::syscall::ISyscall;
 pub use crate::core::ICore;
 
 
-
 // select architecture support
+#[cfg(not(target_os = "none"))]
+pub mod mock;
+#[cfg(not(target_os = "none"))]
+pub use crate::mock as arch;
+
+#[cfg(all(target_arch = "arm", target_os = "none"))]
+pub mod cortex_m;
+#[cfg(all(target_arch = "arm", target_os = "none"))]
 pub use crate::cortex_m as arch;

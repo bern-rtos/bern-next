@@ -308,7 +308,7 @@ impl<T, const N: usize> ListAllocator<T> for StaticListPool<T, {N}> {
 
 /******************************************************************************/
 
-#[cfg(all(test, not(target_arch = "arm")))]
+#[cfg(all(test, not(target_os = "none")))]
 mod tests {
     use super::*;
     use core::borrow::Borrow;

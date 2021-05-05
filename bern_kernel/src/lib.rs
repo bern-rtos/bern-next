@@ -1,4 +1,4 @@
-#![cfg_attr(all(not(test), not(target_arch = "thumb")), no_std)]
+#![cfg_attr(target_os = "none", no_std)]
 #![feature(unsize)]
 #![feature(asm)]
 #![feature(naked_functions)]
