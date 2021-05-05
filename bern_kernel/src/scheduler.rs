@@ -8,6 +8,7 @@
 
 
 use core::sync::atomic::{self, Ordering};
+use arr_macro::arr;
 
 use crate::task::{self, Task, Transition};
 use crate::syscall;
@@ -19,9 +20,12 @@ use crate::sync::simple_mutex::SimpleMutex;
 use bern_arch::{ICore, IScheduler};
 use bern_arch::arch::{ArchCore, Arch};
 
+// todo: make these values configurable, proc macro?
+const TASK_PRIORITIES: usize = 8;
+const TASK_POOL_SIZE: usize = 16;
 
-type TaskPool = StaticListPool<Task, 16>;
-static TASK_POOL: TaskPool = StaticListPool::new([None; 16]);
+type TaskPool = StaticListPool<Task, TASK_POOL_SIZE>;
+static TASK_POOL: TaskPool = StaticListPool::new([None; TASK_POOL_SIZE]);
 
 static SCHEDULER: SimpleMutex<Option<Scheduler>> = SimpleMutex::new(None);
 
@@ -30,8 +34,8 @@ pub struct Scheduler
     core: ArchCore,
     task_running: Option<Box<Node<Task>>>,
     task_idle: Option<Box<Node<Task>>>,
-    tasks_ready: LinkedList<Task, TaskPool>,
-    tasks_suspended: LinkedList<Task, TaskPool>,
+    tasks_ready: [LinkedList<Task, TaskPool>; TASK_PRIORITIES],
+    tasks_suspended: [LinkedList<Task, TaskPool>; TASK_PRIORITIES],
     tasks_terminated: LinkedList<Task, TaskPool>,
 }
 
@@ -44,8 +48,8 @@ pub fn init() {
             core,
             task_running: None,
             task_idle: None,
-            tasks_ready: LinkedList::new(&TASK_POOL),
-            tasks_suspended: LinkedList::new(&TASK_POOL),
+            tasks_ready: arr![LinkedList::new(&TASK_POOL); 8],
+            tasks_suspended: arr![LinkedList::new(&TASK_POOL); 8],
             tasks_terminated: LinkedList::new(&TASK_POOL),
         });
     } else {
@@ -61,8 +65,16 @@ pub fn start() -> ! {
         None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
     };
 
-    sched.task_idle = sched.tasks_ready.pop_front();
-    let task = sched.tasks_ready.pop_front();
+    // this is just an idle task hack for now
+    sched.task_idle = sched.tasks_ready[TASK_PRIORITIES-1].pop_front();
+
+    let mut task = None;
+    for list in sched.tasks_ready.iter_mut() {
+        if list.len() > 0 {
+            task = list.pop_front();
+            break;
+        }
+    }
     sched.task_running = task;
 
     sched.core.start();
@@ -85,7 +97,8 @@ pub fn add(mut task: Task) {
                 );
                 task.set_stack_ptr(stack_ptr);
             }
-            sched.as_mut().unwrap().tasks_ready.emplace_back(task).ok();
+            let prio: usize = task.priority().into();
+            sched.as_mut().unwrap().tasks_ready[prio].emplace_back(task).ok();
             SCHEDULER.release();
         },
         None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
@@ -132,18 +145,25 @@ pub fn tick_update() {
     };
     // update pending -> ready list
     let mut trigger_switch = false;
-    let mut cursor = sched.tasks_suspended.cursor_front_mut();
-    while let Some(task) = cursor.inner() {
-        if task.next_wut() <= now as u64 {
-            // todo: this is inefficient, we know that node exists
-            if let Some(node) = cursor.take() {
-                sched.tasks_ready.push_back(node);
-                trigger_switch = true;
-            }
-        } else {
-            break; // the list is sorted by wake-up time, we can abort early
+    // todo: oof nested loops, check efficiency
+    for (prio, list) in sched.tasks_suspended.iter_mut().enumerate() {
+        if list.len() == 0 {
+            continue;
         }
-        cursor.move_next();
+
+        let mut cursor = list.cursor_front_mut();
+        while let Some(task) = cursor.inner() {
+            if task.next_wut() <= now as u64 {
+                // todo: this is inefficient, we know that node exists
+                if let Some(node) = cursor.take() {
+                    sched.tasks_ready[prio].push_back(node);
+                    trigger_switch = true;
+                }
+            } else {
+                break; // the list is sorted by wake-up time, we can abort early
+            }
+            cursor.move_next();
+        }
     }
 
     SCHEDULER.release();
@@ -173,11 +193,12 @@ fn switch_context(psp: u32) -> u32 {
 
     if sched.task_idle.is_some() {
         let mut pausing = sched.task_running.take().unwrap();
+        let prio: usize = pausing.inner().priority().into();
         match pausing.inner().transition() {
-            Transition::None => sched.tasks_ready.push_back(pausing),
+            Transition::None => sched.tasks_ready[prio].push_back(pausing),
             Transition::Suspending => {
                 pausing.inner_mut().set_transition(Transition::None);
-                sched.tasks_suspended.insert_when(pausing, | pausing, task | {
+                sched.tasks_suspended[prio].insert_when(pausing, | pausing, task | {
                     pausing.next_wut() < task.next_wut()
                 });
             },
@@ -192,7 +213,14 @@ fn switch_context(psp: u32) -> u32 {
     }
 
     // load next task
-    sched.task_running = match sched.tasks_ready.pop_front() {
+    let mut task = None;
+    for list in sched.tasks_ready.iter_mut() {
+        if list.len() > 0 {
+            task = list.pop_front();
+            break;
+        }
+    }
+    sched.task_running = match task {
         Some(task) => Some(task),
         None => sched.task_idle.take(),
     };

@@ -38,13 +38,28 @@ pub enum Transition {
 //type RunnableResult = Result<(), TaskError>;
 pub type RunnableResult = (); // todo: replace with '!' when possible
 
+#[derive(Debug, Copy, Clone)]
+pub struct Priority(pub u8);
+
+impl Into<usize> for Priority {
+    fn into(self) -> usize {
+        self.0 as usize
+    }
+}
+
 pub struct TaskBuilder {
     stack: Option<Stack>,
+    priority: Priority,
 }
 
 impl TaskBuilder {
     pub fn static_stack(&mut self, stack: Stack) -> &mut Self {
         self.stack = Some(stack);
+        self
+    }
+
+    pub fn priority(&mut self, priority: Priority) -> &mut Self {
+        self.priority = priority;
         self
     }
 
@@ -115,6 +130,7 @@ impl TaskBuilder {
             runnable_ptr,
             next_wut: 0,
             stack: self.stack.take().unwrap(),
+            priority: self.priority,
         };
         scheduler::add(task)
     }
@@ -128,12 +144,14 @@ pub struct Task {
     runnable_ptr: *mut usize,
     next_wut: u64,
     stack: Stack,
+    priority: Priority,
 }
 
 impl Task {
     pub fn new() -> TaskBuilder {
         TaskBuilder {
             stack: None,
+            priority: Priority(6), // todo
         }
     }
 
@@ -162,6 +180,10 @@ impl Task {
     }
     pub fn set_transition(&mut self, transition: Transition) {
         self.transition = transition;
+    }
+
+    pub fn priority(&self) -> Priority {
+        self.priority
     }
 }
 

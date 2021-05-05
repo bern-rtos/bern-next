@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 bern-arch = { version = "*", path = "../bern_arch" }
+arr_macro = "0.1.3"

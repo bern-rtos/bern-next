@@ -14,6 +14,7 @@ use cortex_m;
 use cortex_m_rt::entry;
 use st_nucleo_f446::StNucleoF446;
 use stm32f4xx_hal::prelude::*;
+use bern_kernel::task::Priority;
 
 #[entry]
 fn main() -> ! {
@@ -23,6 +24,7 @@ fn main() -> ! {
     scheduler::init();
     /* idle task */
     Task::new()
+        .priority(Priority(7))
         .static_stack(kernel::alloc_static_stack!(128))
         .spawn(move || {
             loop {
@@ -33,6 +35,7 @@ fn main() -> ! {
     /* task 1 */
     let mut led = board.shield.led_7;
     Task::new()
+        .priority(Priority(2))
         .static_stack(kernel::alloc_static_stack!(512))
         .spawn(move || {
             loop {
