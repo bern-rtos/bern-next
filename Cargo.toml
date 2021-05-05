@@ -2,10 +2,10 @@
 
 members = [
     "bern_kernel",
+    "bern_kernel/tests/armv7em",
     "bern_arch",
     "bern_test",
     "platform/st_nucleo_f446",
-    "tests/armv7em",
 ]
 
 [profile.release]
