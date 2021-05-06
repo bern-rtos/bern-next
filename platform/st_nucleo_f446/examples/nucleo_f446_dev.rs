@@ -50,13 +50,13 @@ fn main() -> ! {
         .static_stack(kernel::alloc_static_stack!(1024))
         .spawn(move || {
             /* spawn a new task while the system is running */
-            Task::new()
+            /*Task::new()
                 .static_stack(kernel::alloc_static_stack!(512))
                 .spawn(move || {
                     loop {
                         kernel::sleep(800);
                     }
-                });
+                });*/
 
             loop {
                 another_led.set_high().ok();

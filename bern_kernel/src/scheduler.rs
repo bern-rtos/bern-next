@@ -33,7 +33,6 @@ pub struct Scheduler
 {
     core: ArchCore,
     task_running: Option<Box<Node<Task>>>,
-    task_idle: Option<Box<Node<Task>>>,
     tasks_ready: [LinkedList<Task, TaskPool>; TASK_PRIORITIES],
     tasks_sleeping: LinkedList<Task, TaskPool>,
     tasks_terminated: LinkedList<Task, TaskPool>,
@@ -47,7 +46,6 @@ pub fn init() {
         sched.replace(Scheduler {
             core,
             task_running: None,
-            task_idle: None,
             tasks_ready: arr![LinkedList::new(&TASK_POOL); 8],
             tasks_sleeping: LinkedList::new(&TASK_POOL),
             tasks_terminated: LinkedList::new(&TASK_POOL),
@@ -65,8 +63,13 @@ pub fn start() -> ! {
         None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
     };
 
-    // this is just an idle task hack for now
-    sched.task_idle = sched.tasks_ready[TASK_PRIORITIES-1].pop_front();
+    // ensure an idle task is present
+    if sched.tasks_ready[TASK_PRIORITIES-1].len() == 0 {
+        Task::new()
+            .priority(task::Priority(7))
+            .static_stack(crate::alloc_static_stack!(128))
+            .spawn(move || default_idle());
+    }
 
     let mut task = None;
     for list in sched.tasks_ready.iter_mut() {
@@ -104,11 +107,6 @@ pub fn add(mut task: Task) {
         None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
     };
 }
-
-pub fn replace_idle(_task: Task) {
-
-}
-
 
 pub fn sleep(ms: u32) {
     let sched = match SCHEDULER.lock() {
@@ -166,8 +164,7 @@ pub fn tick_update() {
     }
 }
 
-#[allow(dead_code)]
-fn idle() {
+fn default_idle() {
     loop {
         atomic::compiler_fence(Ordering::SeqCst);
     }
@@ -185,25 +182,21 @@ fn switch_context(psp: u32) -> u32 {
     };
     sched.task_running.as_mut().unwrap().inner_mut().set_stack_ptr(psp as *mut usize);
 
-    if sched.task_idle.is_some() {
-        let mut pausing = sched.task_running.take().unwrap();
-        let prio: usize = pausing.inner().priority().into();
-        match pausing.inner().transition() {
-            Transition::None => sched.tasks_ready[prio].push_back(pausing),
-            Transition::Sleeping => {
-                pausing.inner_mut().set_transition(Transition::None);
-                sched.tasks_sleeping.insert_when(pausing, |pausing, task | {
-                    pausing.next_wut() < task.next_wut()
-                });
-            },
-            Transition::Terminating => {
-                pausing.inner_mut().set_transition(Transition::None);
-                sched.tasks_terminated.push_back(pausing);
-            },
-            _ => (),
-        }
-    } else {
-        sched.task_idle = sched.task_running.take();
+    let mut pausing = sched.task_running.take().unwrap();
+    let prio: usize = pausing.inner().priority().into();
+    match pausing.inner().transition() {
+        Transition::None => sched.tasks_ready[prio].push_back(pausing),
+        Transition::Sleeping => {
+            pausing.inner_mut().set_transition(Transition::None);
+            sched.tasks_sleeping.insert_when(pausing, |pausing, task | {
+                pausing.next_wut() < task.next_wut()
+            });
+        },
+        Transition::Terminating => {
+            pausing.inner_mut().set_transition(Transition::None);
+            sched.tasks_terminated.push_back(pausing);
+        },
+        _ => (),
     }
 
     // load next task
@@ -216,7 +209,7 @@ fn switch_context(psp: u32) -> u32 {
     }
     sched.task_running = match task {
         Some(task) => Some(task),
-        None => sched.task_idle.take(),
+        None => panic!("Idle task must not be suspended"),
     };
     let psp = sched.task_running.as_ref().unwrap().inner().stack_ptr();
     SCHEDULER.release();
