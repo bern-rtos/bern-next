@@ -35,7 +35,7 @@ pub struct Scheduler
     task_running: Option<Box<Node<Task>>>,
     task_idle: Option<Box<Node<Task>>>,
     tasks_ready: [LinkedList<Task, TaskPool>; TASK_PRIORITIES],
-    tasks_suspended: [LinkedList<Task, TaskPool>; TASK_PRIORITIES],
+    tasks_suspended: LinkedList<Task, TaskPool>,
     tasks_terminated: LinkedList<Task, TaskPool>,
 }
 
@@ -49,7 +49,7 @@ pub fn init() {
             task_running: None,
             task_idle: None,
             tasks_ready: arr![LinkedList::new(&TASK_POOL); 8],
-            tasks_suspended: arr![LinkedList::new(&TASK_POOL); 8],
+            tasks_suspended: LinkedList::new(&TASK_POOL),
             tasks_terminated: LinkedList::new(&TASK_POOL),
         });
     } else {
@@ -145,25 +145,19 @@ pub fn tick_update() {
     };
     // update pending -> ready list
     let mut trigger_switch = false;
-    // todo: oof nested loops, check efficiency
-    for (prio, list) in sched.tasks_suspended.iter_mut().enumerate() {
-        if list.len() == 0 {
-            continue;
-        }
-
-        let mut cursor = list.cursor_front_mut();
-        while let Some(task) = cursor.inner() {
-            if task.next_wut() <= now as u64 {
-                // todo: this is inefficient, we know that node exists
-                if let Some(node) = cursor.take() {
-                    sched.tasks_ready[prio].push_back(node);
-                    trigger_switch = true;
-                }
-            } else {
-                break; // the list is sorted by wake-up time, we can abort early
+    let mut cursor = sched.tasks_suspended.cursor_front_mut();
+    while let Some(task) = cursor.inner() {
+        if task.next_wut() <= now as u64 {
+            // todo: this is inefficient, we know that node exists
+            if let Some(node) = cursor.take() {
+                let prio: usize = node.inner().priority().into();
+                sched.tasks_ready[prio].push_back(node);
+                trigger_switch = true;
             }
-            cursor.move_next();
+        } else {
+            break; // the list is sorted by wake-up time, we can abort early
         }
+        cursor.move_next();
     }
 
     SCHEDULER.release();
@@ -198,7 +192,7 @@ fn switch_context(psp: u32) -> u32 {
             Transition::None => sched.tasks_ready[prio].push_back(pausing),
             Transition::Suspending => {
                 pausing.inner_mut().set_transition(Transition::None);
-                sched.tasks_suspended[prio].insert_when(pausing, | pausing, task | {
+                sched.tasks_suspended.insert_when(pausing, | pausing, task | {
                     pausing.next_wut() < task.next_wut()
                 });
             },
