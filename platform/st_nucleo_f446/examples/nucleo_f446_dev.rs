@@ -88,7 +88,7 @@ fn main() -> ! {
 
     /* blocking task */
     Task::new()
-        .priority(Priority(4))
+        .priority(Priority(2))
         .static_stack(kernel::alloc_static_stack!(128))
         .spawn(move || {
             loop {

@@ -161,6 +161,11 @@ pub fn tick_update() {
         cursor.move_next();
     }
 
+    // time-slicing
+    if sched.tasks_ready[preempt_prio].len() > 0 {
+        trigger_switch = true;
+    }
+
     SCHEDULER.release();
     if trigger_switch {
         Arch::trigger_context_switch();
