@@ -162,7 +162,8 @@ impl Task {
     pub fn new() -> TaskBuilder {
         TaskBuilder {
             stack: None,
-            priority: Priority(6), // todo
+            // set default to lowest priority above idle
+            priority: Priority(scheduler::TASK_PRIORITIES as u8 - 2),
         }
     }
 

@@ -15,10 +15,11 @@ use crate::syscall;
 use crate::time;
 use crate::collection::linked_list::*;
 use crate::collection::boxed::Box;
-use crate::sync::simple_mutex::SimpleMutex;
+use crate::sync::critical_mutex::CriticalMutex;
 
 use bern_arch::{ICore, IScheduler};
 use bern_arch::arch::{ArchCore, Arch};
+use core::mem::MaybeUninit;
 
 // todo: make these values configurable, proc macro?
 pub const TASK_PRIORITIES: usize = 8;
@@ -27,7 +28,7 @@ pub const TASK_POOL_SIZE: usize = 16;
 type TaskPool = StaticListPool<Task, TASK_POOL_SIZE>;
 static TASK_POOL: TaskPool = StaticListPool::new([None; TASK_POOL_SIZE]);
 
-static SCHEDULER: SimpleMutex<Option<Scheduler>> = SimpleMutex::new(None);
+static SCHEDULER: CriticalMutex<MaybeUninit<Scheduler>> = CriticalMutex::new(MaybeUninit::uninit());
 
 pub struct Scheduler
 {
@@ -42,26 +43,24 @@ pub struct Scheduler
 pub fn init() {
     let core = ArchCore::new();
 
-    if let Some(sched) = SCHEDULER.lock() {
-        sched.replace(Scheduler {
-            core,
-            task_running: None,
-            tasks_ready: arr![LinkedList::new(&TASK_POOL); 8],
-            tasks_sleeping: LinkedList::new(&TASK_POOL),
-            tasks_terminated: LinkedList::new(&TASK_POOL),
-        });
-    } else {
-        panic!("Scheduler already locked, init called at wrong place");
-    }
+    let sched = SCHEDULER.lock();
+
+    *sched = MaybeUninit::new(Scheduler {
+        core,
+        task_running: None,
+        tasks_ready: arr![LinkedList::new(&TASK_POOL); 8],
+        tasks_sleeping: LinkedList::new(&TASK_POOL),
+        tasks_terminated: LinkedList::new(&TASK_POOL),
+    });
+
     SCHEDULER.release();
 }
 
 
 pub fn start() -> ! {
-    let mut sched = match SCHEDULER.lock() {
-        Some(sched) => sched.as_mut().unwrap(),
-        None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
-    };
+    // Note(unsafe): scheduler must be initialized first
+    // todo: replace with `assume_init_mut()` as soon as stable
+    let mut sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
 
     // ensure an idle task is present
     if sched.tasks_ready[TASK_PRIORITIES-1].len() == 0 {
@@ -83,64 +82,62 @@ pub fn start() -> ! {
     sched.core.start();
 
     let stack_ptr = sched.task_running.as_ref().unwrap().inner().stack_ptr();
-    SCHEDULER.release();
 
+    SCHEDULER.release();
     Arch::start_first_task(stack_ptr);
 }
 
 pub fn add(mut task: Task) {
-    match SCHEDULER.lock() {
-        Some(sched) => {
-            unsafe {
-                let stack_ptr = Arch::init_task_stack(
-                    task.stack_ptr(),
-                    task::entry as *const usize,
-                    task.runnable_ptr(),
-                    syscall::task_exit as *const usize
-                );
-                task.set_stack_ptr(stack_ptr);
-            }
-            let prio: usize = task.priority().into();
-            sched.as_mut().unwrap().tasks_ready[prio].emplace_back(task).ok();
-            SCHEDULER.release();
-        },
-        None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
-    };
+    // Note(unsafe): scheduler must be initialized first
+    // todo: replace with `assume_init_mut()` as soon as stable
+    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+
+    unsafe {
+        let stack_ptr = Arch::init_task_stack(
+            task.stack_ptr(),
+            task::entry as *const usize,
+            task.runnable_ptr(),
+            syscall::task_exit as *const usize
+        );
+        task.set_stack_ptr(stack_ptr);
+    }
+    let prio: usize = task.priority().into();
+    sched.tasks_ready[prio].emplace_back(task).ok();
+    SCHEDULER.release();
 }
 
 pub fn sleep(ms: u32) {
-    let sched = match SCHEDULER.lock() {
-        Some(sched) => sched.as_mut().unwrap(),
-        None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
-    };
+    // Note(unsafe): scheduler must be initialized first
+    // todo: replace with `assume_init_mut()` as soon as stable
+    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
 
     let task = sched.task_running.as_mut().unwrap().inner_mut();
     task.sleep(ms);
     task.set_transition(Transition::Sleeping);
-    SCHEDULER.release();
 
+    SCHEDULER.release();
     Arch::trigger_context_switch();
 }
 
 pub fn task_terminate() {
-    let sched = match SCHEDULER.lock() {
-        Some(sched) => sched.as_mut().unwrap(),
-        None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
-    };
+    // Note(unsafe): scheduler must be initialized first
+    // todo: replace with `assume_init_mut()` as soon as stable
+    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
 
     let task = sched.task_running.as_mut().unwrap().inner_mut();
     task.set_transition(Transition::Terminating);
-    SCHEDULER.release();
 
+    SCHEDULER.release();
     Arch::trigger_context_switch();
 }
 
 pub fn tick_update() {
     let now = time::tick();
-    let sched = match SCHEDULER.lock() {
-        Some(sched) => sched.as_mut().unwrap(),
-        None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
-    };
+
+    // Note(unsafe): scheduler must be initialized first
+    // todo: replace with `assume_init_mut()` as soon as stable
+    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+
     // update pending -> ready list
     let preempt_prio = match sched.task_running.as_ref() {
         Some(task) => task.inner().priority().into(),
@@ -154,7 +151,7 @@ pub fn tick_update() {
             if let Some(node) = cursor.take() {
                 let prio: usize = node.inner().priority().into();
                 sched.tasks_ready[prio].push_back(node);
-                if prio > preempt_prio {
+                if prio < preempt_prio {
                     trigger_switch = true;
                 }
             }
@@ -182,10 +179,10 @@ fn default_idle() {
 /// implementation.
 #[no_mangle]
 fn switch_context(stack_ptr: u32) -> u32 {
-    let mut sched = match SCHEDULER.lock() {
-        Some(sched) => sched.as_mut().unwrap(),
-        None => panic!("Scheduler already locked, (todo reetrant scheduler)"),
-    };
+    // Note(unsafe): scheduler must be initialized first
+    // todo: replace with `assume_init_mut()` as soon as stable
+    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+
     sched.task_running.as_mut().unwrap().inner_mut().set_stack_ptr(stack_ptr as *mut usize);
 
     let mut pausing = sched.task_running.take().unwrap();
@@ -218,6 +215,7 @@ fn switch_context(stack_ptr: u32) -> u32 {
     }
     sched.task_running = task;
     let stack_ptr = sched.task_running.as_ref().unwrap().inner().stack_ptr();
+
     SCHEDULER.release();
     stack_ptr as u32
 }

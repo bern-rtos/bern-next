@@ -1,5 +1,6 @@
 pub mod syscall;
 pub mod core;
+pub mod sync;
 mod scheduler;
 mod tick;
 mod register;

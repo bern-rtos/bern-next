@@ -35,7 +35,7 @@ fn main() -> ! {
     /* task 1 */
     let mut led = board.shield.led_7;
     Task::new()
-        .priority(Priority(2))
+        .priority(Priority(1))
         .static_stack(kernel::alloc_static_stack!(512))
         .spawn(move || {
             loop {
@@ -47,16 +47,17 @@ fn main() -> ! {
     /* task 2 */
     let mut another_led = board.shield.led_6;
     Task::new()
+        .priority(Priority(2))
         .static_stack(kernel::alloc_static_stack!(1024))
         .spawn(move || {
             /* spawn a new task while the system is running */
-            /*Task::new()
+            Task::new()
                 .static_stack(kernel::alloc_static_stack!(512))
                 .spawn(move || {
                     loop {
                         kernel::sleep(800);
                     }
-                });*/
+                });
 
             loop {
                 another_led.set_high().ok();
@@ -70,6 +71,7 @@ fn main() -> ! {
     let mut yet_another_led = board.shield.led_1;
     let mut a = 10;
     Task::new()
+        .priority(Priority(3))
         .static_stack(kernel::alloc_static_stack!(512))
         .spawn(move || {
             loop {
@@ -81,6 +83,16 @@ fn main() -> ! {
                 if a >= 60 {
                     kernel::task_exit();
                 }
+            }
+        });
+
+    /* blocking task */
+    Task::new()
+        .priority(Priority(4))
+        .static_stack(kernel::alloc_static_stack!(128))
+        .spawn(move || {
+            loop {
+                cortex_m::asm::nop();
             }
         });
 
