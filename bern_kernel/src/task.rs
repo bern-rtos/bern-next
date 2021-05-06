@@ -40,6 +40,7 @@ pub type RunnableResult = (); // todo: replace with '!' when possible
 
 #[derive(Debug, Copy, Clone)]
 pub struct Priority(pub u8);
+// todo: check priority range at compile time
 
 impl Into<usize> for Priority {
     fn into(self) -> usize {
@@ -59,7 +60,17 @@ impl TaskBuilder {
     }
 
     pub fn priority(&mut self, priority: Priority) -> &mut Self {
+        if priority.0 >= scheduler::TASK_PRIORITIES as u8 {
+            panic!("Priority out of range. todo: check at compile time");
+        } else if priority.0 == scheduler::TASK_PRIORITIES as u8 - 1  {
+            panic!("Priority reserved for idle task. Use `is_idle_task()` instead. todo: check at compile time")
+        }
         self.priority = priority;
+        self
+    }
+
+    pub fn idle_task(&mut self) -> &mut Self {
+        self.priority = Priority(scheduler::TASK_PRIORITIES as u8 - 1);
         self
     }
 

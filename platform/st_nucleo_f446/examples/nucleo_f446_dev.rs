@@ -24,7 +24,7 @@ fn main() -> ! {
     scheduler::init();
     /* idle task */
     Task::new()
-        .priority(Priority(7))
+        .idle_task()
         .static_stack(kernel::alloc_static_stack!(128))
         .spawn(move || {
             loop {

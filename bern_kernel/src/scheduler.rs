@@ -21,8 +21,8 @@ use bern_arch::{ICore, IScheduler};
 use bern_arch::arch::{ArchCore, Arch};
 
 // todo: make these values configurable, proc macro?
-const TASK_PRIORITIES: usize = 8;
-const TASK_POOL_SIZE: usize = 16;
+pub const TASK_PRIORITIES: usize = 8;
+pub const TASK_POOL_SIZE: usize = 16;
 
 type TaskPool = StaticListPool<Task, TASK_POOL_SIZE>;
 static TASK_POOL: TaskPool = StaticListPool::new([None; TASK_POOL_SIZE]);
@@ -175,12 +175,12 @@ fn default_idle() {
 /// This function must be called from the architecture specific task switch
 /// implementation.
 #[no_mangle]
-fn switch_context(psp: u32) -> u32 {
+fn switch_context(stack_ptr: u32) -> u32 {
     let mut sched = match SCHEDULER.lock() {
         Some(sched) => sched.as_mut().unwrap(),
         None => panic!("Scheduler already locked, (todo reetrant scheduler)"),
     };
-    sched.task_running.as_mut().unwrap().inner_mut().set_stack_ptr(psp as *mut usize);
+    sched.task_running.as_mut().unwrap().inner_mut().set_stack_ptr(stack_ptr as *mut usize);
 
     let mut pausing = sched.task_running.take().unwrap();
     let prio: usize = pausing.inner().priority().into();
@@ -207,11 +207,11 @@ fn switch_context(psp: u32) -> u32 {
             break;
         }
     }
-    sched.task_running = match task {
-        Some(task) => Some(task),
-        None => panic!("Idle task must not be suspended"),
-    };
-    let psp = sched.task_running.as_ref().unwrap().inner().stack_ptr();
+    if task.is_none() {
+        panic!("Idle task must not be suspended");
+    }
+    sched.task_running = task;
+    let stack_ptr = sched.task_running.as_ref().unwrap().inner().stack_ptr();
     SCHEDULER.release();
-    psp as u32
+    stack_ptr as u32
 }
