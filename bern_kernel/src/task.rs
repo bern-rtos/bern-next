@@ -16,7 +16,7 @@ pub struct TaskError;
 #[repr(u8)]
 pub enum Transition {
     None,
-    Suspending,
+    Sleeping,
     Resuming,
     Terminating,
 }

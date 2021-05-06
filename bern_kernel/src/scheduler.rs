@@ -35,7 +35,7 @@ pub struct Scheduler
     task_running: Option<Box<Node<Task>>>,
     task_idle: Option<Box<Node<Task>>>,
     tasks_ready: [LinkedList<Task, TaskPool>; TASK_PRIORITIES],
-    tasks_suspended: LinkedList<Task, TaskPool>,
+    tasks_sleeping: LinkedList<Task, TaskPool>,
     tasks_terminated: LinkedList<Task, TaskPool>,
 }
 
@@ -49,7 +49,7 @@ pub fn init() {
             task_running: None,
             task_idle: None,
             tasks_ready: arr![LinkedList::new(&TASK_POOL); 8],
-            tasks_suspended: LinkedList::new(&TASK_POOL),
+            tasks_sleeping: LinkedList::new(&TASK_POOL),
             tasks_terminated: LinkedList::new(&TASK_POOL),
         });
     } else {
@@ -118,7 +118,7 @@ pub fn sleep(ms: u32) {
 
     let task = sched.task_running.as_mut().unwrap().inner_mut();
     task.sleep(ms);
-    task.set_transition(Transition::Suspending);
+    task.set_transition(Transition::Sleeping);
     SCHEDULER.release();
 
     Arch::trigger_context_switch();
@@ -145,7 +145,7 @@ pub fn tick_update() {
     };
     // update pending -> ready list
     let mut trigger_switch = false;
-    let mut cursor = sched.tasks_suspended.cursor_front_mut();
+    let mut cursor = sched.tasks_sleeping.cursor_front_mut();
     while let Some(task) = cursor.inner() {
         if task.next_wut() <= now as u64 {
             // todo: this is inefficient, we know that node exists
@@ -190,9 +190,9 @@ fn switch_context(psp: u32) -> u32 {
         let prio: usize = pausing.inner().priority().into();
         match pausing.inner().transition() {
             Transition::None => sched.tasks_ready[prio].push_back(pausing),
-            Transition::Suspending => {
+            Transition::Sleeping => {
                 pausing.inner_mut().set_transition(Transition::None);
-                sched.tasks_suspended.insert_when(pausing, | pausing, task | {
+                sched.tasks_sleeping.insert_when(pausing, |pausing, task | {
                     pausing.next_wut() < task.next_wut()
                 });
             },
