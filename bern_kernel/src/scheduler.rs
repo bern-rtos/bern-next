@@ -66,7 +66,7 @@ pub fn start() -> ! {
     // ensure an idle task is present
     if sched.tasks_ready[TASK_PRIORITIES-1].len() == 0 {
         Task::new()
-            .priority(task::Priority(7))
+            .idle_task()
             .static_stack(crate::alloc_static_stack!(128))
             .spawn(move || default_idle());
     }
@@ -142,6 +142,10 @@ pub fn tick_update() {
         None => panic!("Scheduler already locked, (todo reentrant scheduler)"),
     };
     // update pending -> ready list
+    let preempt_prio = match sched.task_running.as_ref() {
+        Some(task) => task.inner().priority().into(),
+        None => usize::MAX,
+    };
     let mut trigger_switch = false;
     let mut cursor = sched.tasks_sleeping.cursor_front_mut();
     while let Some(task) = cursor.inner() {
@@ -150,7 +154,9 @@ pub fn tick_update() {
             if let Some(node) = cursor.take() {
                 let prio: usize = node.inner().priority().into();
                 sched.tasks_ready[prio].push_back(node);
-                trigger_switch = true;
+                if prio > preempt_prio {
+                    trigger_switch = true;
+                }
             }
         } else {
             break; // the list is sorted by wake-up time, we can abort early
