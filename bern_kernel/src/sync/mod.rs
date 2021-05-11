@@ -1,4 +1,5 @@
 #[allow(dead_code)]
 
-pub mod simple_mutex;
-pub mod critical_mutex;
+pub(crate) mod simple_mutex;
+pub(crate) mod critical_mutex;
+pub mod mutex;

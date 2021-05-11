@@ -2,18 +2,28 @@ use core::mem;
 
 use crate::scheduler;
 use crate::task::{RunnableResult, TaskBuilder};
+use crate::sync::mutex;
 
 use bern_arch::{ISyscall, ICore};
 use bern_arch::arch::{Arch, ArchCore};
+use core::ops::{DerefMut};
+use crate::collection::boxed::Box;
+use core::ptr::NonNull;
+use crate::sync::mutex::MutexInternal;
 
+
+// todo: create with proc macro
 
 #[repr(u8)]
-pub enum Service {
+enum Service {
     SchedulerInit,
     MoveClosureToStack,
     TaskSpawn,
     TaskSleep,
     TaskExit,
+    MutexNew,
+    MutexLock,
+    MutexRelease,
 }
 
 impl Service {
@@ -62,6 +72,36 @@ pub fn task_exit() {
     );
 }
 
+pub fn mutex_new<T>(element: &T) -> usize {
+    Arch::syscall(
+        Service::MutexNew.service_id(),
+        element as *const _ as usize,
+        0,
+        0
+    )
+}
+
+pub fn mutex_lock(id: usize) -> Result<*mut usize, mutex::Error> {
+    match Arch::syscall(
+        Service::MutexLock.service_id(),
+        id,
+        0,
+        0
+    ) {
+        0 => Err(mutex::Error::WouldBlock),
+        inner => Ok(inner as *mut usize)
+    }
+}
+
+pub fn mutex_release(id: usize) {
+    Arch::syscall(
+        Service::MutexRelease.service_id(),
+        id,
+        0,
+        0
+    );
+}
+
 // userland barrier ////////////////////////////////////////////////////////////
 
 // todo: return result
@@ -96,6 +136,25 @@ fn syscall_handler(service: Service, arg0: usize, arg1: usize, arg2: usize) -> u
         },
         Service::TaskExit => {
             scheduler::task_terminate();
+            0
+        },
+        Service::MutexNew => {
+            let element = arg0 as *mut _;
+            let mutex = scheduler::mutex_add(mutex::MutexInternal::new(element));
+            match mutex {
+                Ok(mut m) => m.deref_mut() as *mut _ as usize,
+                Err(_) => panic!("could not create mutex"),
+            }
+        },
+        Service::MutexLock => {
+            Box::<MutexInternal>::from_raw(NonNull::new(arg0 as *mut _).unwrap())
+                .deref_mut()
+                .try_lock() as usize
+        },
+        Service::MutexRelease => {
+            Box::<MutexInternal>::from_raw(NonNull::new(arg0 as *mut _).unwrap())
+                .deref_mut()
+                .release();
             0
         },
         _ => {

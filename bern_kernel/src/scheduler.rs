@@ -8,6 +8,7 @@
 
 
 use core::sync::atomic::{self, Ordering};
+use core::mem::MaybeUninit;
 use arr_macro::arr;
 
 use crate::task::{self, Task, Transition};
@@ -16,25 +17,27 @@ use crate::time;
 use crate::collection::linked_list::*;
 use crate::collection::boxed::Box;
 use crate::sync::critical_mutex::CriticalMutex;
+use crate::mem::array_pool::ArrayPool;
+use crate::sync::mutex::MutexInternal;
+use crate::conf;
+use crate::mem::pool_allocator::PoolAllocator;
+use crate::mem::pool_allocator;
 
 use bern_arch::{ICore, IScheduler};
 use bern_arch::arch::{ArchCore, Arch};
-use core::mem::MaybeUninit;
 
-// todo: make these values configurable, proc macro?
-pub const TASK_PRIORITIES: usize = 8;
-pub const TASK_POOL_SIZE: usize = 16;
-
-type TaskPool = StaticListPool<Task, TASK_POOL_SIZE>;
-static TASK_POOL: TaskPool = StaticListPool::new([None; TASK_POOL_SIZE]);
+type TaskPool = StaticListPool<Task, { conf::TASK_POOL_SIZE }>;
+static TASK_POOL: TaskPool = StaticListPool::new([None; conf::TASK_POOL_SIZE]);
+static MUTEX_POOL: ArrayPool<MutexInternal, { conf::MUTEX_POOL_SIZE }> = ArrayPool::new(arr![None; 32]);
 
 static SCHEDULER: CriticalMutex<MaybeUninit<Scheduler>> = CriticalMutex::new(MaybeUninit::uninit());
 
-pub struct Scheduler
-{
+// todo: split scheduler into kernel and scheduler
+
+pub struct Scheduler {
     core: ArchCore,
     task_running: Option<Box<Node<Task>>>,
-    tasks_ready: [LinkedList<Task, TaskPool>; TASK_PRIORITIES],
+    tasks_ready: [LinkedList<Task, TaskPool>; conf::TASK_PRIORITIES],
     tasks_sleeping: LinkedList<Task, TaskPool>,
     tasks_terminated: LinkedList<Task, TaskPool>,
 }
@@ -63,7 +66,7 @@ pub fn start() -> ! {
     let mut sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
 
     // ensure an idle task is present
-    if sched.tasks_ready[TASK_PRIORITIES-1].len() == 0 {
+    if sched.tasks_ready[conf::TASK_PRIORITIES-1].len() == 0 {
         Task::new()
             .idle_task()
             .static_stack(crate::alloc_static_stack!(128))
@@ -178,6 +181,10 @@ fn default_idle() {
     }
 }
 
+pub(crate) fn mutex_add(mutex: MutexInternal) -> Result<Box<MutexInternal>, pool_allocator::Error>  {
+    MUTEX_POOL.insert(mutex)
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 /// This function must be called from the architecture specific task switch
@@ -225,6 +232,7 @@ fn switch_context(stack_ptr: u32) -> u32 {
     stack_ptr as u32
 }
 
+////////////////////////////////////////////////////////////////////////////////
 
 #[cfg(all(test, not(target_os = "none")))]
 mod tests {

@@ -7,6 +7,7 @@ use crate::scheduler;
 use crate::syscall;
 use crate::time;
 use crate::stack::Stack;
+use crate::conf;
 
 
 #[derive(Debug)]
@@ -60,9 +61,9 @@ impl TaskBuilder {
     }
 
     pub fn priority(&mut self, priority: Priority) -> &mut Self {
-        if priority.0 >= scheduler::TASK_PRIORITIES as u8 {
+        if priority.0 >= conf::TASK_PRIORITIES as u8 {
             panic!("Priority out of range. todo: check at compile time");
-        } else if priority.0 == scheduler::TASK_PRIORITIES as u8 - 1  {
+        } else if priority.0 == conf::TASK_PRIORITIES as u8 - 1  {
             panic!("Priority reserved for idle task. Use `is_idle_task()` instead. todo: check at compile time")
         }
         self.priority = priority;
@@ -70,7 +71,7 @@ impl TaskBuilder {
     }
 
     pub fn idle_task(&mut self) -> &mut Self {
-        self.priority = Priority(scheduler::TASK_PRIORITIES as u8 - 1);
+        self.priority = Priority(conf::TASK_PRIORITIES as u8 - 1);
         self
     }
 
@@ -163,7 +164,7 @@ impl Task {
         TaskBuilder {
             stack: None,
             // set default to lowest priority above idle
-            priority: Priority(scheduler::TASK_PRIORITIES as u8 - 2),
+            priority: Priority(conf::TASK_PRIORITIES as u8 - 2),
         }
     }
 

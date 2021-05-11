@@ -3,6 +3,8 @@
 #![feature(asm)]
 #![feature(naked_functions)]
 
+pub mod conf;
+
 pub mod error;
 pub mod task;
 pub mod scheduler;
@@ -10,7 +12,9 @@ pub mod syscall;
 pub mod time;
 pub mod stack;
 mod collection;
-mod sync;
+pub mod sync;
+pub mod mem;
+
 
 pub use crate::syscall::*;
 #[allow(unused_imports)]

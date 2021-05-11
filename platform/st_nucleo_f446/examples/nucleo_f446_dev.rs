@@ -5,7 +5,9 @@
 use bern_kernel as kernel;
 use kernel::{
     task::Task,
+    task::Priority,
     scheduler,
+    sync::mutex::Mutex,
 };
 
 use panic_halt as _;
@@ -14,7 +16,6 @@ use cortex_m;
 use cortex_m_rt::entry;
 use st_nucleo_f446::StNucleoF446;
 use stm32f4xx_hal::prelude::*;
-use bern_kernel::task::Priority;
 
 #[entry]
 fn main() -> ! {
@@ -22,6 +23,8 @@ fn main() -> ! {
     let board = StNucleoF446::new();
 
     scheduler::init();
+    let mutex = Mutex::new(42);
+
     /* idle task */
     Task::new()
         .idle_task()
@@ -41,6 +44,12 @@ fn main() -> ! {
             loop {
                 led.toggle().ok();
                 kernel::sleep(100);
+                {
+                    match mutex.try_lock() {
+                        Ok(mut value) => *value = 54,
+                        Err(_) => (),
+                    }
+                }
             }
         });
 
