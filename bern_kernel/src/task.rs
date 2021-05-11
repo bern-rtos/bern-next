@@ -38,7 +38,7 @@ pub enum Transition {
 //type RunnableResult = Result<(), TaskError>;
 pub type RunnableResult = (); // todo: replace with '!' when possible
 
-#[derive(Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Copy, Clone)]
 pub struct Priority(pub u8);
 // todo: check priority range at compile time
 
@@ -169,32 +169,32 @@ impl Task {
 
     // userland barrier ////////////////////////////////////////////////////////
 
-    pub fn runnable_ptr(&self) -> *const usize {
+    pub(crate) fn runnable_ptr(&self) -> *const usize {
         self.runnable_ptr
     }
 
-    pub fn stack_ptr(&self) -> *mut usize {
+    pub(crate) fn stack_ptr(&self) -> *mut usize {
         self.stack.ptr
     }
-    pub fn set_stack_ptr(&mut self, psp: *mut usize) {
+    pub(crate) fn set_stack_ptr(&mut self, psp: *mut usize) {
         self.stack.ptr = psp;
     }
 
-    pub fn next_wut(&self) -> u64 {
+    pub(crate) fn next_wut(&self) -> u64 {
         self.next_wut
     }
-    pub fn sleep(&mut self, ms: u32) {
+    pub(crate) fn sleep(&mut self, ms: u32) {
         self.next_wut = time::tick() + u64::from(ms);
     }
 
-    pub fn transition(&self) -> &Transition {
+    pub(crate) fn transition(&self) -> &Transition {
         &self.transition
     }
-    pub fn set_transition(&mut self, transition: Transition) {
+    pub(crate) fn set_transition(&mut self, transition: Transition) {
         self.transition = transition;
     }
 
-    pub fn priority(&self) -> Priority {
+    pub(crate) fn priority(&self) -> Priority {
         self.priority
     }
 }
@@ -205,16 +205,17 @@ pub fn entry(runnable: &mut &mut (dyn FnMut() -> RunnableResult)) {
     (runnable)();
 }
 
+
 #[cfg(all(test, not(target_os = "none")))]
 mod tests {
     use super::*;
-    use bern_arch::mock::MockArch;
+    use bern_arch::arch::Arch;
 
     #[test]
-    fn example_test() {
+    fn spawn_task() {
         let mut call_index = 0;
-        let ctx = MockArch::syscall_context();
-        ctx.expect()
+        let syscall_ctx = Arch::syscall_context();
+        syscall_ctx.expect()
             .times(2)
             .returning(move |id, arg0, arg1, arg2| {
                 match call_index {
@@ -231,11 +232,10 @@ mod tests {
             });
 
         Task::new()
+            .priority(Priority(2))
             .static_stack(crate::alloc_static_stack!(512))
             .spawn(move || {
                 loop { }
             });
-
-        ctx.checkpoint();
     }
 }

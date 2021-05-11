@@ -224,3 +224,29 @@ fn switch_context(stack_ptr: u32) -> u32 {
     SCHEDULER.release();
     stack_ptr as u32
 }
+
+
+#[cfg(all(test, not(target_os = "none")))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn init() {
+        Arch::disable_interrupts_context().expect().return_once(|priority| {
+            assert_eq!(priority, usize::MAX);
+        });
+        Arch::enable_interrupts_context().expect().returning(|| {});
+
+        let core_ctx = ArchCore::new_context();
+        core_ctx.expect()
+            .returning(|| {
+                ArchCore::default()
+            });
+
+        super::init();
+
+        let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+        assert_eq!(sched.task_running.is_none(), true);
+        assert_eq!(sched.tasks_terminated.len(), 0);
+    }
+}

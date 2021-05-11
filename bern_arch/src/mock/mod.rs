@@ -6,6 +6,7 @@ use mockall::predicate::*;
 use crate::scheduler::IScheduler;
 use crate::syscall::ISyscall;
 use crate::core::ICore;
+use crate::sync::ISync;
 
 // re-exports
 pub use crate::mock::MockArch as Arch;
@@ -22,6 +23,11 @@ mock!{
 
     impl ISyscall for Arch {
         fn syscall(service: u8, arg0: usize, arg1: usize, arg2: usize) -> usize;
+    }
+
+    impl ISync for Arch {
+        fn disable_interrupts(priority: usize);
+        fn enable_interrupts();
     }
 }
 
