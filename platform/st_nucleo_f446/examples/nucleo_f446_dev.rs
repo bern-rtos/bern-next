@@ -17,13 +17,17 @@ use cortex_m_rt::entry;
 use st_nucleo_f446::StNucleoF446;
 use stm32f4xx_hal::prelude::*;
 
+#[link_section = ".shared"]
+static MUTEX_DATA: usize = 42;
+
 #[entry]
 fn main() -> ! {
     cortex_m::asm::bkpt();
     let board = StNucleoF446::new();
 
     scheduler::init();
-    let mutex = Mutex::new(42);
+
+    let mutex = Mutex::new(MUTEX_DATA);
 
     /* idle task */
     Task::new()

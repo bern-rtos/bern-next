@@ -63,7 +63,7 @@ impl<'a,T> DerefMut for MutexGuard<'a,T> {
 
 impl<'a,T> Drop for MutexGuard<'a,T> {
     fn drop(&mut self) {
-
+        syscall::mutex_release(self.lock.id);
     }
 }
 

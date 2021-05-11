@@ -27,9 +27,16 @@ MEMORY
 /* Align stacks to double word see:
    https://community.arm.com/developer/ip-products/processors/f/cortex-m-forum/6344/what-is-the-meaning-of-a-64-bit-aligned-stack-pointer-address */
 /* Note that the section will not be zero-initialized by the runtime! */
-   SECTIONS {
-     .taskstack (NOLOAD) : ALIGN(8) {
-       *(.taskstack);
-       . = ALIGN(8);
-     } > RAM
-   } INSERT AFTER .bss;
+    SECTIONS {
+        .taskstack (NOLOAD) : ALIGN(8) {
+            *(.taskstack);
+            . = ALIGN(8);
+        } > RAM
+    } INSERT AFTER .bss;
+
+    SECTIONS {
+        .shared : ALIGN(4) {
+            *(.shared);
+            . = ALIGN(4);
+        } > RAM
+    } INSERT AFTER .taskstack;
