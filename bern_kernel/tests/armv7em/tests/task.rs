@@ -43,7 +43,7 @@ mod tests {
 
         Task::spawn(move | | {
             led.toggle().ok();
-            Scheduler::delay(100);
+            Scheduler::sleep(100);
 
             assert_eq!(0,1);
         },

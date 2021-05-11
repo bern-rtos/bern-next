@@ -2,168 +2,251 @@
 // cannot verify critical section, thus they have to marked as unsafe.
 #![allow(unsafe_code)]
 
-use super::task::Task;
-use cortex_m::peripheral::{
-    syst::SystClkSource,
-};
-use cortex_m::{
-    asm,
-    register::*,
-    peripheral::*,
-    interrupt::*,
-};
-use cortex_m_rt::exception;
 
-static mut SCHEDULER: Option<Scheduler> = None;
+/// # Basic Concept
+/// Keep interrupt latency as short as possible, move work to PendSV.
 
-// todo: lock sched
-// todo: replace with single linked list
-pub struct Scheduler<'a>
+
+use core::sync::atomic::{self, Ordering};
+use arr_macro::arr;
+
+use crate::task::{self, Task, Transition};
+use crate::syscall;
+use crate::time;
+use crate::collection::linked_list::*;
+use crate::collection::boxed::Box;
+use crate::sync::critical_mutex::CriticalMutex;
+
+use bern_arch::{ICore, IScheduler};
+use bern_arch::arch::{ArchCore, Arch};
+use core::mem::MaybeUninit;
+
+// todo: make these values configurable, proc macro?
+pub const TASK_PRIORITIES: usize = 8;
+pub const TASK_POOL_SIZE: usize = 16;
+
+type TaskPool = StaticListPool<Task, TASK_POOL_SIZE>;
+static TASK_POOL: TaskPool = StaticListPool::new([None; TASK_POOL_SIZE]);
+
+static SCHEDULER: CriticalMutex<MaybeUninit<Scheduler>> = CriticalMutex::new(MaybeUninit::uninit());
+
+pub struct Scheduler
 {
-    tasks: [Option<Task<'a>>; 5],
-    core: Peripherals,
-    current_task: Option<*mut Task<'a>>, // todo: I'm not fighting the borrow checker until I use a linked list
-    next_task: Option<*mut Task<'a>>,
+    core: ArchCore,
+    task_running: Option<Box<Node<Task>>>,
+    tasks_ready: [LinkedList<Task, TaskPool>; TASK_PRIORITIES],
+    tasks_sleeping: LinkedList<Task, TaskPool>,
+    tasks_terminated: LinkedList<Task, TaskPool>,
 }
 
-impl<'a> Scheduler<'a>
-{
-    pub fn init() {
-        // init systick -> 1ms
-        let mut core = Peripherals::take().unwrap();
-        core.SYST.set_clock_source(SystClkSource::Core);
-        // this is configured for the STM32F411 which has a default CPU clock of 48 MHz
-        core.SYST.set_reload(48_000);
-        core.SYST.clear_current();
 
-        unsafe { SCHEDULER = Some(Scheduler {
-                tasks: [None, None, None, None, None],
-                core,
-                current_task: None,
-                next_task: None,
-            })
-        };
+pub fn init() {
+    let core = ArchCore::new();
+
+    let sched = SCHEDULER.lock();
+
+    *sched = MaybeUninit::new(Scheduler {
+        core,
+        task_running: None,
+        tasks_ready: arr![LinkedList::new(&TASK_POOL); 8],
+        tasks_sleeping: LinkedList::new(&TASK_POOL),
+        tasks_terminated: LinkedList::new(&TASK_POOL),
+    });
+
+    SCHEDULER.release();
+}
+
+
+pub fn start() -> ! {
+    // Note(unsafe): scheduler must be initialized first
+    // todo: replace with `assume_init_mut()` as soon as stable
+    let mut sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+
+    // ensure an idle task is present
+    if sched.tasks_ready[TASK_PRIORITIES-1].len() == 0 {
+        Task::new()
+            .idle_task()
+            .static_stack(crate::alloc_static_stack!(128))
+            .spawn(move || default_idle());
     }
 
-    pub fn add(mut task: Task<'static>) {
-        let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
+    let mut task = None;
+    for list in sched.tasks_ready.iter_mut() {
+        if list.len() > 0 {
+            task = list.pop_front();
+            break;
+        }
+    }
+    sched.task_running = task;
 
-        for _task in scheduler.tasks.iter_mut() {
-            if _task.is_none() {
-                *_task = Some(task);
-                break;
+    sched.core.start();
+
+    let stack_ptr = sched.task_running.as_ref().unwrap().inner().stack_ptr();
+
+    SCHEDULER.release();
+    Arch::start_first_task(stack_ptr);
+}
+
+pub fn add(mut task: Task) {
+    // Note(unsafe): scheduler must be initialized first
+    // todo: replace with `assume_init_mut()` as soon as stable
+    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+
+    unsafe {
+        let stack_ptr = Arch::init_task_stack(
+            task.stack_ptr(),
+            task::entry as *const usize,
+            task.runnable_ptr(),
+            syscall::task_exit as *const usize
+        );
+        task.set_stack_ptr(stack_ptr);
+    }
+    let prio: usize = task.priority().into();
+    sched.tasks_ready[prio].emplace_back(task).ok();
+    SCHEDULER.release();
+}
+
+pub fn sleep(ms: u32) {
+    // Note(unsafe): scheduler must be initialized first
+    // todo: replace with `assume_init_mut()` as soon as stable
+    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+
+    let task = sched.task_running.as_mut().unwrap().inner_mut();
+    task.sleep(ms);
+    task.set_transition(Transition::Sleeping);
+
+    SCHEDULER.release();
+    Arch::trigger_context_switch();
+}
+
+pub fn task_terminate() {
+    // Note(unsafe): scheduler must be initialized first
+    // todo: replace with `assume_init_mut()` as soon as stable
+    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+
+    let task = sched.task_running.as_mut().unwrap().inner_mut();
+    task.set_transition(Transition::Terminating);
+
+    SCHEDULER.release();
+    Arch::trigger_context_switch();
+}
+
+pub fn tick_update() {
+    let now = time::tick();
+
+    // Note(unsafe): scheduler must be initialized first
+    // todo: replace with `assume_init_mut()` as soon as stable
+    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+
+    // update pending -> ready list
+    let preempt_prio = match sched.task_running.as_ref() {
+        Some(task) => task.inner().priority().into(),
+        None => usize::MAX,
+    };
+    let mut trigger_switch = false;
+    let mut cursor = sched.tasks_sleeping.cursor_front_mut();
+    while let Some(task) = cursor.inner() {
+        if task.next_wut() <= now as u64 {
+            // todo: this is inefficient, we know that node exists
+            if let Some(node) = cursor.take() {
+                let prio: usize = node.inner().priority().into();
+                sched.tasks_ready[prio].push_back(node);
+                if prio < preempt_prio {
+                    trigger_switch = true;
+                }
             }
+        } else {
+            break; // the list is sorted by wake-up time, we can abort early
         }
+        cursor.move_next();
     }
 
-    pub fn start() {
-        let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
-        scheduler.current_task = Some(scheduler.tasks[1].as_mut().unwrap());
-        scheduler.next_task = Some(scheduler.tasks[0].as_mut().unwrap());
-
-        scheduler.core.SYST.enable_counter();
-        scheduler.core.SYST.enable_interrupt();
-
-        // enable PendSV interrupt on lowest priority
-        unsafe {
-            scheduler.core.SCB.set_priority(scb::SystemHandler::PendSV, 0xFF);
-        }
-
-        // start first task
-        unsafe {
-            asm!(
-            "msr   psp, {1}", // set process stack pointer -> task stack
-            "msr   control, {0}", // switch to thread mode
-            "isb", // recommended by ARM
-            "pop   {{r4-r11}}", // pop register we initialized
-            "pop   {{r0-r3,r12,lr}}", // force function entry
-            "pop   {{pc}}", // 'jump' to the task entry function we put on the stack
-            in(reg) 0x2,
-            in(reg) scheduler.current_task.as_mut().unwrap().as_mut().unwrap().get_psp() as u32,
-            options(noreturn),
-            );
-        }
+    // time-slicing
+    if sched.tasks_ready[preempt_prio].len() > 0 {
+        trigger_switch = true;
     }
 
-    pub fn delay(ms: u32) {
-        // todo: replace with system call
-        // todo: unsafe -> already &mut in exec
-        let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
-        unsafe { scheduler.current_task.as_mut().unwrap().as_mut().unwrap() }.delay(ms);
-        unsafe { scheduler.current_task.as_mut().unwrap().as_mut().unwrap() }.get_psp();
-
-        SCB::set_pendsv();
+    SCHEDULER.release();
+    if trigger_switch {
+        Arch::trigger_context_switch();
     }
 }
 
-
-pub fn idle() {
+fn default_idle() {
     loop {
-        asm::nop();
+        atomic::compiler_fence(Ordering::SeqCst);
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#[exception]
-fn PendSV() {
+/// This function must be called from the architecture specific task switch
+/// implementation.
+#[no_mangle]
+fn switch_context(stack_ptr: u32) -> u32 {
+    // Note(unsafe): scheduler must be initialized first
+    // todo: replace with `assume_init_mut()` as soon as stable
+    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
 
-    // Source: Definitive Guide to Cortex-M3/4, p. 342
-    // store stack of current task
-    let mut psp: u32;
-    unsafe {
-        asm!(
-            "mrs   r0, psp",
-            "stmdb r0!, {{r4-r11}}",
-            out("r0") psp
-        );
+    sched.task_running.as_mut().unwrap().inner_mut().set_stack_ptr(stack_ptr as *mut usize);
+
+    let mut pausing = sched.task_running.take().unwrap();
+    let prio: usize = pausing.inner().priority().into();
+    match pausing.inner().transition() {
+        Transition::None => sched.tasks_ready[prio].push_back(pausing),
+        Transition::Sleeping => {
+            pausing.inner_mut().set_transition(Transition::None);
+            sched.tasks_sleeping.insert_when(pausing, |pausing, task | {
+                pausing.next_wut() < task.next_wut()
+            });
+        },
+        Transition::Terminating => {
+            pausing.inner_mut().set_transition(Transition::None);
+            sched.tasks_terminated.push_back(pausing);
+        },
+        _ => (),
     }
-    let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
-    unsafe { scheduler.current_task.as_mut().unwrap().as_mut().unwrap() }.set_psp(psp as *mut usize);
 
     // load next task
-    let task = scheduler.next_task.take().unwrap();
-    let psp = unsafe { task.as_mut().unwrap() }.get_psp();
-    scheduler.current_task = Some(task);
-    scheduler.next_task = Some(scheduler.tasks[0].as_mut().unwrap()); // if in doubt -> idle
-    unsafe {
-        asm!(
-            "ldmia r0!, {{r4-r11}}",
-            "msr   psp, r0",
-            in("r0") psp as u32,
-        )
-    }
-}
-
-#[exception]
-fn SVCall() {
-    asm::bkpt();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-static mut COUNT: u64 = 0;
-
-#[exception]
-fn SysTick() {
-    // `COUNT` has transformed to type `&mut u32` and it's safe to use
-    unsafe { COUNT += 1; }
-
-    // check if task is ready
-    let scheduler = unsafe{ SCHEDULER.as_mut() }.unwrap();
-    for (i, task) in scheduler.tasks.iter_mut().enumerate() {
-        if i == 0 || task.is_none() {
-            continue; // idle task
-        }
-        if task.as_mut().unwrap().get_next_wut() <= unsafe { COUNT } {
-            // todo: find better comparison between tasks
-            if task.as_mut().unwrap().get_psp() != unsafe { scheduler.current_task.as_mut().unwrap().as_mut().unwrap() }.get_psp() {
-                scheduler.next_task = Some(task.as_mut().unwrap());
-                SCB::set_pendsv();
-            }
+    let mut task = None;
+    for list in sched.tasks_ready.iter_mut() {
+        if list.len() > 0 {
+            task = list.pop_front();
+            break;
         }
     }
+    if task.is_none() {
+        panic!("Idle task must not be suspended");
+    }
+    sched.task_running = task;
+    let stack_ptr = sched.task_running.as_ref().unwrap().inner().stack_ptr();
+
+    SCHEDULER.release();
+    stack_ptr as u32
 }
 
-pub fn get_tick() -> u64 {
-    unsafe { COUNT }
+
+#[cfg(all(test, not(target_os = "none")))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn init() {
+        Arch::disable_interrupts_context().expect().return_once(|priority| {
+            assert_eq!(priority, usize::MAX);
+        });
+        Arch::enable_interrupts_context().expect().returning(|| {});
+
+        let core_ctx = ArchCore::new_context();
+        core_ctx.expect()
+            .returning(|| {
+                ArchCore::default()
+            });
+
+        super::init();
+
+        let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+        assert_eq!(sched.task_running.is_none(), true);
+        assert_eq!(sched.tasks_terminated.len(), 0);
+    }
 }
