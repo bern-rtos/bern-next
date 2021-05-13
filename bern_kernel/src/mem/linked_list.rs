@@ -5,7 +5,8 @@ use core::ptr::NonNull;
 use core::mem::MaybeUninit;
 use core::cell::RefCell;
 use core::borrow::BorrowMut;
-use super::boxed::Box;
+use crate::mem::boxed::Box;
+use crate::mem::pool_allocator::{self, PoolAllocator};
 
 /// The goal here is to create a fast and efficient linked list
 /// Lists use an array of nodes as memory pool, the array must be static.
@@ -46,7 +47,7 @@ impl<T> Node<T> {
 
 #[derive(Debug)]
 pub struct LinkedList<T,P>
-    where P: ListAllocator<T> + 'static
+    where P: PoolAllocator<Node<T>> + 'static
 {
     head: Link<T>,
     tail: Link<T>,
@@ -56,7 +57,7 @@ pub struct LinkedList<T,P>
 
 /// base on std::collections::LinkedList and https://rust-unofficial.github.io/too-many-lists
 impl<T,P> LinkedList<T,P>
-    where P: ListAllocator<T> + 'static
+    where P: PoolAllocator<Node<T>> + 'static
 {
     pub fn new(pool: &'static P) -> Self {
         LinkedList {
@@ -67,7 +68,7 @@ impl<T,P> LinkedList<T,P>
         }
     }
 
-    pub fn emplace_back(&mut self, element: T) -> Result<(), Error> {
+    pub fn emplace_back(&mut self, element: T) -> Result<(), pool_allocator::Error> {
         let node = self.pool.insert(Node::new(element));
         node.map(|n| {
             self.push_back(n);
@@ -226,14 +227,14 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 
 #[derive(Debug)]
 pub struct Cursor<'a,T,P>
-    where P: ListAllocator<T> + 'static
+    where P: PoolAllocator<Node<T>> + 'static
 {
     node: Link<T>,
     list: &'a mut LinkedList<T,P>,
 }
 
 impl<'a, T, P> Cursor<'a, T, P>
-    where P: ListAllocator<T> + Sized
+    where P: PoolAllocator<Node<T>> + Sized
 {
     pub fn inner(&self) -> Option<&T> {
         self.node.map(|node| unsafe { node.as_ref() }.inner())
@@ -257,54 +258,6 @@ impl<'a, T, P> Cursor<'a, T, P>
             })
     }
 }
-/******************************************************************************/
-
-#[derive(Debug, PartialEq)]
-pub enum Error {
-    OutOfMemory,
-    Unknown,
-}
-
-pub trait ListAllocator<T> {
-    fn insert(&self, node: Node<T>) -> Result<Box<Node<T>>, Error>;
-    // todo: drop
-}
-
-#[derive(Debug)]
-pub struct StaticListPool<T, const N: usize> {
-    pool: RefCell<[Option<Node<T>>; N]>,
-}
-
-impl<T, const N: usize> StaticListPool<T, {N}>
-{
-    pub const fn new(array: [Option<Node<T>>; N]) -> Self {
-        let mut pool = RefCell::new(array);
-        StaticListPool {
-            pool,
-        }
-    }
-}
-
-// todo: make sync safe!
-unsafe impl<T, const N: usize> Sync for StaticListPool<T, {N}> {}
-
-
-impl<T, const N: usize> ListAllocator<T> for StaticListPool<T, {N}> {
-    fn insert(&self, node: Node<T>) -> Result<Box<Node<T>>, Error> {
-        for item in self.pool.borrow_mut().iter_mut() {
-            if item.is_none() {
-                *item = Some(node);
-                match item {
-                    Some(n) => unsafe {
-                        return Ok(Box::from_raw(NonNull::new_unchecked(n as *mut _)))
-                    },
-                    _ => return Err(Error::Unknown),
-                }
-            }
-        }
-        return Err(Error::OutOfMemory);
-    }
-}
 
 /******************************************************************************/
 
@@ -312,6 +265,9 @@ impl<T, const N: usize> ListAllocator<T> for StaticListPool<T, {N}> {
 mod tests {
     use super::*;
     use core::borrow::Borrow;
+    use crate::mem::array_pool::ArrayPool;
+
+    type Pool = ArrayPool<Node<MyStruct>,16>;
 
     #[derive(Debug, Copy, Clone)]
     struct MyStruct {
@@ -320,7 +276,7 @@ mod tests {
 
     #[test]
     fn one_node() {
-        static POOL: StaticListPool<MyStruct,16> = StaticListPool::new([None; 16]);
+        static POOL: Pool = ArrayPool::new([None; 16]);
         let node_0 = POOL.insert(Node::new(MyStruct { id: 42 })).unwrap();
         assert_eq!(node_0.prev, None);
         assert_eq!(node_0.next, None);
@@ -347,7 +303,7 @@ mod tests {
 
     #[test]
     fn length() {
-        static POOL: StaticListPool<MyStruct,16> = StaticListPool::new([None; 16]);
+        static POOL: Pool = ArrayPool::new([None; 16]);
 
         let mut list = LinkedList::new(&POOL);
         assert_eq!(list.len(), 0);
@@ -361,7 +317,7 @@ mod tests {
 
     #[test]
     fn pushing_and_popping() {
-        static POOL: StaticListPool<MyStruct,16> = StaticListPool::new([None; 16]);
+        static POOL: Pool = ArrayPool::new([None; 16]);
 
         let mut list = LinkedList::new(&POOL);
         list.emplace_back(MyStruct { id: 42 });
@@ -379,18 +335,18 @@ mod tests {
 
     #[test]
     fn pool_overflow() {
-        static POOL: StaticListPool<MyStruct,16> = StaticListPool::new([None; 16]);
+        static POOL: Pool = ArrayPool::new([None; 16]);
 
         let mut list = LinkedList::new(&POOL);
         for i in 0..16 {
             assert_eq!(list.emplace_back(MyStruct { id: i }), Ok(()));
         }
-        assert_eq!(list.emplace_back(MyStruct { id: 16 }), Err(Error::OutOfMemory));
+        assert_eq!(list.emplace_back(MyStruct { id: 16 }), Err(pool_allocator::Error::OutOfMemory));
     }
 
     #[test]
     fn iterate() {
-        static POOL: StaticListPool<MyStruct,16> = StaticListPool::new([None; 16]);
+        static POOL: Pool = ArrayPool::new([None; 16]);
         let node_0 = POOL.insert(Node::new(MyStruct { id: 42 })).unwrap();
         let node_1 = POOL.insert(Node::new(MyStruct { id: 43 })).unwrap();
         let node_2 = POOL.insert(Node::new(MyStruct { id: 44 })).unwrap();
@@ -412,7 +368,7 @@ mod tests {
 
     #[test]
     fn iterate_mut() {
-        static POOL: StaticListPool<MyStruct,16> = StaticListPool::new([None; 16]);
+        static POOL: Pool = ArrayPool::new([None; 16]);
         let node_0 = POOL.insert(Node::new(MyStruct { id: 42 })).unwrap();
         let node_1 = POOL.insert(Node::new(MyStruct { id: 43 })).unwrap();
         let node_2 = POOL.insert(Node::new(MyStruct { id: 44 })).unwrap();
@@ -436,7 +392,7 @@ mod tests {
 
     #[test]
     fn find_and_take() {
-        static POOL: StaticListPool<MyStruct,16> = StaticListPool::new([None; 16]);
+        static POOL: Pool = ArrayPool::new([None; 16]);
         let node_0 = POOL.insert(Node::new(MyStruct { id: 42 })).unwrap();
         let node_1 = POOL.insert(Node::new(MyStruct { id: 43 })).unwrap();
         let node_2 = POOL.insert(Node::new(MyStruct { id: 44 })).unwrap();

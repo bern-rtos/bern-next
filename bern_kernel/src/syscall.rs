@@ -7,7 +7,7 @@ use crate::sync::mutex;
 use bern_arch::{ISyscall, ICore};
 use bern_arch::arch::{Arch, ArchCore};
 use core::ops::{DerefMut};
-use crate::collection::boxed::Box;
+use crate::mem::boxed::Box;
 use core::ptr::NonNull;
 use crate::sync::mutex::MutexInternal;
 

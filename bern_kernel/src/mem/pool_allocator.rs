@@ -1,5 +1,6 @@
-use crate::collection::boxed::Box;
+use crate::mem::boxed::Box;
 
+#[derive(Debug, Eq, PartialEq)]
 pub enum Error {
     OutOfMemory,
     Unknown,

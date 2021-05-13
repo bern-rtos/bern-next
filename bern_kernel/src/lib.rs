@@ -11,7 +11,6 @@ pub mod scheduler;
 pub mod syscall;
 pub mod time;
 pub mod stack;
-mod collection;
 pub mod sync;
 pub mod mem;
 

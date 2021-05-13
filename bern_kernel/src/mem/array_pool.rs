@@ -2,7 +2,7 @@ use core::cell::RefCell;
 use core::ptr::NonNull;
 
 use crate::mem::pool_allocator::{PoolAllocator, Error};
-use crate::collection::boxed::Box;
+use crate::mem::boxed::Box;
 
 
 #[derive(Debug)]

@@ -4,7 +4,7 @@ use crate::syscall;
 use core::ptr::{null_mut};
 use core::ops::{Deref, DerefMut};
 use core::cell::UnsafeCell;
-use crate::collection::linked_list::LinkedList;
+use crate::mem::linked_list::LinkedList;
 
 pub enum Error {
     WouldBlock,

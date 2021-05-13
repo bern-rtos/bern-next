@@ -14,8 +14,8 @@ use arr_macro::arr;
 use crate::task::{self, Task, Transition};
 use crate::syscall;
 use crate::time;
-use crate::collection::linked_list::*;
-use crate::collection::boxed::Box;
+use crate::mem::linked_list::*;
+use crate::mem::boxed::Box;
 use crate::sync::critical_mutex::CriticalMutex;
 use crate::mem::array_pool::ArrayPool;
 use crate::sync::mutex::MutexInternal;
@@ -26,8 +26,8 @@ use crate::mem::pool_allocator;
 use bern_arch::{ICore, IScheduler};
 use bern_arch::arch::{ArchCore, Arch};
 
-type TaskPool = StaticListPool<Task, { conf::TASK_POOL_SIZE }>;
-static TASK_POOL: TaskPool = StaticListPool::new([None; conf::TASK_POOL_SIZE]);
+type TaskPool = ArrayPool<Node<Task>, { conf::TASK_POOL_SIZE }>;
+static TASK_POOL: TaskPool = ArrayPool::new([None; conf::TASK_POOL_SIZE]);
 static MUTEX_POOL: ArrayPool<MutexInternal, { conf::MUTEX_POOL_SIZE }> = ArrayPool::new(arr![None; 32]);
 
 static SCHEDULER: CriticalMutex<MaybeUninit<Scheduler>> = CriticalMutex::new(MaybeUninit::uninit());

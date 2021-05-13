@@ -212,31 +212,4 @@ mod tests {
     use super::*;
     use bern_arch::arch::Arch;
 
-    #[test]
-    fn spawn_task() {
-        let mut call_index = 0;
-        let syscall_ctx = Arch::syscall_context();
-        syscall_ctx.expect()
-            .times(2)
-            .returning(move |id, arg0, arg1, arg2| {
-                match call_index {
-                    0 => {
-                        assert_eq!(id, syscall::Service::MoveClosureToStack.service_id());
-                    },
-                    1 => {
-                        assert_eq!(id, syscall::Service::TaskSpawn.service_id());
-                    },
-                    _ => (),
-                }
-                call_index += 1;
-                0
-            });
-
-        Task::new()
-            .priority(Priority(2))
-            .static_stack(crate::alloc_static_stack!(512))
-            .spawn(move || {
-                loop { }
-            });
-    }
 }
