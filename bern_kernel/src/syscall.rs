@@ -1,15 +1,11 @@
 use core::mem;
 
-use crate::scheduler;
+use crate::sched;
 use crate::task::{RunnableResult, TaskBuilder};
-use crate::sync::mutex;
 
 use bern_arch::{ISyscall, ICore};
 use bern_arch::arch::{Arch, ArchCore};
-use core::ops::{DerefMut};
-use crate::mem::boxed::Box;
-use core::ptr::NonNull;
-use crate::sync::mutex::MutexInternal;
+use crate::sched::event;
 
 
 // todo: create with proc macro
@@ -21,9 +17,9 @@ enum Service {
     TaskSpawn,
     TaskSleep,
     TaskExit,
-    MutexNew,
-    MutexLock,
-    MutexRelease,
+    EventRegister,
+    EventAwait,
+    EventFire,
 }
 
 impl Service {
@@ -72,6 +68,34 @@ pub fn task_exit() {
     );
 }
 
+pub fn event_register() -> usize {
+    Arch::syscall(
+        Service::EventRegister.service_id(),
+        0,
+        0,
+        0
+    )
+}
+
+pub fn event_await(id: usize, timeout: u32) -> Result<(), event::Error> {
+    let ret_code = Arch::syscall(
+        Service::EventAwait.service_id(),
+        id,
+        timeout as usize,
+        0
+    ) as u8;
+    unsafe { mem::transmute(ret_code) }
+}
+
+pub fn event_fire(id: usize) {
+    Arch::syscall(
+        Service::EventFire.service_id(),
+        id,
+        0,
+        0
+    );
+}
+
 
 // userland barrier ////////////////////////////////////////////////////////////
 
@@ -102,11 +126,30 @@ fn syscall_handler(service: Service, arg0: usize, arg1: usize, arg2: usize) -> u
         },
         Service::TaskSleep => {
             let ms: u32 = arg0 as u32;
-            scheduler::sleep(ms);
+            sched::sleep(ms);
             0
         },
         Service::TaskExit => {
-            scheduler::task_terminate();
+            sched::task_terminate();
+            0
+        },
+
+        Service::EventRegister => {
+            match sched::event_register() {
+                Ok(id) => id,
+                Err(_) => 0,
+            }
+        },
+        Service::EventAwait => {
+            let id = arg0;
+            let timeout = arg1;
+            let result = sched::event_await(id, timeout);
+            let ret_code: u8 = unsafe { mem::transmute(result) };
+            ret_code as usize
+        },
+        Service::EventFire => {
+            let id = arg0;
+            sched::event_fire(id);
             0
         },
         _ => {

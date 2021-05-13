@@ -7,7 +7,7 @@ static COUNT: AtomicU32 = AtomicU32::new(0); // todo: replace with u64
 #[inline(always)]
 fn system_tick_update() {
     COUNT.fetch_add(1, Ordering::Relaxed);
-    scheduler::tick_update();
+    sched::tick_update();
 }
 
 pub fn tick() -> u64 {

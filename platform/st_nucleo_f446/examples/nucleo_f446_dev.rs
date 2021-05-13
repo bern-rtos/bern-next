@@ -6,7 +6,7 @@ use bern_kernel as kernel;
 use kernel::{
     task::Task,
     task::Priority,
-    scheduler,
+    sched,
     sync::mutex::Mutex,
 };
 
@@ -25,7 +25,8 @@ fn main() -> ! {
     cortex_m::asm::bkpt();
     let board = StNucleoF446::new();
 
-    scheduler::init();
+    sched::init();
+    MUTEX.register().ok();
 
     /* idle task */
     Task::new()
@@ -44,21 +45,21 @@ fn main() -> ! {
         .static_stack(kernel::alloc_static_stack!(512))
         .spawn(move || {
             loop {
-                led.toggle().ok();
-                kernel::sleep(100);
                 {
-                    match MUTEX.try_lock() {
+                    match MUTEX.lock(1000) {
                         Ok(mut value) => *value = 54,
                         Err(_) => (),
                     }
                 }
+                led.toggle().ok();
+                kernel::sleep(100);
             }
         });
 
     /* task 2 */
     let mut another_led = board.shield.led_6;
     Task::new()
-        .priority(Priority(2))
+        .priority(Priority(3))
         .static_stack(kernel::alloc_static_stack!(1024))
         .spawn(move || {
             /* spawn a new task while the system is running */
@@ -72,14 +73,12 @@ fn main() -> ! {
 
             loop {
                 another_led.set_high().ok();
-                kernel::sleep(50);
-                another_led.set_low().ok();
-                kernel::sleep(400);
-
                 match MUTEX.try_lock() {
-                    Ok(mut value) => *value = 36,
+                    Ok(_) => kernel::sleep(500),
                     Err(_) => (),
                 }
+                another_led.set_low().ok();
+                kernel::sleep(1000);
             }
         });
 
@@ -104,7 +103,7 @@ fn main() -> ! {
 
     /* blocking task */
     Task::new()
-        .priority(Priority(2))
+        .priority(Priority(4))
         .static_stack(kernel::alloc_static_stack!(128))
         .spawn(move || {
             loop {
@@ -112,5 +111,5 @@ fn main() -> ! {
             }
         });
 
-    scheduler::start();
+    sched::start();
 }

@@ -3,32 +3,38 @@
 #![allow(unsafe_code)]
 
 
+
+
 /// # Basic Concept
 /// Keep interrupt latency as short as possible, move work to PendSV.
 
+pub(crate) mod event;
 
 use core::sync::atomic::{self, Ordering};
 use core::mem::MaybeUninit;
 use arr_macro::arr;
 
+use event::Event;
 use crate::task::{self, Task, Transition};
 use crate::syscall;
 use crate::time;
-use crate::mem::linked_list::*;
-use crate::mem::boxed::Box;
 use crate::sync::critical_mutex::CriticalMutex;
-use crate::mem::array_pool::ArrayPool;
-use crate::sync::mutex::MutexInternal;
 use crate::conf;
-use crate::mem::pool_allocator::PoolAllocator;
-use crate::mem::pool_allocator;
+use crate::mem::{
+    linked_list::*,
+    boxed::Box,
+    array_pool::ArrayPool,
+    pool_allocator,
+};
 
 use bern_arch::{ICore, IScheduler};
 use bern_arch::arch::{ArchCore, Arch};
+use core::ptr::NonNull;
 
 type TaskPool = ArrayPool<Node<Task>, { conf::TASK_POOL_SIZE }>;
 static TASK_POOL: TaskPool = ArrayPool::new([None; conf::TASK_POOL_SIZE]);
-static MUTEX_POOL: ArrayPool<MutexInternal, { conf::MUTEX_POOL_SIZE }> = ArrayPool::new(arr![None; 32]);
+type EventPool = ArrayPool<Node<Event>, { conf::MUTEX_POOL_SIZE }>;
+static EVENT_POOL: EventPool = ArrayPool::new(arr![None; 32]);
 
 static SCHEDULER: CriticalMutex<MaybeUninit<Scheduler>> = CriticalMutex::new(MaybeUninit::uninit());
 
@@ -40,6 +46,8 @@ pub struct Scheduler {
     tasks_ready: [LinkedList<Task, TaskPool>; conf::TASK_PRIORITIES],
     tasks_sleeping: LinkedList<Task, TaskPool>,
     tasks_terminated: LinkedList<Task, TaskPool>,
+    events: LinkedList<Event, EventPool>,
+    event_counter: usize,
 }
 
 
@@ -54,6 +62,8 @@ pub fn init() {
         tasks_ready: arr![LinkedList::new(&TASK_POOL); 8],
         tasks_sleeping: LinkedList::new(&TASK_POOL),
         tasks_terminated: LinkedList::new(&TASK_POOL),
+        events: LinkedList::new(&EVENT_POOL),
+        event_counter: 0,
     });
 
     SCHEDULER.release();
@@ -181,8 +191,52 @@ fn default_idle() {
     }
 }
 
-pub(crate) fn mutex_add(mutex: MutexInternal) -> Result<Box<MutexInternal>, pool_allocator::Error>  {
-    MUTEX_POOL.insert(mutex)
+pub fn event_register() -> Result<usize, pool_allocator::Error> {
+    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+
+    let id = sched.event_counter + 1;
+    sched.event_counter = id;
+    let result = sched.events.emplace_back(Event::new(id));
+    SCHEDULER.release();
+    result.map(|_| id)
+}
+
+pub fn event_await(id: usize, _timeout: usize) -> Result<(), event::Error> {
+    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+
+    let event = match sched.events.iter_mut().find(|e|
+        e.id() == id
+    ) {
+        Some(e) => unsafe { NonNull::new_unchecked(e) },
+        None => {
+            SCHEDULER.release();
+            return Err(event::Error::InvalidId);
+        }
+    };
+
+    let task = sched.task_running.as_mut().unwrap();
+    task.inner_mut().set_blocking_event(event);
+    task.inner_mut().set_transition(Transition::Blocked);
+
+    SCHEDULER.release();
+    Arch::trigger_context_switch();
+    Ok(())
+}
+
+pub fn event_fire(id: usize) {
+    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+
+    if let Some(e) = sched.events.iter_mut().find(|e| e.id() == id) {
+        if let Some(t) = e.pending.pop_front() {
+            let prio: usize = t.inner().priority().into();
+            sched.tasks_ready[prio].push_back(t);
+        }
+
+        SCHEDULER.release();
+        Arch::trigger_context_switch();
+    } else {
+        SCHEDULER.release();
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -203,10 +257,21 @@ fn switch_context(stack_ptr: u32) -> u32 {
         Transition::None => sched.tasks_ready[prio].push_back(pausing),
         Transition::Sleeping => {
             pausing.inner_mut().set_transition(Transition::None);
-            sched.tasks_sleeping.insert_when(pausing, |pausing, task | {
-                pausing.next_wut() < task.next_wut()
+            sched.tasks_sleeping.insert_when(
+                pausing,
+                |pausing, task | {
+                    pausing.next_wut() < task.next_wut()
             });
         },
+        Transition::Blocked => {
+            let event = pausing.inner().blocking_event().unwrap(); // cannot be none
+            pausing.inner_mut().set_transition(Transition::None);
+            unsafe { &mut *event.as_ptr() }.pending.insert_when(
+                pausing,
+                |pausing, task | {
+                    pausing.priority().0 < task.priority().0
+            });
+        }
         Transition::Terminating => {
             pausing.inner_mut().set_transition(Transition::None);
             sched.tasks_terminated.push_back(pausing);

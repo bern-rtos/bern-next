@@ -8,7 +8,7 @@ use common::main as _;
 mod tests {
     use crate::common::st_nucleo_f446::StNucleoF446;
     use stm32f4xx_hal::prelude::*;
-    use bern_kernel::scheduler::Scheduler;
+    use bern_kernel::sched::Scheduler;
     use bern_kernel::{alloc_static_stack, task::{Task}};
 
     #[test_set_up]

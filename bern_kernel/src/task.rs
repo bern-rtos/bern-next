@@ -3,11 +3,13 @@ use core::mem;
 use core::ptr;
 use core::ops::Deref;
 
-use crate::scheduler;
+use crate::sched;
 use crate::syscall;
 use crate::time;
 use crate::stack::Stack;
 use crate::conf;
+use crate::sched::event::Event;
+use core::ptr::NonNull;
 
 
 #[derive(Debug)]
@@ -18,6 +20,7 @@ pub struct TaskError;
 pub enum Transition {
     None,
     Sleeping,
+    Blocked,
     Resuming,
     Terminating,
 }
@@ -143,8 +146,9 @@ impl TaskBuilder {
             next_wut: 0,
             stack: self.stack.take().unwrap(),
             priority: self.priority,
+            blocking_event: None,
         };
-        scheduler::add(task)
+        sched::add(task)
     }
 }
 
@@ -157,6 +161,7 @@ pub struct Task {
     next_wut: u64,
     stack: Stack,
     priority: Priority,
+    blocking_event: Option<NonNull<Event>>,
 }
 
 impl Task {
@@ -197,6 +202,13 @@ impl Task {
 
     pub(crate) fn priority(&self) -> Priority {
         self.priority
+    }
+
+    pub(crate) fn blocking_event(&self) -> Option<NonNull<Event>> {
+        self.blocking_event
+    }
+    pub(crate) fn set_blocking_event(&mut self, event: NonNull<Event>) {
+        self.blocking_event = Some(event);
     }
 }
 
