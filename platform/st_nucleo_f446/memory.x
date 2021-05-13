@@ -19,17 +19,14 @@ MEMORY
    after the vector table */
 /* _stext = ORIGIN(FLASH) + 0x400; */
 
-/* Example of putting non-initialized variables into custom RAM locations. */
-/* This assumes you have defined a region RAM2 above, and in the Rust
-   sources added the attribute `#[link_section = ".ram2bss"]` to the data
-   you want to place there. */
+
 
 /* Align stacks to double word see:
    https://community.arm.com/developer/ip-products/processors/f/cortex-m-forum/6344/what-is-the-meaning-of-a-64-bit-aligned-stack-pointer-address */
 /* Note that the section will not be zero-initialized by the runtime! */
     SECTIONS {
-        .taskstack (NOLOAD) : ALIGN(8) {
-            *(.taskstack);
+        .task_stack (NOLOAD) : ALIGN(8) {
+            *(.task_stack);
             . = ALIGN(8);
         } > RAM
     } INSERT AFTER .bss;
@@ -39,4 +36,4 @@ MEMORY
             *(.shared);
             . = ALIGN(4);
         } > RAM
-    } INSERT AFTER .taskstack;
+    } INSERT AFTER .task_stack;

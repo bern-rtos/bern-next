@@ -17,8 +17,8 @@ use cortex_m_rt::entry;
 use st_nucleo_f446::StNucleoF446;
 use stm32f4xx_hal::prelude::*;
 
-#[link_section = ".shared"]
-static MUTEX_DATA: usize = 42;
+//#[link_section = ".shared"]
+static MUTEX: Mutex<u32> = Mutex::new(42);
 
 #[entry]
 fn main() -> ! {
@@ -26,8 +26,6 @@ fn main() -> ! {
     let board = StNucleoF446::new();
 
     scheduler::init();
-
-    let mutex = Mutex::new(MUTEX_DATA);
 
     /* idle task */
     Task::new()
@@ -49,7 +47,7 @@ fn main() -> ! {
                 led.toggle().ok();
                 kernel::sleep(100);
                 {
-                    match mutex.try_lock() {
+                    match MUTEX.try_lock() {
                         Ok(mut value) => *value = 54,
                         Err(_) => (),
                     }
@@ -77,6 +75,11 @@ fn main() -> ! {
                 kernel::sleep(50);
                 another_led.set_low().ok();
                 kernel::sleep(400);
+
+                match MUTEX.try_lock() {
+                    Ok(mut value) => *value = 36,
+                    Err(_) => (),
+                }
             }
         });
 
