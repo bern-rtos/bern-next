@@ -94,7 +94,7 @@ fn main() -> ! {
                 yet_another_led.set_high().ok();
                 kernel::sleep(50);
                 yet_another_led.set_low().ok();
-                kernel::sleep(950);
+                kernel::sleep(150);
                 if a >= 60 {
                     kernel::task_exit();
                 }

@@ -9,7 +9,7 @@ pub enum Error {
 
 pub enum Wake {
     WakeFirst,
-    WakeAll,
+    //WakeAll,
 }
 
 pub struct Event {

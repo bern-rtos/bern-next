@@ -1,8 +1,8 @@
 use core::sync::atomic::{AtomicBool, Ordering};
-
-use crate::syscall;
 use core::ops::{Deref, DerefMut};
 use core::cell::UnsafeCell;
+
+use crate::syscall;
 use crate::sched::event;
 
 pub enum Error {

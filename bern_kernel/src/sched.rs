@@ -1,4 +1,4 @@
-// note(unsafe): Switching tasks is protected by critical sections. The compiler
+// NOTE(unsafe): Switching tasks is protected by critical sections. The compiler
 // cannot verify critical section, thus they have to marked as unsafe.
 #![allow(unsafe_code)]
 
@@ -18,7 +18,7 @@ use event::Event;
 use crate::task::{self, Task, Transition};
 use crate::syscall;
 use crate::time;
-use crate::sync::critical_mutex::CriticalMutex;
+use crate::sync::critical_section;
 use crate::conf;
 use crate::mem::{
     linked_list::*,
@@ -36,7 +36,7 @@ static TASK_POOL: TaskPool = ArrayPool::new([None; conf::TASK_POOL_SIZE]);
 type EventPool = ArrayPool<Node<Event>, { conf::MUTEX_POOL_SIZE }>;
 static EVENT_POOL: EventPool = ArrayPool::new(arr![None; 32]);
 
-static SCHEDULER: CriticalMutex<MaybeUninit<Scheduler>> = CriticalMutex::new(MaybeUninit::uninit());
+static mut SCHEDULER: MaybeUninit<Scheduler> = MaybeUninit::uninit();
 
 // todo: split scheduler into kernel and scheduler
 
@@ -54,26 +54,24 @@ pub struct Scheduler {
 pub fn init() {
     let core = ArchCore::new();
 
-    let sched = SCHEDULER.lock();
-
-    *sched = MaybeUninit::new(Scheduler {
-        core,
-        task_running: None,
-        tasks_ready: arr![LinkedList::new(&TASK_POOL); 8],
-        tasks_sleeping: LinkedList::new(&TASK_POOL),
-        tasks_terminated: LinkedList::new(&TASK_POOL),
-        events: LinkedList::new(&EVENT_POOL),
-        event_counter: 0,
-    });
-
-    SCHEDULER.release();
+    unsafe {
+        SCHEDULER = MaybeUninit::new(Scheduler {
+            core,
+            task_running: None,
+            tasks_ready: arr![LinkedList::new(&TASK_POOL); 8],
+            tasks_sleeping: LinkedList::new(&TASK_POOL),
+            tasks_terminated: LinkedList::new(&TASK_POOL),
+            events: LinkedList::new(&EVENT_POOL),
+            event_counter: 0,
+        });
+    }
 }
 
 
 pub fn start() -> ! {
-    // Note(unsafe): scheduler must be initialized first
+    // NOTE(unsafe): scheduler must be initialized first
     // todo: replace with `assume_init_mut()` as soon as stable
-    let mut sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+    let sched = unsafe { &mut *SCHEDULER.as_mut_ptr() };
 
     // ensure an idle task is present
     if sched.tasks_ready[conf::TASK_PRIORITIES-1].len() == 0 {
@@ -95,91 +93,92 @@ pub fn start() -> ! {
     sched.core.start();
 
     let stack_ptr = sched.task_running.as_ref().unwrap().inner().stack_ptr();
-
-    SCHEDULER.release();
     Arch::start_first_task(stack_ptr);
 }
 
 pub fn add(mut task: Task) {
-    // Note(unsafe): scheduler must be initialized first
+    // NOTE(unsafe): scheduler must be initialized first
     // todo: replace with `assume_init_mut()` as soon as stable
-    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
 
-    unsafe {
-        let stack_ptr = Arch::init_task_stack(
-            task.stack_ptr(),
-            task::entry as *const usize,
-            task.runnable_ptr(),
-            syscall::task_exit as *const usize
-        );
-        task.set_stack_ptr(stack_ptr);
-    }
-    let prio: usize = task.priority().into();
-    sched.tasks_ready[prio].emplace_back(task).ok();
-    SCHEDULER.release();
+    let sched = unsafe { &mut *SCHEDULER.as_mut_ptr() };
+
+    critical_section::exec(|| {
+        unsafe {
+            let stack_ptr = Arch::init_task_stack(
+                task.stack_ptr(),
+                task::entry as *const usize,
+                task.runnable_ptr(),
+                syscall::task_exit as *const usize
+            );
+            task.set_stack_ptr(stack_ptr);
+        }
+
+        let prio: usize = task.priority().into();
+        sched.tasks_ready[prio].emplace_back(task).ok();
+    });
 }
 
 pub fn sleep(ms: u32) {
-    // Note(unsafe): scheduler must be initialized first
+    // NOTE(unsafe): scheduler must be initialized first
     // todo: replace with `assume_init_mut()` as soon as stable
-    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+    let sched = unsafe { &mut *SCHEDULER.as_mut_ptr() };
 
-    let task = sched.task_running.as_mut().unwrap().inner_mut();
-    task.sleep(ms);
-    task.set_transition(Transition::Sleeping);
-
-    SCHEDULER.release();
+    critical_section::exec(|| {
+        let task = sched.task_running.as_mut().unwrap().inner_mut();
+        task.sleep(ms);
+        task.set_transition(Transition::Sleeping);
+    });
     Arch::trigger_context_switch();
 }
 
 pub fn task_terminate() {
-    // Note(unsafe): scheduler must be initialized first
+    // NOTE(unsafe): scheduler must be initialized first
     // todo: replace with `assume_init_mut()` as soon as stable
-    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+    let sched = unsafe { &mut *SCHEDULER.as_mut_ptr() };
 
-    let task = sched.task_running.as_mut().unwrap().inner_mut();
-    task.set_transition(Transition::Terminating);
-
-    SCHEDULER.release();
+    critical_section::exec(|| {
+        let task = sched.task_running.as_mut().unwrap().inner_mut();
+        task.set_transition(Transition::Terminating);
+    });
     Arch::trigger_context_switch();
 }
 
 pub fn tick_update() {
     let now = time::tick();
 
-    // Note(unsafe): scheduler must be initialized first
+    // NOTE(unsafe): scheduler must be initialized first
     // todo: replace with `assume_init_mut()` as soon as stable
-    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
-
-    // update pending -> ready list
-    let preempt_prio = match sched.task_running.as_ref() {
-        Some(task) => task.inner().priority().into(),
-        None => usize::MAX,
-    };
+    let sched = unsafe { &mut *SCHEDULER.as_mut_ptr() };
     let mut trigger_switch = false;
-    let mut cursor = sched.tasks_sleeping.cursor_front_mut();
-    while let Some(task) = cursor.inner() {
-        if task.next_wut() <= now as u64 {
-            // todo: this is inefficient, we know that node exists
-            if let Some(node) = cursor.take() {
-                let prio: usize = node.inner().priority().into();
-                sched.tasks_ready[prio].push_back(node);
-                if prio < preempt_prio {
-                    trigger_switch = true;
+    critical_section::exec(|| {
+        // update pending -> ready list
+        let preempt_prio = match sched.task_running.as_ref() {
+            Some(task) => task.inner().priority().into(),
+            None => usize::MAX,
+        };
+
+        let mut cursor = sched.tasks_sleeping.cursor_front_mut();
+        while let Some(task) = cursor.inner() {
+            if task.next_wut() <= now as u64 {
+                // todo: this is inefficient, we know that node exists
+                if let Some(node) = cursor.take() {
+                    let prio: usize = node.inner().priority().into();
+                    sched.tasks_ready[prio].push_back(node);
+                    if prio < preempt_prio {
+                        trigger_switch = true;
+                    }
                 }
+            } else {
+                break; // the list is sorted by wake-up time, we can abort early
             }
-        } else {
-            break; // the list is sorted by wake-up time, we can abort early
+            cursor.move_next();
         }
-        cursor.move_next();
-    }
 
-    // time-slicing
-    if sched.tasks_ready[preempt_prio].len() > 0 {
-        trigger_switch = true;
-    }
-
-    SCHEDULER.release();
+        // time-slicing
+        if sched.tasks_ready[preempt_prio].len() > 0 {
+            trigger_switch = true;
+        }
+    });
     if trigger_switch {
         Arch::trigger_context_switch();
     }
@@ -192,50 +191,52 @@ fn default_idle() {
 }
 
 pub fn event_register() -> Result<usize, pool_allocator::Error> {
-    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+    let sched = unsafe { &mut *SCHEDULER.as_mut_ptr() };
 
-    let id = sched.event_counter + 1;
-    sched.event_counter = id;
-    let result = sched.events.emplace_back(Event::new(id));
-    SCHEDULER.release();
-    result.map(|_| id)
+    critical_section::exec(|| {
+        let id = sched.event_counter + 1;
+        sched.event_counter = id;
+        let result = sched.events.emplace_back(Event::new(id));
+        result.map(|_| id)
+    })
 }
 
 pub fn event_await(id: usize, _timeout: usize) -> Result<(), event::Error> {
-    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+    let sched = unsafe { &mut *SCHEDULER.as_mut_ptr() };
 
-    let event = match sched.events.iter_mut().find(|e|
-        e.id() == id
-    ) {
-        Some(e) => unsafe { NonNull::new_unchecked(e) },
-        None => {
-            SCHEDULER.release();
-            return Err(event::Error::InvalidId);
-        }
-    };
+    critical_section::exec(|| {
+        let event = match sched.events.iter_mut().find(|e|
+            e.id() == id
+        ) {
+            Some(e) => unsafe { NonNull::new_unchecked(e) },
+            None => {
+                return Err(event::Error::InvalidId);
+            }
+        };
 
-    let task = sched.task_running.as_mut().unwrap();
-    task.inner_mut().set_blocking_event(event);
-    task.inner_mut().set_transition(Transition::Blocked);
-
-    SCHEDULER.release();
-    Arch::trigger_context_switch();
-    Ok(())
+        let task = sched.task_running.as_mut().unwrap();
+        task.inner_mut().set_blocking_event(event);
+        task.inner_mut().set_transition(Transition::Blocked);
+        return Ok(());
+    }).map(|_| Arch::trigger_context_switch())
 }
 
 pub fn event_fire(id: usize) {
-    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+    let sched = unsafe { &mut *SCHEDULER.as_mut_ptr() };
+    let mut switch = false;
 
-    if let Some(e) = sched.events.iter_mut().find(|e| e.id() == id) {
-        if let Some(t) = e.pending.pop_front() {
-            let prio: usize = t.inner().priority().into();
-            sched.tasks_ready[prio].push_back(t);
+    critical_section::exec(|| {
+        if let Some(e) = sched.events.iter_mut().find(|e| e.id() == id) {
+            if let Some(t) = e.pending.pop_front() {
+                let prio: usize = t.inner().priority().into();
+                sched.tasks_ready[prio].push_back(t);
+            }
+            switch = true;
         }
+    });
 
-        SCHEDULER.release();
+    if switch {
         Arch::trigger_context_switch();
-    } else {
-        SCHEDULER.release();
     }
 }
 
@@ -245,56 +246,56 @@ pub fn event_fire(id: usize) {
 /// implementation.
 #[no_mangle]
 fn switch_context(stack_ptr: u32) -> u32 {
-    // Note(unsafe): scheduler must be initialized first
+    // NOTE(unsafe): scheduler must be initialized first
     // todo: replace with `assume_init_mut()` as soon as stable
-    let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
+    let sched = unsafe { &mut *SCHEDULER.as_mut_ptr() };
 
-    sched.task_running.as_mut().unwrap().inner_mut().set_stack_ptr(stack_ptr as *mut usize);
+    critical_section::exec(|| {
+        sched.task_running.as_mut().unwrap().inner_mut().set_stack_ptr(stack_ptr as *mut usize);
 
-    let mut pausing = sched.task_running.take().unwrap();
-    let prio: usize = pausing.inner().priority().into();
-    match pausing.inner().transition() {
-        Transition::None => sched.tasks_ready[prio].push_back(pausing),
-        Transition::Sleeping => {
-            pausing.inner_mut().set_transition(Transition::None);
-            sched.tasks_sleeping.insert_when(
-                pausing,
-                |pausing, task | {
-                    pausing.next_wut() < task.next_wut()
-            });
-        },
-        Transition::Blocked => {
-            let event = pausing.inner().blocking_event().unwrap(); // cannot be none
-            pausing.inner_mut().set_transition(Transition::None);
-            unsafe { &mut *event.as_ptr() }.pending.insert_when(
-                pausing,
-                |pausing, task | {
-                    pausing.priority().0 < task.priority().0
-            });
+        let mut pausing = sched.task_running.take().unwrap();
+        let prio: usize = pausing.inner().priority().into();
+        match pausing.inner().transition() {
+            Transition::None => sched.tasks_ready[prio].push_back(pausing),
+            Transition::Sleeping => {
+                pausing.inner_mut().set_transition(Transition::None);
+                sched.tasks_sleeping.insert_when(
+                    pausing,
+                    |pausing, task| {
+                        pausing.next_wut() < task.next_wut()
+                    });
+            },
+            Transition::Blocked => {
+                let event = pausing.inner().blocking_event().unwrap(); // cannot be none
+                pausing.inner_mut().set_transition(Transition::None);
+                unsafe { &mut *event.as_ptr() }.pending.insert_when(
+                    pausing,
+                    |pausing, task| {
+                        pausing.priority().0 < task.priority().0
+                    });
+            }
+            Transition::Terminating => {
+                pausing.inner_mut().set_transition(Transition::None);
+                sched.tasks_terminated.push_back(pausing);
+            },
+            _ => (),
         }
-        Transition::Terminating => {
-            pausing.inner_mut().set_transition(Transition::None);
-            sched.tasks_terminated.push_back(pausing);
-        },
-        _ => (),
-    }
 
-    // load next task
-    let mut task = None;
-    for list in sched.tasks_ready.iter_mut() {
-        if list.len() > 0 {
-            task = list.pop_front();
-            break;
+        // load next task
+        let mut task = None;
+        for list in sched.tasks_ready.iter_mut() {
+            if list.len() > 0 {
+                task = list.pop_front();
+                break;
+            }
         }
-    }
-    if task.is_none() {
-        panic!("Idle task must not be suspended");
-    }
-    sched.task_running = task;
-    let stack_ptr = sched.task_running.as_ref().unwrap().inner().stack_ptr();
-
-    SCHEDULER.release();
-    stack_ptr as u32
+        if task.is_none() {
+            panic!("Idle task must not be suspended");
+        }
+        sched.task_running = task;
+        let stack_ptr = sched.task_running.as_ref().unwrap().inner().stack_ptr();
+        stack_ptr as u32
+    })
 }
 
 ////////////////////////////////////////////////////////////////////////////////
