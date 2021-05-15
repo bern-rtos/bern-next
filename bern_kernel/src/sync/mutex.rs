@@ -4,13 +4,7 @@ use core::cell::UnsafeCell;
 
 use crate::syscall;
 use crate::sched::event;
-
-pub enum Error {
-    WouldBlock,
-    TimeOut,
-    Poisoned,
-    OutOfMemory,
-}
+use super::Error;
 
 /// For multiple tasks to access a mutex it must be placed in shared memory
 /// section. If the data is placed in a shared section the lock can be placed
@@ -45,9 +39,9 @@ impl<T> Mutex<T> {
 
     pub fn try_lock(&self) -> Result<MutexGuard<'_,T>, Error> {
         if self.raw_lock().is_ok() {
-            return Ok(MutexGuard::new(&self));
+            Ok(MutexGuard::new(&self))
         } else {
-            return Err(Error::WouldBlock);
+            Err(Error::WouldBlock)
         }
     }
 
@@ -75,7 +69,7 @@ impl<T> Mutex<T> {
 
     fn raw_unlock(&self) {
         self.lock.store(false, Ordering::Release);
-        // NOTE(unsafe): id is not changed after startup
+        // NOTE(unsafe): `id` is not changed after startup
         syscall::event_fire(unsafe { *self.id.get() });
     }
 }
@@ -88,7 +82,7 @@ pub struct MutexGuard<'a,T> {
 }
 
 impl<'a,T> MutexGuard<'a,T> {
-    fn new(lock: &'a Mutex<T>,) -> Self {
+    fn new(lock: &'a Mutex<T>) -> Self {
         MutexGuard {
             lock,
         }

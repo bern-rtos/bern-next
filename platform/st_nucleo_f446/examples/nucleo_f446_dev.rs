@@ -16,9 +16,12 @@ use cortex_m;
 use cortex_m_rt::entry;
 use st_nucleo_f446::StNucleoF446;
 use stm32f4xx_hal::prelude::*;
+use bern_kernel::sync::semaphore::Semaphore;
 
 #[link_section = ".shared"]
 static MUTEX: Mutex<u32> = Mutex::new(42);
+#[link_section = ".shared"]
+static SEMAPHORE: Semaphore = Semaphore::new(4);
 
 #[entry]
 fn main() -> ! {
@@ -27,6 +30,7 @@ fn main() -> ! {
 
     sched::init();
     MUTEX.register().ok();
+    SEMAPHORE.register().ok();
 
     /* idle task */
     Task::new()
@@ -95,8 +99,19 @@ fn main() -> ! {
                 kernel::sleep(50);
                 yet_another_led.set_low().ok();
                 kernel::sleep(150);
+
                 if a >= 60 {
-                    kernel::task_exit();
+                    let perm0 = SEMAPHORE.acquire(100);
+                    let perm1 = SEMAPHORE.acquire(100);
+                    let perm2 = SEMAPHORE.acquire(100);
+                    let perm3 = SEMAPHORE.acquire(100);
+                    let perm4 = SEMAPHORE.acquire(100);
+                    core::mem::drop(perm0.ok().unwrap());
+                    core::mem::drop(perm1.ok().unwrap());
+                    core::mem::drop(perm2.ok().unwrap());
+                    core::mem::drop(perm3.ok().unwrap());
+                    core::mem::drop(perm4.ok().unwrap());
+                    //kernel::task_exit();
                 }
             }
         });

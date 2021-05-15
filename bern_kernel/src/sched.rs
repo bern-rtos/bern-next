@@ -222,6 +222,7 @@ pub fn event_await(id: usize, _timeout: usize) -> Result<(), event::Error> {
         task.inner_mut().set_transition(Transition::Blocked);
         return Ok(());
     }).map(|_| Arch::trigger_context_switch())
+    // todo: returning ok will not work, because the result will be returned to the wrong task
 }
 
 pub fn event_fire(id: usize) {
