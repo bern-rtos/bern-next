@@ -26,6 +26,7 @@ use crate::mem::{
     array_pool::ArrayPool,
     pool_allocator,
 };
+use crate::startup;
 
 use bern_arch::{ICore, IScheduler};
 use bern_arch::arch::{ArchCore, Arch};
@@ -52,6 +53,8 @@ pub struct Scheduler {
 
 
 pub fn init() {
+    startup::init_static();
+
     let core = ArchCore::new();
 
     unsafe {

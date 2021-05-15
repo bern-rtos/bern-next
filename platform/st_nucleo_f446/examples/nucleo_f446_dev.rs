@@ -17,7 +17,7 @@ use cortex_m_rt::entry;
 use st_nucleo_f446::StNucleoF446;
 use stm32f4xx_hal::prelude::*;
 
-//#[link_section = ".shared"]
+#[link_section = ".shared"]
 static MUTEX: Mutex<u32> = Mutex::new(42);
 
 #[entry]

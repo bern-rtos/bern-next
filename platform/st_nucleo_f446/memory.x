@@ -32,8 +32,14 @@ MEMORY
     } INSERT AFTER .bss;
 
     SECTIONS {
-        .shared : ALIGN(4) {
+        /*### .shared */
+        .shared : ALIGN(4)
+        {
+            . = ALIGN(4);
+            __sshared = .;
             *(.shared);
             . = ALIGN(4);
+            __eshared = .;
         } > RAM
-    } INSERT AFTER .task_stack;
+        __sishared = LOADADDR(.shared);
+    } INSERT AFTER .task_stack
