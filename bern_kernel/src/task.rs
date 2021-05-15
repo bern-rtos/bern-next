@@ -3,10 +3,13 @@ use core::mem;
 use core::ptr;
 use core::ops::Deref;
 
-use crate::scheduler;
+use crate::sched;
 use crate::syscall;
 use crate::time;
 use crate::stack::Stack;
+use crate::conf;
+use crate::sched::event::Event;
+use core::ptr::NonNull;
 
 
 #[derive(Debug)]
@@ -17,6 +20,7 @@ pub struct TaskError;
 pub enum Transition {
     None,
     Sleeping,
+    Blocked,
     Resuming,
     Terminating,
 }
@@ -60,9 +64,9 @@ impl TaskBuilder {
     }
 
     pub fn priority(&mut self, priority: Priority) -> &mut Self {
-        if priority.0 >= scheduler::TASK_PRIORITIES as u8 {
+        if priority.0 >= conf::TASK_PRIORITIES as u8 {
             panic!("Priority out of range. todo: check at compile time");
-        } else if priority.0 == scheduler::TASK_PRIORITIES as u8 - 1  {
+        } else if priority.0 == conf::TASK_PRIORITIES as u8 - 1  {
             panic!("Priority reserved for idle task. Use `is_idle_task()` instead. todo: check at compile time")
         }
         self.priority = priority;
@@ -70,7 +74,7 @@ impl TaskBuilder {
     }
 
     pub fn idle_task(&mut self) -> &mut Self {
-        self.priority = Priority(scheduler::TASK_PRIORITIES as u8 - 1);
+        self.priority = Priority(conf::TASK_PRIORITIES as u8 - 1);
         self
     }
 
@@ -142,8 +146,9 @@ impl TaskBuilder {
             next_wut: 0,
             stack: self.stack.take().unwrap(),
             priority: self.priority,
+            blocking_event: None,
         };
-        scheduler::add(task)
+        sched::add(task)
     }
 }
 
@@ -156,6 +161,7 @@ pub struct Task {
     next_wut: u64,
     stack: Stack,
     priority: Priority,
+    blocking_event: Option<NonNull<Event>>,
 }
 
 impl Task {
@@ -163,7 +169,7 @@ impl Task {
         TaskBuilder {
             stack: None,
             // set default to lowest priority above idle
-            priority: Priority(scheduler::TASK_PRIORITIES as u8 - 2),
+            priority: Priority(conf::TASK_PRIORITIES as u8 - 2),
         }
     }
 
@@ -197,6 +203,13 @@ impl Task {
     pub(crate) fn priority(&self) -> Priority {
         self.priority
     }
+
+    pub(crate) fn blocking_event(&self) -> Option<NonNull<Event>> {
+        self.blocking_event
+    }
+    pub(crate) fn set_blocking_event(&mut self, event: NonNull<Event>) {
+        self.blocking_event = Some(event);
+    }
 }
 
 /// *Note* don't be fooled by the `&mut &mut` the first one is a reference
@@ -211,31 +224,4 @@ mod tests {
     use super::*;
     use bern_arch::arch::Arch;
 
-    #[test]
-    fn spawn_task() {
-        let mut call_index = 0;
-        let syscall_ctx = Arch::syscall_context();
-        syscall_ctx.expect()
-            .times(2)
-            .returning(move |id, arg0, arg1, arg2| {
-                match call_index {
-                    0 => {
-                        assert_eq!(id, syscall::Service::MoveClosureToStack.service_id());
-                    },
-                    1 => {
-                        assert_eq!(id, syscall::Service::TaskSpawn.service_id());
-                    },
-                    _ => (),
-                }
-                call_index += 1;
-                0
-            });
-
-        Task::new()
-            .priority(Priority(2))
-            .static_stack(crate::alloc_static_stack!(512))
-            .spawn(move || {
-                loop { }
-            });
-    }
 }

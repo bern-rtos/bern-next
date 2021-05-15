@@ -30,7 +30,7 @@ impl Stack {
 macro_rules! alloc_static_stack {
     ($size:expr) => {
         {
-            #[link_section = ".taskstack"]
+            #[link_section = ".task_stack"]
             static mut STACK: [u8; $size] = [0; $size]; // will not be initialized -> linker script
             unsafe{ // stack pattern for debugging
                 for byte in STACK.iter_mut() {

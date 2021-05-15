@@ -5,7 +5,9 @@
 use bern_kernel as kernel;
 use kernel::{
     task::Task,
-    scheduler,
+    task::Priority,
+    sched,
+    sync::mutex::Mutex,
 };
 
 use panic_halt as _;
@@ -14,14 +16,22 @@ use cortex_m;
 use cortex_m_rt::entry;
 use st_nucleo_f446::StNucleoF446;
 use stm32f4xx_hal::prelude::*;
-use bern_kernel::task::Priority;
+use bern_kernel::sync::semaphore::Semaphore;
+
+#[link_section = ".shared"]
+static MUTEX: Mutex<u32> = Mutex::new(42);
+#[link_section = ".shared"]
+static SEMAPHORE: Semaphore = Semaphore::new(4);
 
 #[entry]
 fn main() -> ! {
     cortex_m::asm::bkpt();
     let board = StNucleoF446::new();
 
-    scheduler::init();
+    sched::init();
+    MUTEX.register().ok();
+    SEMAPHORE.register().ok();
+
     /* idle task */
     Task::new()
         .idle_task()
@@ -39,6 +49,12 @@ fn main() -> ! {
         .static_stack(kernel::alloc_static_stack!(512))
         .spawn(move || {
             loop {
+                {
+                    match MUTEX.lock(1000) {
+                        Ok(mut value) => *value = 54,
+                        Err(_) => (),
+                    }
+                }
                 led.toggle().ok();
                 kernel::sleep(100);
             }
@@ -47,7 +63,7 @@ fn main() -> ! {
     /* task 2 */
     let mut another_led = board.shield.led_6;
     Task::new()
-        .priority(Priority(2))
+        .priority(Priority(3))
         .static_stack(kernel::alloc_static_stack!(1024))
         .spawn(move || {
             /* spawn a new task while the system is running */
@@ -61,9 +77,12 @@ fn main() -> ! {
 
             loop {
                 another_led.set_high().ok();
-                kernel::sleep(50);
+                match MUTEX.try_lock() {
+                    Ok(_) => kernel::sleep(500),
+                    Err(_) => (),
+                }
                 another_led.set_low().ok();
-                kernel::sleep(400);
+                kernel::sleep(1000);
             }
         });
 
@@ -79,16 +98,27 @@ fn main() -> ! {
                 yet_another_led.set_high().ok();
                 kernel::sleep(50);
                 yet_another_led.set_low().ok();
-                kernel::sleep(950);
+                kernel::sleep(150);
+
                 if a >= 60 {
-                    kernel::task_exit();
+                    let perm0 = SEMAPHORE.acquire(100);
+                    let perm1 = SEMAPHORE.acquire(100);
+                    let perm2 = SEMAPHORE.acquire(100);
+                    let perm3 = SEMAPHORE.acquire(100);
+                    let perm4 = SEMAPHORE.acquire(100);
+                    core::mem::drop(perm0.ok().unwrap());
+                    core::mem::drop(perm1.ok().unwrap());
+                    core::mem::drop(perm2.ok().unwrap());
+                    core::mem::drop(perm3.ok().unwrap());
+                    core::mem::drop(perm4.ok().unwrap());
+                    //kernel::task_exit();
                 }
             }
         });
 
     /* blocking task */
     Task::new()
-        .priority(Priority(2))
+        .priority(Priority(4))
         .static_stack(kernel::alloc_static_stack!(128))
         .spawn(move || {
             loop {
@@ -96,5 +126,5 @@ fn main() -> ! {
             }
         });
 
-    scheduler::start();
+    sched::start();
 }
