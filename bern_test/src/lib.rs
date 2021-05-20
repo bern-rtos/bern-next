@@ -9,6 +9,24 @@ pub use bern_test_macros::tests;
 #[cfg(feature = "rtt")]
 pub use rtt_target;
 
+use core::panic::PanicInfo;
+
+pub fn test_succeeded() {
+    println!(term_green!("ok"));
+    run_all::test_succeeded();
+}
+
+pub fn test_failed(message: &str) {
+    println!(term_red!("FAILED"));
+    println!("{}", message);
+}
+
+pub fn test_panicked(info: &PanicInfo) {
+    println!(term_red!("FAILED"));
+    println!(" └─ stdout:\n{}", info);
+}
+
+
 #[cfg(feature = "serial")]
 #[macro_export]
 macro_rules! println {

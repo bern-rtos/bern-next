@@ -1,9 +1,9 @@
 /* these must be put in a linker section that does get initialized */
-#[link_section = ".test_secret"]
+#[link_section = ".uninit"]
 static mut TEST_SECRET: u32 = 0;
-#[link_section = ".test_secret"]
+#[link_section = ".uninit"]
 static mut TEST_NEXT: u8 = 0;
-#[link_section = ".test_secret"]
+#[link_section = ".uninit"]
 static mut TEST_SUCCESSFUL: u8 = 0;
 
 const SECRET_NUMBER: u32 = 0x12345678;

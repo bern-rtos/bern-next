@@ -49,7 +49,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                         test = true;
                     } else if attr.path.is_ident("should_panic") {
                         should_panic = true;
-                    } else if attr.path.is_ident("ignored") {
+                    } else if attr.path.is_ident("ignore") {
                         ignored = true;
                     } else if attr.path.is_ident("test_set_up") {
                         test_set_up = true;
@@ -157,38 +157,38 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
 
             pub fn runner(#test_input_declaration) {
                 if bern_test::is_autorun_enabled() && !bern_test::run_all::is_active() {
-                    print_header();
-                    runall_initiate();
+                    __print_header();
+                    __runall_initiate();
                 } else if !bern_test::run_all::is_active() {
                     // provide user interface
-                    print_header();
-                    list_tests();
+                    __print_header();
+                    __list_tests();
                     let test_index = match bern_test::console::handle_user_input() {
                         255 => {
-                            runall_initiate();
+                            __runall_initiate();
                         },
                         i => {
                             println!("");
-                            test_set_up();
-                            run(i, #test_input_call);
-                            test_tear_down();
+                            __test_set_up();
+                            __run(i, #test_input_call);
+                            __test_tear_down();
                         },
                     };
                 }
 
                 if bern_test::run_all::is_active() {
-                    runall(#test_input_call);
+                    __runall(#test_input_call);
                 }
             }
 
-            fn print_header() {
+            fn __print_header() {
                 println!(term_reset!());
                 println!("~~~~~~~~~~~~~~ Bern Test v{} ~~~~~~~~~~~~~~",
                     bern_test::get_version(),
                 );
             }
 
-            fn list_tests() {
+            fn __list_tests() {
                 #(
                     println!("[{}] {}::{}", #k, #module_name_string, #name_copy);
                 )*
@@ -196,19 +196,19 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                 println!("Select test [0..{}]:", #n_tests-1);
             }
 
-            fn runall_initiate() {
+            fn __runall_initiate() {
                 bern_test::run_all::activate();
                 bern_test::run_all::set_next_test(0);
                 println!("\nrunning {} tests", #n_tests);
             }
 
-            fn runall(#test_input_declaration) {
+            fn __runall(#test_input_declaration) {
                 let test_index = bern_test::run_all::get_next_test();
                 if test_index < #n_tests {
                     bern_test::run_all::set_next_test(test_index + 1);
-                    test_set_up();
-                    run(test_index, #test_input_call);
-                    test_tear_down();
+                    __test_set_up();
+                    __run(test_index, #test_input_call);
+                    __test_tear_down();
                 } else {
                     let successes = bern_test::run_all::get_success_count();
                     let summary =  match successes {
@@ -222,11 +222,11 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                         #n_tests - successes,
                     );
                     bern_test::run_all::deactivate();
-                    tear_down();
+                    __tear_down();
                 }
             }
 
-            fn run(index: u8, #test_input_declaration) {
+            fn __run(index: u8, #test_input_declaration) {
                 match index {
                 #(
                     #i => {
@@ -236,11 +236,9 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
                         #test_calls
                         /* if we get here the test did not panic */
                         if !#test_should_panic {
-                            println!(term_green!("ok"));
-                            bern_test::run_all::test_succeeded();
+                            bern_test::test_succeeded();
                         } else {
-                            println!(term_red!("FAILED"));
-                            println!(" └─ did not panic");
+                            bern_test::test_failed(" └─ did not panic");
                         }
                     },
                 )*
@@ -250,27 +248,25 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
 
             pub fn panicked(info: &PanicInfo) {
                 if SHOULD_PANIC.load(Ordering::Relaxed) {
-                    println!(term_green!("ok"));
-                    bern_test::run_all::test_succeeded();
+                    bern_test::test_succeeded();
                 } else {
-                    println!(term_red!("FAILED"));
-                    println!(" └─ stdout:\n{}", info);
+                    bern_test::test_panicked(info);
                 }
-                test_tear_down();
+                __test_tear_down();
             }
 
             // runs before every test
-            fn test_set_up() {
+            fn __test_set_up() {
                 #( #test_set_up_code )*
             }
 
             // runs after every test
-            fn test_tear_down() {
+            fn __test_tear_down() {
                 #( #test_tear_down_code )*
             }
 
             // runs after all tests
-            fn tear_down() {
+            fn __tear_down() {
                 #( #tear_down_code )*
             }
 
