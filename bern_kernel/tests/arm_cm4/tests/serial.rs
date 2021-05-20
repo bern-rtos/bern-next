@@ -40,7 +40,7 @@ mod tests {
     }
 
     #[test]
-    #[ignored]
+    #[ignore]
     fn stack_overflow() {
         super::recursion(0);
     }
@@ -58,7 +58,7 @@ mod tests {
     }
 
     #[test]
-    #[ignored]
+    #[ignore]
     fn a_third_test() {
         assert_eq!(1, 1);
     }

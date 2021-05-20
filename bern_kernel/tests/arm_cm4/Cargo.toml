@@ -6,11 +6,13 @@ edition = "2018"
 version = "0.1.0"
 
 [[test]]
-name = "serial"
+name = "arm_cm4-serial"
+path = "tests/serial.rs"
 harness = false
 
 [[test]]
-name = "task"
+name = "arm_cm4-task"
+path = "tests/task.rs"
 harness = false
 
 [dependencies]
