@@ -128,16 +128,14 @@ impl TaskBuilder {
         // copy runnable trait object to stack
         let runnable_len = mem::size_of_val(runnable);
         unsafe {
+            ptr = Self::align_ptr(ptr, 8);
             ptr = ptr.offset(-(runnable_len as isize));
             ptr::write(ptr as *mut _, runnable.deref());
         }
         let runnable_ptr = ptr as *mut usize;
 
-        // align task stack to double word
-        let mut alignment = ptr as usize % 8;
-        unsafe {
-            ptr = ptr.offset(-(alignment as isize));
-        }
+        // align top of stack
+        unsafe { ptr = Self::align_ptr(ptr, 8); }
         stack.ptr = ptr as *mut usize;
 
         let mut task = Task {
@@ -149,6 +147,11 @@ impl TaskBuilder {
             blocking_event: None,
         };
         sched::add(task)
+    }
+
+    unsafe fn align_ptr(ptr: *mut u8, align: usize) -> *mut u8 {
+        let offset = ptr as usize % align;
+        ptr.offset(-(offset as isize))
     }
 }
 

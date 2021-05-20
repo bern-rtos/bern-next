@@ -1,4 +1,4 @@
-use core::cell::RefCell;
+use core::cell::UnsafeCell;
 use core::ptr::NonNull;
 
 use crate::mem::pool_allocator::{PoolAllocator, Error};
@@ -7,14 +7,14 @@ use crate::mem::boxed::Box;
 
 #[derive(Debug)]
 pub struct ArrayPool<T, const N: usize> {
-    pool: RefCell<[Option<T>; N]>,
+    pool: UnsafeCell<[Option<T>; N]>,
 }
 
 impl<T, const N: usize> ArrayPool<T, {N}>
 {
     pub const fn new(array: [Option<T>; N]) -> Self {
         ArrayPool {
-            pool: RefCell::new(array),
+            pool: UnsafeCell::new(array),
         }
     }
 }
@@ -25,7 +25,8 @@ unsafe impl<T, const N: usize> Sync for ArrayPool<T, {N}> {}
 
 impl<T, const N: usize> PoolAllocator<T> for ArrayPool<T, {N}> {
     fn insert(&self, element: T) -> Result<Box<T>, Error> {
-        for item in self.pool.borrow_mut().iter_mut() {
+        // NOTE(unsafe): must be called from critical section
+        for item in unsafe { &mut *self.pool.get() }.iter_mut() {
             if item.is_none() {
                 *item = Some(element);
                 match item {
