@@ -134,6 +134,10 @@ pub fn sleep(ms: u32) {
     Arch::trigger_context_switch();
 }
 
+pub fn yield_now() {
+    Arch::trigger_context_switch();
+}
+
 pub fn task_terminate() {
     // NOTE(unsafe): scheduler must be initialized first
     // todo: replace with `assume_init_mut()` as soon as stable

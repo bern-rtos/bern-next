@@ -16,6 +16,7 @@ enum Service {
     MoveClosureToStack,
     TaskSpawn,
     TaskSleep,
+    TaskYield,
     TaskExit,
     EventRegister,
     EventAwait,
@@ -54,6 +55,15 @@ pub fn sleep(ms: u32) {
     Arch::syscall(
         Service::TaskSleep.service_id(),
         ms as usize,
+        0,
+        0
+    );
+}
+
+pub fn yield_now() {
+    Arch::syscall(
+        Service::TaskYield.service_id(),
+        0,
         0,
         0
     );
@@ -127,6 +137,10 @@ fn syscall_handler(service: Service, arg0: usize, arg1: usize, arg2: usize) -> u
         Service::TaskSleep => {
             let ms: u32 = arg0 as u32;
             sched::sleep(ms);
+            0
+        },
+        Service::TaskYield => {
+            sched::yield_now();
             0
         },
         Service::TaskExit => {
