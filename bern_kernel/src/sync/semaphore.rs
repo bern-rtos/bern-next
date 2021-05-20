@@ -54,6 +54,10 @@ impl Semaphore {
         }
     }
 
+    pub fn available_permits(&self) -> usize {
+        self.permits - self.permits_issued.load(Ordering::Relaxed)
+    }
+
     ///
     /// **Note:** This will return a false positive when `permits_issued` overflows
     fn raw_acquire(&self) -> Result<(), ()> {

@@ -1,5 +1,5 @@
 use core::sync::atomic::{AtomicU32, Ordering};
-use crate::scheduler;
+use crate::sched;
 
 static COUNT: AtomicU32 = AtomicU32::new(0); // todo: replace with u64
 

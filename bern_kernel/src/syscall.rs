@@ -158,6 +158,7 @@ fn syscall_handler(service: Service, arg0: usize, arg1: usize, arg2: usize) -> u
             let id = arg0;
             let timeout = arg1;
             let result = sched::event_await(id, timeout);
+            let result: Result<(), event::Error> = Ok(());
             let ret_code: u8 = unsafe { mem::transmute(result) };
             ret_code as usize
         },

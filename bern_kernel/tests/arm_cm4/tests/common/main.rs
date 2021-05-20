@@ -1,6 +1,6 @@
 use core::sync::atomic::{self, Ordering};
 
-use st_nucleo_f446::StNucleoF446;
+use st_nucleo_f446::StNucleoF446 as Board;
 use stm32f4xx_hal::prelude::*;
 
 //use rtt_target::{rtt_init_print, ChannelMode::BlockIfFull};
@@ -10,7 +10,7 @@ use nb::Error::{WouldBlock, Other};
 
 #[cortex_m_rt::entry]
 fn main() -> ! {
-    let mut board = StNucleoF446::new();
+    let mut board = Board::new();
     //rtt_init_print!(BlockIfFull);
     let vcp = board.vcp.take().unwrap();
     bern_test_serial_uplink(vcp.tx);
@@ -31,7 +31,10 @@ fn bern_test_serial_uplink<T>(mut tx: T)
 {
     Serial::set_write(move |b| {
         match tx.write(b) {
-            Ok(_) => Ok(()),
+            Ok(_) => {
+                nb::block!(tx.flush()).ok();
+                Ok(())
+            },
             Err(e) => match e {
                 WouldBlock => Err(WouldBlock),
                 _ => Err(Other(serial::Error::Peripheral)),

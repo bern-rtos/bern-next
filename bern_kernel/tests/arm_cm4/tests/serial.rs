@@ -10,14 +10,10 @@ fn recursion(i: u32) {
 
 #[bern_test::tests]
 mod tests {
-    use crate::common::st_nucleo_f446::StNucleoF446;
-    use stm32f4xx_hal::prelude::*;
+    use crate::common::*;
 
     #[test_tear_down]
     fn reset() {
-        // add a short delay to flush serial
-        // todo: add wait functionality
-        super::common::stupid_wait(1000);
         cortex_m::peripheral::SCB::sys_reset();
     }
 
@@ -32,7 +28,7 @@ mod tests {
     }
 
     #[test]
-    fn with_board(board: &mut StNucleoF446) {
+    fn with_board(board: &mut Board) {
         let mut led = board.led.take().unwrap();
         led.set_high().ok();
         board.shield.led_0.set_high().ok();

@@ -124,7 +124,7 @@ macro_rules! sprintln {
         $crate::serial::Serial::write_str(concat!($fmt, "\r\n"));
     };
     ($fmt:expr, $($arg:tt)*) => {
-        $crate::serial::Serial::write_fmt(format_args!(concat!($fmt, "\n"), $($arg)*));
+        $crate::serial::Serial::write_fmt(format_args!(concat!($fmt, "\r\n"), $($arg)*));
     };
 }
 
