@@ -81,6 +81,7 @@ dependencies = [
  "cortex-m 0.7.2",
  "cortex-m-rt",
  "mockall",
+ "r0 1.0.0",
 ]
 
 [[package]]
@@ -89,7 +90,6 @@ version = "0.0.1"
 dependencies = [
  "arr_macro",
  "bern-arch",
- "r0 1.0.0",
  "serde",
  "serde_derive",
  "toml",

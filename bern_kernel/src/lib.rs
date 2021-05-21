@@ -13,7 +13,6 @@ pub mod time;
 pub mod stack;
 pub mod sync;
 pub mod mem;
-mod startup;
 
 
 pub use crate::syscall::*;

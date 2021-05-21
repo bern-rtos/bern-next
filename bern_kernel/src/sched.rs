@@ -26,9 +26,8 @@ use crate::mem::{
     array_pool::ArrayPool,
     pool_allocator,
 };
-use crate::startup;
 
-use bern_arch::{ICore, IScheduler};
+use bern_arch::{ICore, IScheduler, IStartup};
 use bern_arch::arch::{ArchCore, Arch};
 use core::ptr::NonNull;
 
@@ -53,7 +52,7 @@ pub struct Scheduler {
 
 
 pub fn init() {
-    startup::init_static();
+    Arch::init_static_memory();
 
     let core = ArchCore::new();
 
@@ -327,8 +326,11 @@ mod tests {
 
         super::init();
 
-        let sched = unsafe { &mut *SCHEDULER.lock().as_mut_ptr() };
-        assert_eq!(sched.task_running.is_none(), true);
-        assert_eq!(sched.tasks_terminated.len(), 0);
+        let sched = unsafe { &mut *SCHEDULER.as_mut_ptr() };
+
+        critical_section::exec(|| {
+            assert_eq!(sched.task_running.is_none(), true);
+            assert_eq!(sched.tasks_terminated.len(), 0);
+        });
     }
 }

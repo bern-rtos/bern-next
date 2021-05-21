@@ -7,6 +7,7 @@ use crate::scheduler::IScheduler;
 use crate::syscall::ISyscall;
 use crate::core::ICore;
 use crate::sync::ISync;
+use crate::startup::IStartup;
 
 // re-exports
 pub use crate::mock::MockArch as Arch;
@@ -28,6 +29,10 @@ mock!{
     impl ISync for Arch {
         fn disable_interrupts(priority: usize);
         fn enable_interrupts();
+    }
+
+    impl IStartup for Arch {
+        fn init_static_memory();
     }
 }
 

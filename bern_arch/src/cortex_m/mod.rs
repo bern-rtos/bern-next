@@ -4,6 +4,7 @@ pub mod sync;
 mod scheduler;
 mod tick;
 mod register;
+pub mod startup;
 
 pub struct Arch;
 
