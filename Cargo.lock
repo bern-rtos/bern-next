@@ -90,8 +90,21 @@ version = "0.0.1"
 dependencies = [
  "arr_macro",
  "bern-arch",
+ "bern-kernel-macros",
  "serde",
  "serde_derive",
+ "toml",
+]
+
+[[package]]
+name = "bern-kernel-macros"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_derive",
+ "syn",
  "toml",
 ]
 

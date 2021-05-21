@@ -2,6 +2,7 @@
 
 members = [
     "bern_kernel",
+    "bern_kernel/macros",
     "bern_kernel/tests/arm_cm4",
     "bern_arch",
     "bern_test",
