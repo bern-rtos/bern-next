@@ -4,8 +4,8 @@ mod tests {
 
     #[test]
     fn load() {
-        load_conf!();
+        load_conf!("bern_test.toml");
 
-        assert_eq!(MUTEX_POOL_SIZE, 32);
+        assert_eq!(MUTEX_POOL_SIZE, 16);
     }
 }

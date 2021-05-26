@@ -5,12 +5,8 @@ use quote::ToTokens;
 
 #[proc_macro]
 pub fn load_conf(input: TokenStream) -> TokenStream {
-    // there's nothing to parse
-    let _ = input;
-
+    let config = syn::parse_macro_input!(input as conf::Config);
     let mut output = proc_macro2::TokenStream::new();
-    let config = conf::toml::Config::new();
     config.to_tokens(&mut output);
-
     TokenStream::from(output)
 }

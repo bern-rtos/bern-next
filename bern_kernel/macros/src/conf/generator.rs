@@ -1,7 +1,6 @@
-use super::toml::Config;
+use super::Config;
 use quote::ToTokens;
 use proc_macro2::TokenStream;
-use quote::quote;
 
 use std::str::FromStr;
 

@@ -1,0 +1,6 @@
+[mutex]
+pool_size = 16
+
+[task]
+priorities = 8
+pool_size = 16
