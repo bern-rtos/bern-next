@@ -17,7 +17,7 @@ extern "C" fn PendSV() {
         "push  {{lr}}",
         "bl    switch_context",
         "pop   {{lr}}",
-        "mov   r3, #2",        // todo: read from function
+        "mov   r3, #3",        // todo: read from function
         "msr   control, r3",   // switch to unprivileged thread mode
         "ldmia r0!, {{r4-r11}}",
         "msr   psp, r0",
@@ -55,7 +55,7 @@ impl IScheduler for Arch {
             "pop   {{r4-r11}}",     // pop register we initialized
             "pop   {{r0-r3,r12,lr}}", // force function entry
             "pop   {{pc}}",         // 'jump' to the task entry function we put on the stack
-            in(reg) 0x2,            // privileged task
+            in(reg) 0x3,            // unprivileged task
             in(reg) stack_ptr as u32,
             options(noreturn),
             );
