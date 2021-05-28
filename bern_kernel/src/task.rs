@@ -188,6 +188,9 @@ impl Task {
     pub(crate) fn set_stack_ptr(&mut self, psp: *mut usize) {
         self.stack.ptr = psp;
     }
+    pub(crate) fn stack_top(&self) -> *const usize {
+        self.stack.top_ptr() as *const _
+    }
 
     pub(crate) fn next_wut(&self) -> u64 {
         self.next_wut

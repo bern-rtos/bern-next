@@ -27,7 +27,7 @@ use crate::mem::{
     pool_allocator,
 };
 
-use bern_arch::{ICore, IScheduler, IStartup};
+use bern_arch::{ICore, IScheduler, IStartup, IMemoryProtection};
 use bern_arch::arch::{ArchCore, Arch};
 use core::ptr::NonNull;
 
@@ -53,6 +53,28 @@ pub struct Scheduler {
 
 pub fn init() {
     Arch::init_static_memory();
+
+    /* allow flash read/exec */
+    Arch::protect_memory_region(
+        0,
+        0x08000000 as *const _,
+        17, // 512kB
+        0b110 << 24 | 1 << 18 | 1 << 17); // RO, 'normal', cacheable
+
+    /* allow peripheral RW */
+    Arch::protect_memory_region(
+        1,
+        0x4000_0000 as *const _,
+        28, // 512MB
+        0b11 << 24 | 1 << 16); // RW, 'device', no cache
+
+    /* allow .shared section RW access */
+    let shared = Arch::region();
+    Arch::protect_memory_region(
+        1,
+        shared.start,
+        7, // just guess 256B
+        0b11 << 24 | 1 << 18 | 1 << 17); // RW, 'normal', cacheable
 
     let core = ArchCore::new();
 
@@ -253,11 +275,12 @@ pub fn event_fire(id: usize) {
 /// implementation.
 #[no_mangle]
 fn switch_context(stack_ptr: u32) -> u32 {
+    Arch::disable_memory_protection();
     // NOTE(unsafe): scheduler must be initialized first
     // todo: replace with `assume_init_mut()` as soon as stable
     let sched = unsafe { &mut *SCHEDULER.as_mut_ptr() };
 
-    critical_section::exec(|| {
+    let stack_ptr = critical_section::exec(|| {
         sched.task_running.as_mut().unwrap().inner_mut().set_stack_ptr(stack_ptr as *mut usize);
 
         let mut pausing = sched.task_running.take().unwrap();
@@ -299,10 +322,20 @@ fn switch_context(stack_ptr: u32) -> u32 {
         if task.is_none() {
             panic!("Idle task must not be suspended");
         }
+
+        Arch::protect_memory_region(
+            3,
+            task.as_ref().unwrap().inner().stack_top(),
+            8,
+            0b11 << 24 | 1 << 28 | 1 << 18 | 1 << 17); // RW, no exec, 'normal', cacheable
+
         sched.task_running = task;
         let stack_ptr = sched.task_running.as_ref().unwrap().inner().stack_ptr();
         stack_ptr as u32
-    })
+    });
+
+    Arch::enable_memory_protection();
+    stack_ptr
 }
 
 ////////////////////////////////////////////////////////////////////////////////

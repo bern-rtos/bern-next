@@ -8,6 +8,7 @@ pub mod core;
 pub mod scheduler;
 pub mod sync;
 pub mod startup;
+pub mod memory_protection;
 
 // re-exports
 pub use crate::scheduler::IScheduler;
@@ -15,6 +16,7 @@ pub use crate::syscall::ISyscall;
 pub use crate::core::ICore;
 pub use crate::sync::ISync;
 pub use crate::startup::IStartup;
+pub use crate::memory_protection::IMemoryProtection;
 
 // select architecture support
 #[cfg(not(target_os = "none"))]

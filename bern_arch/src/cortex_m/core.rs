@@ -30,6 +30,8 @@ impl ICore for ArchCore {
         unsafe {
             self.peripherals.SCB.set_priority(scb::SystemHandler::PendSV, 0xFF);
         }
+        // todo: move
+        self.peripherals.SCB.enable(scb::Exception::MemoryManagement);
     }
 
     fn bkpt() {

@@ -5,6 +5,7 @@ mod scheduler;
 mod tick;
 mod register;
 pub mod startup;
+pub mod memory_protection;
 
 pub struct Arch;
 
