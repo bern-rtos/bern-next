@@ -18,7 +18,8 @@ pub struct Access {
 }
 
 pub enum Type {
-    Ram,
+    SramInternal,
+    SramExternal,
     Flash,
     Peripheral,
 }

@@ -28,15 +28,22 @@ impl IMemoryProtection for Arch {
         );
 
         let attributes = match config.memory {
-            Type::Ram | Type::Flash => Attributes::Normal {
+            Type::SramInternal => Attributes::Normal {
                 shareable: true,
+                cache_policy: (CachePolicy::WriteThrough, CachePolicy::WriteThrough),
+            },
+            Type::SramExternal => Attributes::Normal {
+                shareable: true,
+                cache_policy: (CachePolicy::WriteBack { wa: true }, CachePolicy::WriteBack { wa: true }),
+            },
+            Type::Flash => Attributes::Normal {
+                shareable: false,
                 cache_policy: (CachePolicy::WriteThrough, CachePolicy::WriteThrough),
             },
             Type::Peripheral => Attributes::Device {
                 shareable: true
             }
         };
-
 
         mpu.set_region_attributes(
             config.executable,
