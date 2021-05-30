@@ -6,6 +6,7 @@ mod tick;
 mod register;
 pub mod startup;
 pub mod memory_protection;
+mod mpu;
 
 pub struct Arch;
 

@@ -1,48 +1,52 @@
-use crate::memory_protection::IMemoryProtection;
+use crate::memory_protection::{IMemoryProtection, Config, Type};
 use crate::arch::Arch;
+use crate::arch::mpu::{Mpu, RegionNumber, Permission, Subregions, Attributes, CachePolicy};
+pub use crate::arch::mpu::Size;
 
-use cortex_m::peripheral::{self, mpu};
 use cortex_m::asm;
 use cortex_m_rt::exception;
 
-unsafe fn mpu() -> &'static mut mpu::RegisterBlock {
-    &mut *(peripheral::MPU::PTR as *mut _)
-}
-
 impl IMemoryProtection for Arch {
+    type Size = Size;
+
     fn enable_memory_protection() {
-        let mpu =  unsafe{ mpu() };
-        unsafe {
-            mpu.ctrl.write(5);
-        }
-        asm::dsb();
-        asm::isb();
+        let mut mpu =  unsafe{ Mpu::take() };
+        mpu.enable();
     }
 
     fn disable_memory_protection() {
-        let mpu =  unsafe{ mpu() };
-        asm::dmb();
-        unsafe {
-            mpu.ctrl.write(0);
-        }
+        let mut mpu =  unsafe{ Mpu::take() };
+        mpu.disable();
     }
 
-    fn protect_memory_region(region: u8, addr: *const usize, size: usize, mode: usize) {
-        let mpu =  unsafe{ mpu() };
-        let rbar: u32 =
-            addr as u32 & !((2 << size) - 1) |   // address
-            (1 << 4) |                    // use region number defined below
-            region as u32;                // region number
+    fn protect_memory_region(region: u8, config: Config<Size>) {
+        let mut mpu =  unsafe{ Mpu::take() };
 
-        let rasr: u32 =
-            mode as u32 |
-            (size as u32) << 1 |
-            1; // enable
+        mpu.set_region_base_address(
+            config.addr as u32,
+            RegionNumber::Use(region)
+        );
 
-        unsafe {
-            mpu.rbar.write(rbar);
-            mpu.rasr.write(rasr);
-        }
+        let attributes = match config.memory {
+            Type::Ram | Type::Flash => Attributes::Normal {
+                shareable: true,
+                cache_policy: (CachePolicy::WriteThrough, CachePolicy::WriteThrough),
+            },
+            Type::Peripheral => Attributes::Device {
+                shareable: true
+            }
+        };
+
+
+        mpu.set_region_attributes(
+            config.executable,
+            (Permission::from(config.access.system), Permission::from(config.access.user)),
+            attributes,
+            Subregions::ALL,
+            config.size,
+        )
+
+
     }
 }
 

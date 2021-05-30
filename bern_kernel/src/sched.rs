@@ -30,6 +30,8 @@ use crate::mem::{
 use bern_arch::{ICore, IScheduler, IStartup, IMemoryProtection};
 use bern_arch::arch::{ArchCore, Arch};
 use core::ptr::NonNull;
+use bern_arch::memory_protection::{Config, Type, Access, Permission};
+use bern_arch::arch::memory_protection::Size;
 
 type TaskPool = ArrayPool<Node<Task>, { conf::TASK_POOL_SIZE }>;
 static TASK_POOL: TaskPool = ArrayPool::new([None; conf::TASK_POOL_SIZE]);
@@ -57,24 +59,37 @@ pub fn init() {
     /* allow flash read/exec */
     Arch::protect_memory_region(
         0,
-        0x08000000 as *const _,
-        17, // 512kB
-        0b110 << 24 | 1 << 18 | 1 << 17); // RO, 'normal', cacheable
+        Config {
+            addr: 0x08000000 as *const _, // flash base address
+            memory: Type::Flash,
+            size: Size::S512K,
+            access: Access { user: Permission::ReadOnly, system: Permission::ReadOnly },
+            executable: true
+        });
+
 
     /* allow peripheral RW */
     Arch::protect_memory_region(
         1,
-        0x4000_0000 as *const _,
-        28, // 512MB
-        0b11 << 24 | 1 << 16); // RW, 'device', no cache
+        Config {
+            addr: 0x4000_0000 as *const _, // peripheral base address
+            memory: Type::Peripheral,
+            size: Size::S512M,
+            access: Access { user: Permission::ReadWrite, system: Permission::ReadWrite },
+            executable: false
+        });
 
     /* allow .shared section RW access */
     let shared = Arch::region();
     Arch::protect_memory_region(
-        1,
-        shared.start,
-        7, // just guess 256B
-        0b11 << 24 | 1 << 18 | 1 << 17); // RW, 'normal', cacheable
+        2,
+        Config {
+            addr: shared.start,
+            memory: Type::Ram,
+            size: Size::S256,
+            access: Access { user: Permission::ReadWrite, system: Permission::ReadWrite },
+            executable: false
+        });
 
     let core = ArchCore::new();
 
@@ -325,9 +340,13 @@ fn switch_context(stack_ptr: u32) -> u32 {
 
         Arch::protect_memory_region(
             3,
-            task.as_ref().unwrap().inner().stack_top(),
-            8,
-            0b11 << 24 | 1 << 28 | 1 << 18 | 1 << 17); // RW, no exec, 'normal', cacheable
+            Config {
+                addr: task.as_ref().unwrap().inner().stack_top(),
+                memory: Type::Ram,
+                size: Size::S512,
+                access: Access { user: Permission::ReadWrite, system: Permission::ReadWrite },
+                executable: false
+            });
 
         sched.task_running = task;
         let stack_ptr = sched.task_running.as_ref().unwrap().inner().stack_ptr();
