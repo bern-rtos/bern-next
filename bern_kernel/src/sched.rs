@@ -57,7 +57,7 @@ pub fn init() {
     Arch::init_static_memory();
 
     /* allow flash read/exec */
-    Arch::protect_memory_region(
+    Arch::enable_memory_region(
         0,
         Config {
             addr: 0x08000000 as *const _, // flash base address
@@ -69,7 +69,7 @@ pub fn init() {
 
 
     /* allow peripheral RW */
-    Arch::protect_memory_region(
+    Arch::enable_memory_region(
         1,
         Config {
             addr: 0x4000_0000 as *const _, // peripheral base address
@@ -81,15 +81,17 @@ pub fn init() {
 
     /* allow .shared section RW access */
     let shared = Arch::region();
-    Arch::protect_memory_region(
+    Arch::enable_memory_region(
         2,
         Config {
             addr: shared.start,
-            memory: Type::Ram,
+            memory: Type::SramInternal,
             size: Size::S256,
             access: Access { user: Permission::ReadWrite, system: Permission::ReadWrite },
             executable: false
         });
+    Arch::disable_memory_region(3);
+    Arch::disable_memory_region(4);
 
     let core = ArchCore::new();
 
@@ -127,6 +129,8 @@ pub fn start() -> ! {
             break;
         }
     }
+
+    Arch::apply_regions(task.as_ref().unwrap().inner().memory_regions());
     sched.task_running = task;
 
     sched.core.start();
@@ -338,16 +342,7 @@ fn switch_context(stack_ptr: u32) -> u32 {
             panic!("Idle task must not be suspended");
         }
 
-        Arch::protect_memory_region(
-            3,
-            Config {
-                addr: task.as_ref().unwrap().inner().stack_top(),
-                memory: Type::Ram,
-                size: Size::S512,
-                access: Access { user: Permission::ReadWrite, system: Permission::ReadWrite },
-                executable: false
-            });
-
+        Arch::apply_regions(task.as_ref().unwrap().inner().memory_regions());
         sched.task_running = task;
         let stack_ptr = sched.task_running.as_ref().unwrap().inner().stack_ptr();
         stack_ptr as u32

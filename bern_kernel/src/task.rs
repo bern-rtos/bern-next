@@ -10,6 +10,10 @@ use crate::stack::Stack;
 use crate::conf;
 use crate::sched::event::Event;
 use core::ptr::NonNull;
+use bern_arch::arch::memory_protection::{MemoryRegion, Size};
+use bern_arch::arch::Arch;
+use bern_arch::memory_protection::{Config, Type, Access, Permission};
+use bern_arch::IMemoryProtection;
 
 
 #[derive(Debug)]
@@ -138,6 +142,20 @@ impl TaskBuilder {
         unsafe { ptr = Self::align_ptr(ptr, 8); }
         stack.ptr = ptr as *mut usize;
 
+        // prepare memory region configs
+        let memory_regions = [Arch::prepare_memory_region(
+            5,
+            Config {
+                addr: self.stack.as_ref().unwrap().top_ptr() as *const _,
+                memory: Type::SramInternal,
+                size: Size::S512,
+                access: Access { user: Permission::ReadWrite, system: Permission::ReadWrite },
+                executable: false
+            }),
+            Arch::prepare_unused_region(6),
+            Arch::prepare_unused_region(7)
+        ];
+
         let mut task = Task {
             transition: Transition::None,
             runnable_ptr,
@@ -145,6 +163,7 @@ impl TaskBuilder {
             stack: self.stack.take().unwrap(),
             priority: self.priority,
             blocking_event: None,
+            memory_regions,
         };
         sched::add(task)
     }
@@ -165,6 +184,7 @@ pub struct Task {
     stack: Stack,
     priority: Priority,
     blocking_event: Option<NonNull<Event>>,
+    memory_regions: [MemoryRegion; 3],
 }
 
 impl Task {
@@ -208,6 +228,10 @@ impl Task {
 
     pub(crate) fn priority(&self) -> Priority {
         self.priority
+    }
+
+    pub(crate) fn memory_regions(&self) -> &[MemoryRegion; 3] {
+        &self.memory_regions
     }
 
     pub(crate) fn blocking_event(&self) -> Option<NonNull<Event>> {
