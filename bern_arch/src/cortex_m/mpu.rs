@@ -36,7 +36,7 @@ pub enum Size {
     S4G = 31,
 }
 impl Size {
-    pub fn bits(self) -> u32 {
+    pub const fn bits(self) -> u32 {
         self as u32
     }
 }
@@ -63,9 +63,9 @@ impl Region {
 */
 
 /* Control Register */
-const MPU_ENABLE: u32 = 1;
-const MPU_HARD_FAULT_ENABLED: u32 = 1 << 1;
-const MPU_PRIVILEGED_DEFAULT_ENABLE: u32 = 1 << 2;
+pub const MPU_ENABLE: u32 = 1;
+pub const MPU_HARD_FAULT_ENABLED: u32 = 1 << 1;
+pub const MPU_PRIVILEGED_DEFAULT_ENABLE: u32 = 1 << 2;
 
 /* Region Number Register */
 pub enum RegionNumber {
@@ -73,8 +73,11 @@ pub enum RegionNumber {
     Use(u8),
 }
 
+/* Region Base Address Register */
+pub const MPU_REGION_VALID: u32 = 1 << 4;
+
 /* Region Attribute and Status Register */
-const MPU_REGION_ENABLE: u32 = 1;
+pub const MPU_REGION_ENABLE: u32 = 1;
 
 pub enum Permission {
     NoAccess,
@@ -119,9 +122,23 @@ impl Subregions {
     pub const ALL: Subregions = Subregions(0xFF);
     pub const NONE: Subregions = Subregions(0);
 
-    pub fn bits(self) -> u32 {
+    pub const fn bits(self) -> u32 {
         !self.0 as u32
     }
+}
+
+impl Default for Subregions {
+    fn default() -> Self {
+        Subregions::ALL
+    }
+}
+
+/// Raw register values, for fast MPU updates.
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct MemoryRegion {
+    pub region_base_address_reg: u32,
+    pub region_attribute_size_reg: u32,
 }
 
 pub struct Mpu<'a>(&'a mut mpu::RegisterBlock);
@@ -149,26 +166,33 @@ impl Mpu<'_> {
         }
     }
 
-    #[inline]
-    pub fn set_region_base_address(&mut self, addr: u32, region: RegionNumber) {
+    pub const fn prepare_region_base_address(addr: u32, region: RegionNumber) -> u32 {
         let base_addr = addr & !0x1F;
         let (valid, region) = match region {
             RegionNumber::Ignore => (0, 0),
-            RegionNumber::Use(region) => (1, region),
+            RegionNumber::Use(region) => (MPU_REGION_VALID, region),
         };
 
-        unsafe {
-            self.0.rbar.write(base_addr | valid << 4 | region as u32);
-        }
+        base_addr | valid | region as u32
     }
 
     #[inline]
-    pub fn set_region_attributes(&mut self,
-                                 executable: bool,
-                                 access: (Permission, Permission),
-                                 attributes: Attributes,
-                                 subregions: Subregions,
-                                 region_size: Size) {
+    pub fn set_region_base_address(&mut self, addr: u32, region: RegionNumber) {
+        let register = Self::prepare_region_base_address(
+            addr,
+            region
+        );
+
+        unsafe {
+            self.0.rbar.write(register);
+        }
+    }
+
+    pub const fn prepare_region_attributes(executable: bool,
+                                     access: (Permission, Permission),
+                                     attributes: Attributes,
+                                     subregions: Subregions,
+                                     region_size: Size) -> u32 {
 
         // (privileged, unprivileged)
         let ap = match access {
@@ -213,8 +237,45 @@ impl Mpu<'_> {
             region_size.bits() << 1 |
             MPU_REGION_ENABLE;
 
+        register
+    }
+
+    #[inline]
+    pub fn set_region_attributes(&mut self,
+                                 executable: bool,
+                                 access: (Permission, Permission),
+                                 attributes: Attributes,
+                                 subregions: Subregions,
+                                 region_size: Size) {
+
+        let register = Self::prepare_region_attributes(
+            executable,
+            access,
+            attributes,
+            subregions,
+            region_size
+        );
+
         unsafe {
             self.0.rasr.write(register);
+        }
+    }
+
+    pub fn set_region(&mut self, memory_region: &MemoryRegion) {
+        unsafe {
+            self.0.rbar.write(memory_region.region_base_address_reg);
+            self.0.rasr.write(memory_region.region_attribute_size_reg);
+        }
+    }
+
+    pub fn set_regions(&mut self, memory_region: &[MemoryRegion; 3]) {
+        unsafe {
+            self.0.rbar_a1.write(memory_region[0].region_base_address_reg);
+            self.0.rasr_a1.write(memory_region[0].region_attribute_size_reg);
+            self.0.rbar_a2.write(memory_region[1].region_base_address_reg);
+            self.0.rasr_a2.write(memory_region[1].region_attribute_size_reg);
+            self.0.rbar_a3.write(memory_region[2].region_base_address_reg);
+            self.0.rasr_a3.write(memory_region[2].region_attribute_size_reg);
         }
     }
 

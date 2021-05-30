@@ -1,9 +1,18 @@
+use crate::arch::memory_protection::MemoryRegion;
+
 pub trait IMemoryProtection {
     type Size;
+    type MemoryRegion;
 
     fn enable_memory_protection();
     fn disable_memory_protection();
-    fn protect_memory_region(region: u8, config: Config<Self::Size>);
+    fn enable_memory_region(region: u8, config: Config<Self::Size>);
+    fn disable_memory_region(region: u8);
+    /// Same as `enable_memory_region()` but return the register configuration
+    /// instead of applying it to the actual registers.
+    fn prepare_memory_region(region: u8, config: Config<Self::Size>) -> Self::MemoryRegion;
+    fn prepare_unused_region(region: u8) -> Self::MemoryRegion;
+    fn apply_regions(memory_regions: &[MemoryRegion; 3]);
 }
 
 pub enum Permission {
