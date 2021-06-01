@@ -12,7 +12,6 @@ pub(crate) mod event;
 
 use core::sync::atomic::{self, Ordering};
 use core::mem::MaybeUninit;
-use arr_macro::arr;
 use core::ptr::NonNull;
 
 use event::Event;
@@ -33,10 +32,15 @@ use bern_arch::memory_protection::{Config, Type, Access, Permission};
 use bern_arch::arch::memory_protection::Size;
 use bern_conf::CONF;
 
+// These statics are MaybeUninit because, there currently no solution to
+// initialize an array dependent on a `const` size and a non-copy type.
+// These attempts didn't work:
+// - const fn with internal MaybeUninit: not stable yet
+// - proc_macro: cannot evaluate const
 type TaskPool = ArrayPool<Node<Task>, { CONF.task.pool_size }>;
-static TASK_POOL: TaskPool = ArrayPool::new([None; CONF.task.pool_size]);
 type EventPool = ArrayPool<Node<Event>, { CONF.event.pool_size }>;
-static EVENT_POOL: EventPool = ArrayPool::new(arr![None; 32]);
+static mut TASK_POOL: MaybeUninit<TaskPool> = MaybeUninit::uninit();
+static mut EVENT_POOL: MaybeUninit<EventPool> = MaybeUninit::uninit();
 
 static mut SCHEDULER: MaybeUninit<Scheduler> = MaybeUninit::uninit();
 
@@ -95,14 +99,37 @@ pub fn init() {
 
     let core = ArchCore::new();
 
+    // Init static pools, this is unsafe but stable for now. Temporary solution
+    // until const fn works with MaybeUninit.
     unsafe {
+        let mut task_pool: [Option<Node<Task>>; CONF.task.pool_size] =
+            MaybeUninit::uninit().assume_init();
+        for element in task_pool.iter_mut() {
+            *element = None;
+        }
+        TASK_POOL = MaybeUninit::new(ArrayPool::new(task_pool));
+
+        let mut event_pool: [Option<Node<Event>>; CONF.event.pool_size] =
+            MaybeUninit::uninit().assume_init();
+        for element in event_pool.iter_mut() {
+            *element = None;
+        }
+        EVENT_POOL = MaybeUninit::new(ArrayPool::new(event_pool));
+
+        let mut tasks_ready: [LinkedList<Task, TaskPool>; { CONF.task.priorities as usize }] =
+            MaybeUninit::uninit().assume_init();
+        for element in tasks_ready.iter_mut() {
+            *element = LinkedList::new(&*TASK_POOL.as_mut_ptr());
+        }
+
+
         SCHEDULER = MaybeUninit::new(Scheduler {
             core,
             task_running: None,
-            tasks_ready: arr![LinkedList::new(&TASK_POOL); 8],
-            tasks_sleeping: LinkedList::new(&TASK_POOL),
-            tasks_terminated: LinkedList::new(&TASK_POOL),
-            events: LinkedList::new(&EVENT_POOL),
+            tasks_ready: tasks_ready,
+            tasks_sleeping: LinkedList::new(&*TASK_POOL.as_mut_ptr()),
+            tasks_terminated: LinkedList::new(&*TASK_POOL.as_mut_ptr()),
+            events: LinkedList::new(&*EVENT_POOL.as_mut_ptr()),
             event_counter: 0,
         });
     }

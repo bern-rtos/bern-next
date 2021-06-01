@@ -25,11 +25,13 @@ pub struct Event {
 
 impl Event {
     pub fn new(id: usize) -> Self {
-        Event {
-            id,
-            pending: LinkedList::new(&super::TASK_POOL),
-            wake: Wake::WakeFirst,
-            priority_inversion: false,
+        unsafe {
+            Event {
+                id,
+                pending: LinkedList::new(&*super::TASK_POOL.as_mut_ptr()),
+                wake: Wake::WakeFirst,
+                priority_inversion: false,
+            }
         }
     }
 
