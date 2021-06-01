@@ -13,13 +13,13 @@ pub(crate) mod event;
 use core::sync::atomic::{self, Ordering};
 use core::mem::MaybeUninit;
 use arr_macro::arr;
+use core::ptr::NonNull;
 
 use event::Event;
 use crate::task::{self, Task, Transition};
 use crate::syscall;
 use crate::time;
 use crate::sync::critical_section;
-use crate::conf;
 use crate::mem::{
     linked_list::*,
     boxed::Box,
@@ -29,13 +29,13 @@ use crate::mem::{
 
 use bern_arch::{ICore, IScheduler, IStartup, IMemoryProtection};
 use bern_arch::arch::{ArchCore, Arch};
-use core::ptr::NonNull;
 use bern_arch::memory_protection::{Config, Type, Access, Permission};
 use bern_arch::arch::memory_protection::Size;
+use bern_conf::CONF;
 
-type TaskPool = ArrayPool<Node<Task>, { conf::TASK_POOL_SIZE }>;
-static TASK_POOL: TaskPool = ArrayPool::new([None; conf::TASK_POOL_SIZE]);
-type EventPool = ArrayPool<Node<Event>, { conf::MUTEX_POOL_SIZE }>;
+type TaskPool = ArrayPool<Node<Task>, { CONF.task.pool_size }>;
+static TASK_POOL: TaskPool = ArrayPool::new([None; CONF.task.pool_size]);
+type EventPool = ArrayPool<Node<Event>, { CONF.event.pool_size }>;
 static EVENT_POOL: EventPool = ArrayPool::new(arr![None; 32]);
 
 static mut SCHEDULER: MaybeUninit<Scheduler> = MaybeUninit::uninit();
@@ -45,7 +45,7 @@ static mut SCHEDULER: MaybeUninit<Scheduler> = MaybeUninit::uninit();
 pub struct Scheduler {
     core: ArchCore,
     task_running: Option<Box<Node<Task>>>,
-    tasks_ready: [LinkedList<Task, TaskPool>; conf::TASK_PRIORITIES],
+    tasks_ready: [LinkedList<Task, TaskPool>; CONF.task.pool_size],
     tasks_sleeping: LinkedList<Task, TaskPool>,
     tasks_terminated: LinkedList<Task, TaskPool>,
     events: LinkedList<Event, EventPool>,
@@ -115,7 +115,7 @@ pub fn start() -> ! {
     let sched = unsafe { &mut *SCHEDULER.as_mut_ptr() };
 
     // ensure an idle task is present
-    if sched.tasks_ready[conf::TASK_PRIORITIES-1].len() == 0 {
+    if sched.tasks_ready[(CONF.task.priorities as usize) -1].len() == 0 {
         Task::new()
             .idle_task()
             .static_stack(crate::alloc_static_stack!(128))

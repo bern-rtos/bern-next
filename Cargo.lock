@@ -85,11 +85,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "bern-conf"
+version = "0.1.0"
+dependencies = [
+ "bern-conf-type",
+]
+
+[[package]]
+name = "bern-conf-type"
+version = "0.1.0"
+
+[[package]]
 name = "bern-kernel"
 version = "0.0.1"
 dependencies = [
  "arr_macro",
  "bern-arch",
+ "bern-conf",
  "bern-kernel-macros",
  "serde",
  "serde_derive",

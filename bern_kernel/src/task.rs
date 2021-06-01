@@ -7,14 +7,13 @@ use crate::sched;
 use crate::syscall;
 use crate::time;
 use crate::stack::Stack;
-use crate::conf;
 use crate::sched::event::Event;
 use core::ptr::NonNull;
 use bern_arch::arch::memory_protection::{MemoryRegion, Size};
 use bern_arch::arch::Arch;
 use bern_arch::memory_protection::{Config, Type, Access, Permission};
 use bern_arch::IMemoryProtection;
-
+use bern_conf::CONF;
 
 #[derive(Debug)]
 pub struct TaskError;
@@ -68,9 +67,9 @@ impl TaskBuilder {
     }
 
     pub fn priority(&mut self, priority: Priority) -> &mut Self {
-        if priority.0 >= conf::TASK_PRIORITIES as u8 {
+        if priority.0 >= CONF.task.priorities as u8 {
             panic!("Priority out of range. todo: check at compile time");
-        } else if priority.0 == conf::TASK_PRIORITIES as u8 - 1  {
+        } else if priority.0 == CONF.task.priorities as u8 - 1  {
             panic!("Priority reserved for idle task. Use `is_idle_task()` instead. todo: check at compile time")
         }
         self.priority = priority;
@@ -78,7 +77,7 @@ impl TaskBuilder {
     }
 
     pub fn idle_task(&mut self) -> &mut Self {
-        self.priority = Priority(conf::TASK_PRIORITIES as u8 - 1);
+        self.priority = Priority(CONF.task.priorities as u8 - 1);
         self
     }
 
@@ -192,7 +191,7 @@ impl Task {
         TaskBuilder {
             stack: None,
             // set default to lowest priority above idle
-            priority: Priority(conf::TASK_PRIORITIES as u8 - 2),
+            priority: Priority(CONF.task.priorities - 2),
         }
     }
 

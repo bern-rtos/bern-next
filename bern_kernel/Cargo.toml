@@ -8,6 +8,7 @@ edition = "2018"
 bern-arch = { version = "*", path = "../bern_arch" }
 arr_macro = "0.1.3"
 bern-kernel-macros = { version = "*", path = "macros" }
+bern-conf = { version = "*", path = "conf" }
 
 [build-dependencies]
 toml = "0.5.8"
