@@ -13,15 +13,15 @@ pub const CONF: Conf = Conf {
     memory: Memory {
         flash: MemorySection {
             start_address: 0x08000000,
-            size: Bytes::from_kB(512),
+            size: Size::S512K,
         },
         sram: MemorySection {
             start_address: 0,
-            size: Bytes::from_kB(128),
+            size: Size::S128K,
         },
         peripheral: MemorySection {
             start_address: 0x4000_0000,
-            size: Bytes::from_MB(512),
+            size: Size::S512M,
         },
     },
 };

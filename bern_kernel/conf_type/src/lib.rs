@@ -1,7 +1,8 @@
 #![no_std]
 
 pub mod bytes;
-pub use bytes::Bytes;
+
+pub use bern_arch::arch::memory_protection::Size;
 
 pub struct Task {
     pub pool_size: usize,
@@ -14,7 +15,7 @@ pub struct Event {
 
 pub struct MemorySection {
     pub start_address: usize,
-    pub size: Bytes,
+    pub size: Size,
 }
 
 pub struct Memory {
