@@ -64,7 +64,7 @@ pub fn init() {
     Arch::enable_memory_region(
         0,
         Config {
-            addr: 0x08000000 as *const _, // flash base address
+            addr: CONF.memory.flash.start_address as *const _, // flash base address
             memory: Type::Flash,
             size: Size::S512K,
             access: Access { user: Permission::ReadOnly, system: Permission::ReadOnly },
@@ -76,7 +76,7 @@ pub fn init() {
     Arch::enable_memory_region(
         1,
         Config {
-            addr: 0x4000_0000 as *const _, // peripheral base address
+            addr: CONF.memory.peripheral.start_address as *const _, // peripheral base address
             memory: Type::Peripheral,
             size: Size::S512M,
             access: Access { user: Permission::ReadWrite, system: Permission::ReadWrite },
