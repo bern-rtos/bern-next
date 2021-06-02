@@ -66,7 +66,7 @@ pub fn init() {
         Config {
             addr: CONF.memory.flash.start_address as *const _, // flash base address
             memory: Type::Flash,
-            size: Size::S512K,
+            size: CONF.memory.flash.size,
             access: Access { user: Permission::ReadOnly, system: Permission::ReadOnly },
             executable: true
         });
@@ -78,7 +78,7 @@ pub fn init() {
         Config {
             addr: CONF.memory.peripheral.start_address as *const _, // peripheral base address
             memory: Type::Peripheral,
-            size: Size::S512M,
+            size: CONF.memory.peripheral.size,
             access: Access { user: Permission::ReadWrite, system: Permission::ReadWrite },
             executable: false
         });
