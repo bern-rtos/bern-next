@@ -12,16 +12,16 @@ extern "C" {
 impl IStartup for Arch {
     fn init_static_memory() {
         unsafe {
-            let mut shared_ptr = __sshared;
-            r0::init_data(&mut shared_ptr, &mut __eshared, &__sishared);
+            let shared_ptr = &mut __sshared;
+            r0::init_data(shared_ptr, &mut __eshared, &__sishared);
         }
     }
 
     fn region() -> Region {
         unsafe {
             Region {
-                start: __sshared as *const _,
-                stop: __eshared as *const _,
+                start: &__sshared as *const _ as *const usize,
+                stop: &__eshared as *const _ as *const usize,
             }
         }
     }
