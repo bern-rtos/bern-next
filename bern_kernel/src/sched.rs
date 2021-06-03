@@ -31,6 +31,7 @@ use bern_arch::arch::{ArchCore, Arch};
 use bern_arch::memory_protection::{Config, Type, Access, Permission};
 use bern_arch::arch::memory_protection::Size;
 use bern_conf::CONF;
+use crate::stack::Stack;
 
 // These statics are MaybeUninit because, there currently no solution to
 // initialize an array dependent on a `const` size and a non-copy type.
@@ -377,6 +378,22 @@ fn switch_context(stack_ptr: u32) -> u32 {
 
     Arch::enable_memory_protection();
     new_stack_ptr
+}
+
+#[repr(usize)]
+pub enum StackSpace {
+    Sufficient = 1,
+    Insufficient = 0,
+}
+#[no_mangle]
+fn check_stack(stack_ptr: usize) -> StackSpace {
+    let sched = unsafe { &mut *SCHEDULER.as_mut_ptr() };
+    let stack = sched.task_running.as_ref().unwrap().inner().stack();
+    if stack_ptr > (stack.bottom_ptr() as usize) {
+        StackSpace::Sufficient
+    } else {
+        StackSpace::Insufficient
+    }
 }
 
 #[no_mangle]

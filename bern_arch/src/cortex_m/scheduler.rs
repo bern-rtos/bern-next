@@ -12,16 +12,22 @@ extern "C" fn PendSV() {
     // store stack of current task
     unsafe {
         asm!(
-        "mrs   r0, psp",
-        "stmdb r0!, {{r4-r11}}",
-        "push  {{lr}}",
-        "bl    switch_context",
-        "pop   {{lr}}",
-        "mov   r3, #3",        // todo: read from function
-        "msr   control, r3",   // switch to unprivileged thread mode
-        "ldmia r0!, {{r4-r11}}",
-        "msr   psp, r0",
-        "bx    lr",
+        "push    {{lr}}",
+        "mrs     r3, psp",
+        "sub     r0, r3, #32",  // psp after register push
+        "bl      check_stack",  // in: psp (r0), out: store context (1), stack would overflow (0)
+        "cmp     r0, #1",       // stack valid?
+        "it      eq",
+        "stmdbeq r3!, {{r4-r11}}",
+        "mov     r0, r3",
+        "bl      switch_context",
+        "pop     {{lr}}",
+        "mov     r3, #3",        // todo: read from function
+        "msr     control, r3",   // switch to unprivileged thread mode
+        "isb",
+        "ldmia   r0!, {{r4-r11}}",
+        "msr     psp, r0",
+        "bx      lr",
         options(noreturn),
         )
     }

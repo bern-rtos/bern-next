@@ -201,6 +201,12 @@ impl Task {
         self.runnable_ptr
     }
 
+    pub(crate) fn stack(&self) -> &Stack {
+        &self.stack
+    }
+    pub(crate) fn stack_mut(&mut self) -> &mut Stack {
+        &mut self.stack
+    }
     pub(crate) fn stack_ptr(&self) -> *mut usize {
         self.stack.ptr
     }
@@ -208,7 +214,7 @@ impl Task {
         self.stack.ptr = psp;
     }
     pub(crate) fn stack_top(&self) -> *const usize {
-        self.stack.top_ptr() as *const _
+        self.stack.bottom_ptr() as *const _
     }
 
     pub(crate) fn next_wut(&self) -> u64 {

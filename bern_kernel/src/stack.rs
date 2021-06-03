@@ -3,7 +3,7 @@ use core::ops::{DerefMut, Deref};
 #[derive(Copy, Clone)] // todo: remove
 #[repr(C)]
 pub struct Stack {
-    top: *mut u8,
+    bottom: *mut u8,
     len: usize,
     pub ptr: *mut usize,
 }
@@ -11,14 +11,14 @@ pub struct Stack {
 impl Stack {
     pub fn new(stack: &mut [u8]) -> Self {
         Stack {
-            top: stack.as_mut_ptr(),
+            bottom: stack.as_mut_ptr(),
             len: stack.len(),
             ptr: unsafe { stack.as_mut_ptr().offset(stack.len() as isize) } as *mut usize,
         }
     }
 
-    pub fn top_ptr(&self) -> *mut u8 {
-        self.top
+    pub fn bottom_ptr(&self) -> *mut u8 {
+        self.bottom
     }
 
     pub fn len(&self) -> usize {
@@ -28,7 +28,7 @@ impl Stack {
 
 
 // based on https://github.com/japaric/aligned/blob/master/src/lib.rs
-#[repr(align(512))]
+#[repr(align(1024))]
 pub struct A256B;
 
 #[repr(C)]
