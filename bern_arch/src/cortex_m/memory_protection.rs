@@ -84,8 +84,14 @@ impl IMemoryProtection for Arch {
     }
 }
 
+
+extern "C" {
+    pub fn memory_protection_exception();
+}
 #[allow(non_snake_case)]
 #[exception]
 fn MemoryManagement() -> () {
-    cortex_m::asm::bkpt();
+    unsafe {
+        memory_protection_exception();
+    }
 }

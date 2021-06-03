@@ -158,8 +158,8 @@ pub fn start() -> ! {
     }
 
     Arch::apply_regions(task.as_ref().unwrap().inner().memory_regions());
+    Arch::enable_memory_protection();
     sched.task_running = task;
-
     sched.core.start();
 
     let stack_ptr = sched.task_running.as_ref().unwrap().inner().stack_ptr();
@@ -321,12 +321,12 @@ pub fn event_fire(id: usize) {
 /// implementation.
 #[no_mangle]
 fn switch_context(stack_ptr: u32) -> u32 {
-    Arch::disable_memory_protection();
     // NOTE(unsafe): scheduler must be initialized first
     // todo: replace with `assume_init_mut()` as soon as stable
     let sched = unsafe { &mut *SCHEDULER.as_mut_ptr() };
 
-    let stack_ptr = critical_section::exec(|| {
+    Arch::disable_memory_protection();
+    let new_stack_ptr = critical_section::exec(|| {
         sched.task_running.as_mut().unwrap().inner_mut().set_stack_ptr(stack_ptr as *mut usize);
 
         let mut pausing = sched.task_running.take().unwrap();
@@ -376,7 +376,12 @@ fn switch_context(stack_ptr: u32) -> u32 {
     });
 
     Arch::enable_memory_protection();
-    stack_ptr
+    new_stack_ptr
+}
+
+#[no_mangle]
+fn memory_protection_exception() {
+    task_terminate();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
