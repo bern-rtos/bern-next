@@ -28,8 +28,8 @@ impl Stack {
 
 
 // based on https://github.com/japaric/aligned/blob/master/src/lib.rs
-#[repr(align(1024))]
-pub struct A256B;
+#[repr(align(512))]
+pub struct A512B;
 
 #[repr(C)]
 pub struct Aligned<A, T>
@@ -67,7 +67,7 @@ macro_rules! alloc_static_stack {
     ($size:expr) => {
         {
             #[link_section = ".task_stack"]
-            static mut STACK: $crate::stack::Aligned<$crate::stack::A256B, [u8; $size]> =
+            static mut STACK: $crate::stack::Aligned<$crate::stack::A512B, [u8; $size]> =
                 $crate::stack::Aligned([0; $size]);
             //static mut STACK: [u8; $size] = [0; $size]; // will not be initialized -> linker script
             /*unsafe{ // stack pattern for debugging

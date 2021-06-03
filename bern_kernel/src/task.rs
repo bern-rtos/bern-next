@@ -145,7 +145,7 @@ impl TaskBuilder {
         let memory_regions = [Arch::prepare_memory_region(
             5,
             Config {
-                addr: self.stack.as_ref().unwrap().top_ptr() as *const _,
+                addr: stack.bottom_ptr() as *const _,
                 memory: Type::SramInternal,
                 size: Size::S512,
                 access: Access { user: Permission::ReadWrite, system: Permission::ReadWrite },
