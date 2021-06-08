@@ -1,19 +1,20 @@
 use core::ops::{DerefMut, Deref};
+use crate::bern_arch::arch::memory_protection::Size;
 
 #[derive(Copy, Clone)] // todo: remove
 #[repr(C)]
 pub struct Stack {
     bottom: *mut u8,
-    len: usize,
     pub ptr: *mut usize,
+    size: Size,
 }
 
 impl Stack {
-    pub fn new(stack: &mut [u8]) -> Self {
+    pub fn new(stack: &mut [u8], size: Size) -> Self {
         Stack {
             bottom: stack.as_mut_ptr(),
-            len: stack.len(),
             ptr: unsafe { stack.as_mut_ptr().offset(stack.len() as isize) } as *mut usize,
+            size
         }
     }
 
@@ -21,16 +22,13 @@ impl Stack {
         self.bottom
     }
 
-    pub fn len(&self) -> usize {
-        self.len
+    pub fn size(&self) -> Size {
+        self.size
     }
 }
 
 
 // based on https://github.com/japaric/aligned/blob/master/src/lib.rs
-#[repr(align(512))]
-pub struct A512B;
-
 #[repr(C)]
 pub struct Aligned<A, T>
     where
@@ -64,18 +62,14 @@ impl<A, T> DerefMut for Aligned<A, T> {
 // todo: enforce alignment and size restrictions
 #[macro_export]
 macro_rules! alloc_static_stack {
-    ($size:expr) => {
+    ($size:tt) => {
         {
             #[link_section = ".task_stack"]
-            static mut STACK: $crate::stack::Aligned<$crate::stack::A512B, [u8; $size]> =
+            static mut STACK: $crate::stack::Aligned<$crate::bern_arch::alignment_from_size!($size), [u8; $size]> =
                 $crate::stack::Aligned([0; $size]);
-            //static mut STACK: [u8; $size] = [0; $size]; // will not be initialized -> linker script
-            /*unsafe{ // stack pattern for debugging
-                for byte in *STACK.iter_mut() {
-                    *byte = 0xAA;
-                }
-            }*/
-            unsafe { $crate::stack::Stack::new(&mut *STACK) }
+
+            // this is unsound, because the same stack can 'allocated' multiple times
+            unsafe { $crate::stack::Stack::new(&mut *STACK, $crate::bern_arch::size_from_raw!($size)) }
         }
     };
 }

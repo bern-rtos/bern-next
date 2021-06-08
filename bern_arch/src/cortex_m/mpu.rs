@@ -39,6 +39,10 @@ impl Size {
     pub const fn bits(self) -> u32 {
         self as u32
     }
+
+    pub const fn size_bytes(self) -> u32 {
+        2u32.pow((self as u32) + 1)
+    }
 }
 
 /*

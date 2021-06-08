@@ -147,7 +147,7 @@ impl TaskBuilder {
             Config {
                 addr: stack.bottom_ptr() as *const _,
                 memory: Type::SramInternal,
-                size: Size::S512,
+                size: stack.size(),
                 access: Access { user: Permission::ReadWrite, system: Permission::ReadWrite },
                 executable: false
             }),

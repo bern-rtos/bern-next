@@ -17,3 +17,4 @@ pub use bern_kernel_macros::*;
 
 #[allow(unused_imports)]
 use bern_arch::arch as _;
+pub use bern_arch;
