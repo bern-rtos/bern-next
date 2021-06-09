@@ -31,7 +31,6 @@ use bern_arch::arch::{ArchCore, Arch};
 use bern_arch::memory_protection::{Config, Type, Access, Permission};
 use bern_arch::arch::memory_protection::Size;
 use bern_conf::CONF;
-use crate::stack::Stack;
 
 // These statics are MaybeUninit because, there currently no solution to
 // initialize an array dependent on a `const` size and a non-copy type.
@@ -95,6 +94,7 @@ pub fn init() {
             access: Access { user: Permission::ReadWrite, system: Permission::ReadWrite },
             executable: false
         });
+
     Arch::disable_memory_region(3);
     Arch::disable_memory_region(4);
 
@@ -117,7 +117,7 @@ pub fn init() {
         }
         EVENT_POOL = MaybeUninit::new(ArrayPool::new(event_pool));
 
-        let mut tasks_ready: [LinkedList<Task, TaskPool>; { CONF.task.priorities as usize }] =
+        let mut tasks_ready: [LinkedList<Task, TaskPool>; CONF.task.priorities as usize] =
             MaybeUninit::uninit().assume_init();
         for element in tasks_ready.iter_mut() {
             *element = LinkedList::new(&*TASK_POOL.as_mut_ptr());

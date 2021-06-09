@@ -1,6 +1,6 @@
 mod enum_map;
 
-use proc_macro::{TokenStream};
+use proc_macro::TokenStream;
 use quote::ToTokens;
 
 #[proc_macro]

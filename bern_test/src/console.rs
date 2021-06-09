@@ -1,9 +1,6 @@
 use nb::Error::Other;
 use crate::serial::{self, Serial};
 use crate::println;
-#[cfg(feature = "serial")]
-use crate::sprintln;
-
 
 pub fn handle_user_input() -> u8 {
     loop {
@@ -40,7 +37,7 @@ pub fn handle_user_input() -> u8 {
 }
 
 // todo: make nicer
-/* ansi terminal colors, see: https://github.com/l-tools/ansi-colors/blob/master/src/colors.rs */
+/* ansi terminal colors, see: <https://github.com/l-tools/ansi-colors/blob/master/src/colors.rs> */
 #[cfg(feature = "colored")]
 # [macro_export]
 macro_rules! term_reset {

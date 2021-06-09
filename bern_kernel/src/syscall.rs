@@ -3,8 +3,8 @@ use core::mem;
 use crate::sched;
 use crate::task::{RunnableResult, TaskBuilder};
 
-use bern_arch::{ISyscall, ICore};
-use bern_arch::arch::{Arch, ArchCore};
+use bern_arch::ISyscall;
+use bern_arch::arch::Arch;
 use crate::sched::event;
 
 
@@ -12,7 +12,6 @@ use crate::sched::event;
 
 #[repr(u8)]
 enum Service {
-    SchedulerInit,
     MoveClosureToStack,
     TaskSpawn,
     TaskSleep,
@@ -165,10 +164,6 @@ fn syscall_handler(service: Service, arg0: usize, arg1: usize, arg2: usize) -> u
         Service::EventFire => {
             let id = arg0;
             sched::event_fire(id);
-            0
-        },
-        _ => {
-            ArchCore::bkpt();
             0
         },
     }

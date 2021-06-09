@@ -7,11 +7,13 @@ pub enum Error {
     InvalidId,
 }
 
+#[allow(dead_code)]
 pub enum Wake {
     WakeFirst,
-    //WakeAll,
+    WakeAll,
 }
 
+#[allow(dead_code)]
 pub struct Event {
     /// Event identifier (randomize to protect access)
     id: usize,

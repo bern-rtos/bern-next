@@ -3,6 +3,8 @@
 #![feature(naked_functions)]
 #![feature(never_type)] // for mock only
 
+#![allow(unused)]
+
 pub mod syscall;
 pub mod core;
 pub mod scheduler;

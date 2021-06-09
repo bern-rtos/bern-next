@@ -1,16 +1,14 @@
 extern crate proc_macro;
 use proc_macro::TokenStream;
-use proc_macro2::{Span, Ident};
-use quote::{format_ident, quote};
-use syn::{parse, spanned::Spanned, Attribute, Item, ItemFn, ItemMod, ReturnType, Type, TypeReference, FnArg, PatType, Pat, PatIdent};
-use syn::__private::fmt::format;
-use std::borrow::Borrow;
+use proc_macro2::Ident;
+use quote::quote;
+use syn::{parse, spanned::Spanned, Item, ItemFn, ItemMod, FnArg, Pat};
 
 
 // adapted from https://github.com/knurling-rs/defmt/blob/main/firmware/defmt-test/macros/src/lib.rs
 
 #[proc_macro_attribute]
-pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
+pub fn tests(_args: TokenStream, input: TokenStream) -> TokenStream {
     let module: ItemMod = syn::parse(input).unwrap();
 
     let items = if let Some(content) = module.content {
@@ -34,11 +32,10 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut test_input_types = vec![];
     for item in items {
         match item {
-            Item::Fn(mut func) => {
+            Item::Fn(func) => {
                 let mut test = false;
                 let mut should_panic = false;
                 let mut ignored = false;
-                let mut set_up = false;
                 let mut test_set_up = false;
                 let mut test_tear_down = false;
                 let mut tear_down = false;
@@ -113,7 +110,6 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
     // todo: clean
     let module_name = module.ident.clone();
     let module_name_string = format!("{}", module.ident);
-    let test_idents = tests.iter().map(|t| &t.name);
     let test_blocks = tests.iter().map(|t| &t.func.block);
     let test_should_panic = tests.iter().map(|t| &t.should_panic);
     let test_sig = tests.iter().map(|t| &t.func.sig);
@@ -145,7 +141,7 @@ pub fn tests(args: TokenStream, input: TokenStream) -> TokenStream {
      * - a test runner
      * - the test function implementations
      */
-    let mut tokens = quote! {
+    let tokens = quote! {
         mod #module_name {
             #(#imports)*
 
