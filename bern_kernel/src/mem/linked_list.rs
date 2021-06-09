@@ -1,3 +1,8 @@
+//! The goal here is to create a fast and efficient linked list
+//! Lists use an array of nodes as memory pool, the array must be static.
+//! In contrast to `std::collections::LinkedList` you can never copy the inner
+//! value out of the list.
+
 #![allow(unused)]
 
 use core::ptr;
@@ -7,11 +12,6 @@ use core::cell::RefCell;
 use core::borrow::BorrowMut;
 use crate::mem::boxed::Box;
 use crate::mem::pool_allocator::{self, PoolAllocator};
-
-/// The goal here is to create a fast and efficient linked list
-/// Lists use an array of nodes as memory pool, the array must be static.
-/// In contrast to `std::collections::LinkedList` you can never copy the inner
-/// value out of the list.
 
 type Link<T> = Option<NonNull<Node<T>>>;
 
@@ -55,7 +55,7 @@ pub struct LinkedList<T,P>
     len: usize,
 }
 
-/// base on std::collections::LinkedList and https://rust-unofficial.github.io/too-many-lists
+/// based on std::collections::LinkedList and <https://rust-unofficial.github.io/too-many-lists>
 impl<T,P> LinkedList<T,P>
     where P: PoolAllocator<Node<T>> + 'static
 {

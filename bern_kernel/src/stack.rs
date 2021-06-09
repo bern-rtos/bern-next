@@ -1,15 +1,28 @@
+//! Task stack management.
+//!
+//! # Example
+//! You typically want to use a macro allocate a static stack ([`alloc_static_stack`]) and create the
+//! management object accordingly:
+//! ```no_run
+//! let stack: bern_kernel::stack::Stack = alloc_static_stack!(512);
+//! ```
+
 use core::ops::{DerefMut, Deref};
 use crate::bern_arch::arch::memory_protection::Size;
 
-#[derive(Copy, Clone)] // todo: remove
+/// Stack management structure
 #[repr(C)]
 pub struct Stack {
+    /// Pointer to the first element of the stack
     bottom: *mut u8,
-    pub ptr: *mut usize,
+    /// Stack size
     size: Size,
+    /// Current stack pointer
+    pub ptr: *mut usize,
 }
 
 impl Stack {
+    /// Create a new stack object from an existing byte array with a fixed size
     pub fn new(stack: &mut [u8], size: Size) -> Self {
         Stack {
             bottom: stack.as_mut_ptr(),
@@ -18,17 +31,31 @@ impl Stack {
         }
     }
 
+    /// Pointer to first element of the stack
     pub fn bottom_ptr(&self) -> *mut u8 {
         self.bottom
     }
 
+    /// Stack size in bytes
     pub fn size(&self) -> Size {
         self.size
     }
 }
 
-
-// based on https://github.com/japaric/aligned/blob/master/src/lib.rs
+/// A newtype with alignment of at least `A` bytes
+///
+/// Copied from <https://docs.rs/aligned/0.3.4/aligned/>
+///
+/// **Note:** The alignment structs are dependent on the memory protection
+/// hardware and must thus be implemented in the architecture specific code.
+/// e.g.:
+/// ```rust,no_run
+/// #[repr(align(64))]
+/// pub struct A64;
+///
+/// #[repr(align(1_024))]
+/// pub struct A1K;
+/// ```
 #[repr(C)]
 pub struct Aligned<A, T>
     where
@@ -38,6 +65,7 @@ pub struct Aligned<A, T>
     value: T,
 }
 
+/// Changes the alignment of `value` to be at least `A` bytes
 #[allow(non_snake_case)]
 pub const fn Aligned<A, T>(value: T) -> Aligned<A, T> {
     Aligned {
@@ -59,7 +87,23 @@ impl<A, T> DerefMut for Aligned<A, T> {
     }
 }
 
-// todo: enforce alignment and size restrictions
+/// Allocate a static stack with given size in bytes.
+///
+/// The macro checks whether the size meets the size and alignment requirements
+/// of the memory protection hardware in use. e.g.
+/// ```no_run
+/// let stack: bern_kernel::stack::Stack = alloc_static_stack!(512);
+/// // ok
+///
+/// let stack: bern_kernel::stack::Stack = alloc_static_stack!(431);
+/// // compiler error on cortex-m as size is not feasible for memory protection
+/// ```
+///
+/// The arrays for static stacks are put in the `.task_stack` linker section.
+///
+/// # Safety
+/// This macro must no be called multiple times as new stack objects to the same
+/// static stack will be returned.
 #[macro_export]
 macro_rules! alloc_static_stack {
     ($size:tt) => {

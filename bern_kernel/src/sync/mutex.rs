@@ -1,3 +1,9 @@
+//! Atomic mutual exclusion.
+//!
+//!
+//!
+//! # Examples
+
 use core::sync::atomic::{AtomicBool, Ordering};
 use core::ops::{Deref, DerefMut};
 use core::cell::UnsafeCell;
@@ -6,11 +12,13 @@ use crate::syscall;
 use crate::sched::event;
 use super::Error;
 
+///
+/// (similar to [`std::sync::Mutex`](https://doc.rust-lang.org/std/sync/struct.Mutex.html))
+///
 /// For multiple tasks to access a mutex it must be placed in shared memory
 /// section. If the data is placed in a shared section the lock can be placed
 /// there as well. Malicious software can corrupt any shared memory section it
 /// has access to.
-///
 pub struct Mutex<T> {
     id: UnsafeCell<usize>,
     inner: UnsafeCell<T>,
@@ -26,6 +34,9 @@ impl<T> Mutex<T> {
         }
     }
 
+    /// Allocate an event ot the mutex.
+    ///
+    /// **Note:** The kernel must be initialized before calling this method.
     pub fn register(&self) -> Result<(),Error> {
         let id = syscall::event_register();
         if id == 0 {
@@ -37,6 +48,8 @@ impl<T> Mutex<T> {
         }
     }
 
+    /// Try to lock the mutex (non-blocking). Returns a [`MutexGuard`] or an
+    /// error if the mutex is not available or poisoned.
     pub fn try_lock(&self) -> Result<MutexGuard<'_,T>, Error> {
         if self.raw_lock().is_ok() {
             Ok(MutexGuard::new(&self))
@@ -45,6 +58,10 @@ impl<T> Mutex<T> {
         }
     }
 
+    /// Try to lock the mutex (blocking).Returns a [`MutexGuard`] or an
+    /// error if the request timed out or the mutex was poisoned.
+    ///
+    /// **Note:** The timeout function is not implemented yet.
     pub fn lock(&self, timeout: u32) ->  Result<MutexGuard<'_,T>, Error> {
         if self.raw_lock().is_ok() {
             return Ok(MutexGuard::new(&self));
@@ -76,7 +93,7 @@ impl<T> Mutex<T> {
 
 unsafe impl<T> Sync for Mutex<T> {}
 
-
+/// Scoped mutex (similar to [`std::sync::MutexGuard`](https://doc.rust-lang.org/std/sync/struct.MutexGuard.html))
 pub struct MutexGuard<'a,T> {
     lock: &'a Mutex<T>,
 }

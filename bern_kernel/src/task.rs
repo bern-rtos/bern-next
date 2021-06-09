@@ -1,3 +1,25 @@
+//! Task creation and control.
+//!
+//! # Example
+//! Create a task using the builder pattern:
+//! ```no_run
+//! let mut heartbeat = board.shield.led_1;
+//! Task::new()
+//!     .priority(Priority(0))
+//!     .static_stack(kernel::alloc_static_stack!(512))
+//!     .spawn(move || {
+//!         loop {
+//!             kernel::sleep(200);
+//!             heartbeat.toggle().ok();
+//!         }
+//!     });
+//! ```
+//! The task builder ([`TaskBuilder`]) is used to configure a task. On
+//! [`TaskBuilder::spawn()`] the information is passed to the scheduler and the
+//! task is put into ready state.
+//!
+//! Tasks can be spawened from `main()` or within other tasks.
+
 #![allow(unused)]
 use core::mem;
 use core::ptr;
@@ -15,22 +37,25 @@ use bern_arch::memory_protection::{Config, Type, Access, Permission};
 use bern_arch::IMemoryProtection;
 use bern_conf::CONF;
 
-#[derive(Debug)]
-pub struct TaskError;
-
+/// Transition for next context switch
 #[derive(Copy, Clone)]
 #[repr(u8)]
 pub enum Transition {
+    /// No transition
     None,
+    /// Task is going into sleep mode
     Sleeping,
+    /// Task es beeing blocked and waiting for an event
     Blocked,
+    /// Resume suspended task
     Resuming,
+    /// Terminate task
     Terminating,
 }
 
 
-/// Issue with closures and static tasks
-/// ------------------------------------
+/// # Issue with closures and static tasks
+///
 /// Every closure has its own anonymous type. A closure can only be stored in a
 /// generic struct. The task object stored in the task "list" (array) must all
 /// have the same size -> not generic. Thus, the closure can only be referenced
@@ -42,9 +67,11 @@ pub enum Transition {
 /// closure trait object, which now references a static object which cannot go
 /// out of scope.
 
-//type RunnableResult = Result<(), TaskError>;
 pub type RunnableResult = (); // todo: replace with '!' when possible
 
+/// Task priority.
+///
+/// 0 is the highest priority.
 #[derive(PartialEq, Debug, Copy, Clone)]
 pub struct Priority(pub u8);
 // todo: check priority range at compile time
@@ -55,17 +82,22 @@ impl Into<usize> for Priority {
     }
 }
 
+/// Builder to create a new task
 pub struct TaskBuilder {
+    /// Task stack
     stack: Option<Stack>,
+    /// Task priority
     priority: Priority,
 }
 
 impl TaskBuilder {
+    /// Add a static stack to the task.
     pub fn static_stack(&mut self, stack: Stack) -> &mut Self {
         self.stack = Some(stack);
         self
     }
 
+    /// Set task priority.
     pub fn priority(&mut self, priority: Priority) -> &mut Self {
         if priority.0 >= CONF.task.priorities as u8 {
             panic!("Priority out of range. todo: check at compile time");
@@ -76,15 +108,17 @@ impl TaskBuilder {
         self
     }
 
+    /// This task will replace the default idle task.
     pub fn idle_task(&mut self) -> &mut Self {
         self.priority = Priority(CONF.task.priorities as u8 - 1);
         self
     }
 
     // todo: return result
+    /// Spawns the task and takes the entry point as closure.
     ///
-    /// A task cannot access another tasks stack, thus all stack initialization
-    /// must be handled via syscalls
+    /// **Note:** A task cannot access another tasks stack, thus all stack
+    /// initialization must be handled via syscalls.
     pub fn spawn<F>(&mut self, closure: F)
         where F: 'static + Sync + FnMut() -> RunnableResult
     {
@@ -175,7 +209,7 @@ impl TaskBuilder {
 
 
 // todo: manage lifetime of stack & runnable
-#[derive(Copy, Clone)]
+/// Task control block
 pub struct Task {
     transition: Transition,
     runnable_ptr: *mut usize,
@@ -187,6 +221,7 @@ pub struct Task {
 }
 
 impl Task {
+    /// Create a new task using the [`TaskBuilder`]
     pub fn new() -> TaskBuilder {
         TaskBuilder {
             stack: None,
@@ -247,9 +282,14 @@ impl Task {
     }
 }
 
-/// *Note* don't be fooled by the `&mut &mut` the first one is a reference
+/// Static and non-generic entry point of the task.
+///
+/// This function simply starts the closure stored on the task stack. It will
+/// only be called when the task runs for the first time.
+///
+/// **Note:** Don't be fooled by the `&mut &mut` the first one is a reference
 /// and second one is part of the trait object type
-pub fn entry(runnable: &mut &mut (dyn FnMut() -> RunnableResult)) {
+pub(crate) fn entry(runnable: &mut &mut (dyn FnMut() -> RunnableResult)) {
     (runnable)();
 }
 

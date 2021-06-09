@@ -43,7 +43,7 @@ impl Serial {
 
     ///
     /// # Safety
-    /// see [set_write]
+    /// see [`Self::set_write`]
     pub fn set_read<F>(read: F)
         where F: FnMut() -> nb::Result<u8, Error> + 'static
     {

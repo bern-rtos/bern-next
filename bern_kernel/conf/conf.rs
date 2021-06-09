@@ -1,3 +1,14 @@
+//! Bern RTOS kernel configuration.
+//!
+//! This is the default kernel config. To apply your own config clone the this
+//! crate into your project and apply a cargo path to override the default
+//! config:
+//! ```toml
+//! # `Cargo.toml`
+//! [patch.crates-io]
+//! bern-conf = { path = "conf" }
+//! ```
+
 #![no_std]
 
 use bern_conf_type::*;

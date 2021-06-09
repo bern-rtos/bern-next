@@ -1,7 +1,10 @@
+//! System time.
+
 use core::sync::atomic::{AtomicU32, Ordering};
 use crate::sched;
 
-pub struct Duration {
+// todo: finish
+pub(crate) struct Duration {
     ticks: u64
 }
 
@@ -22,10 +25,12 @@ impl Duration {
     }
 }
 
-///
+/// Current system tick count.
 static COUNT: AtomicU32 = AtomicU32::new(0); // todo: replace with u64
 
+/// Update system tick count by adding 1.
 ///
+/// **Note:** This function must be called from the architecture implementation.
 #[no_mangle]
 #[inline(always)]
 fn system_tick_update() {
@@ -33,7 +38,7 @@ fn system_tick_update() {
     sched::tick_update();
 }
 
-
+/// Get the current system time in ticks.
 pub fn tick() -> u64 {
     COUNT.load(Ordering::Relaxed) as u64
 }
