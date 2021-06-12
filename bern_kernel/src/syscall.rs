@@ -1,11 +1,32 @@
+//! System calls.
+//!
+//! # Example
+//!
+//! Launch a task that wait for 100 iterations and the terminates.
+//! ```no_run
+//! fn main() -> ! {
+//!     /*...*/
+//!     sched::init();
+//!
+//!     Task::new()
+//!         .static_stack(kernel::alloc_static_stack!(512))
+//!         .spawn(move || {
+//!             for a in 0..100 {
+//!                 bern_kernel::sleep(100);
+//!             }
+//!             bern_kernel::task_exit();
+//!         });
+//! }
+//! ```
+
 use core::mem;
 
 use crate::sched;
+use crate::sched::event;
 use crate::task::{RunnableResult, TaskBuilder};
 
 use bern_arch::ISyscall;
 use bern_arch::arch::Arch;
-use crate::sched::event;
 
 
 // todo: create with proc macro
@@ -29,8 +50,10 @@ impl Service {
     }
 }
 
-
-pub fn move_closure_to_stack<F>(closure: F, builder: &mut TaskBuilder)
+/// Move the closure for the task entry point to the task stack.
+///
+/// This will copy the `closure` to stack point store in the `builder`c
+pub(crate) fn move_closure_to_stack<F>(closure: F, builder: &mut TaskBuilder)
     where F: 'static + Sync + FnMut() -> RunnableResult
 {
     Arch::syscall(
@@ -41,7 +64,8 @@ pub fn move_closure_to_stack<F>(closure: F, builder: &mut TaskBuilder)
     );
 }
 
-pub fn task_spawn(builder: &mut TaskBuilder, runnable: &&mut (dyn FnMut() -> RunnableResult)) {
+/// Add a task to the scheduler based on its `TaskBuilder` and entry point.
+pub(crate) fn task_spawn(builder: &mut TaskBuilder, runnable: &&mut (dyn FnMut() -> RunnableResult)) {
     Arch::syscall(
         Service::TaskSpawn.service_id(),
         builder as *mut _ as usize,
@@ -50,6 +74,8 @@ pub fn task_spawn(builder: &mut TaskBuilder, runnable: &&mut (dyn FnMut() -> Run
     );
 }
 
+
+/// Put the current task to sleep for `ms` milliseconds.
 pub fn sleep(ms: u32) {
     Arch::syscall(
         Service::TaskSleep.service_id(),
@@ -59,6 +85,10 @@ pub fn sleep(ms: u32) {
     );
 }
 
+/// Yield the CPU.
+///
+/// **Note:** If the calling task is the only ready task of its priority it will
+/// be put to running state again.
 pub fn yield_now() {
     Arch::syscall(
         Service::TaskYield.service_id(),
@@ -68,6 +98,7 @@ pub fn yield_now() {
     );
 }
 
+/// Terminate the current task voluntarily.
 pub fn task_exit() {
     Arch::syscall(
         Service::TaskExit.service_id(),
@@ -77,7 +108,10 @@ pub fn task_exit() {
     );
 }
 
-pub fn event_register() -> usize {
+/// Allocate and request the ID a new event.
+///
+/// The ID is later used to await and fire events.
+pub(crate) fn event_register() -> usize {
     Arch::syscall(
         Service::EventRegister.service_id(),
         0,
@@ -86,7 +120,8 @@ pub fn event_register() -> usize {
     )
 }
 
-pub fn event_await(id: usize, timeout: u32) -> Result<(), event::Error> {
+/// Wait until an event or a timeout occurs.
+pub(crate) fn event_await(id: usize, timeout: u32) -> Result<(), event::Error> {
     let ret_code = Arch::syscall(
         Service::EventAwait.service_id(),
         id,
@@ -96,7 +131,8 @@ pub fn event_await(id: usize, timeout: u32) -> Result<(), event::Error> {
     unsafe { mem::transmute(ret_code) }
 }
 
-pub fn event_fire(id: usize) {
+/// Trigger an event given its ID.
+pub(crate) fn event_fire(id: usize) {
     Arch::syscall(
         Service::EventFire.service_id(),
         id,
@@ -108,6 +144,10 @@ pub fn event_fire(id: usize) {
 
 // userland barrier ////////////////////////////////////////////////////////////
 
+/// System Call handler.
+///
+/// **Note:** The syscall above will trigger hardware specific system call
+/// handler which **must** call this function.
 // todo: return result
 #[allow(unused_variables)]
 #[no_mangle]

@@ -8,6 +8,7 @@ pub(crate) struct Duration {
     ticks: u64
 }
 
+#[allow(dead_code)]
 impl Duration {
     pub const fn from_millis(millis: u64) -> Self {
         Duration {

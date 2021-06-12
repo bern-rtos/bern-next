@@ -4,8 +4,11 @@
 
 pub(crate) mod critical_mutex;
 pub(crate) mod critical_section;
-pub mod mutex;
-pub mod semaphore;
+mod mutex;
+mod semaphore;
+
+pub use mutex::{Mutex, MutexGuard};
+pub use semaphore::{Semaphore, SemaphorePermit};
 
 /// Common error type for all sync primitives
 pub enum Error {

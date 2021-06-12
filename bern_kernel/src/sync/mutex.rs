@@ -1,9 +1,3 @@
-//! Atomic mutual exclusion.
-//!
-//!
-//!
-//! # Examples
-
 use core::sync::atomic::{AtomicBool, Ordering};
 use core::ops::{Deref, DerefMut};
 use core::cell::UnsafeCell;
@@ -12,13 +6,51 @@ use crate::syscall;
 use crate::sched::event;
 use super::Error;
 
+/// Atomic mutual exclusion
 ///
-/// (similar to [`std::sync::Mutex`](https://doc.rust-lang.org/std/sync/struct.Mutex.html))
+/// similar to [`std::sync::Mutex`](https://doc.rust-lang.org/std/sync/struct.Mutex.html).
+///
+/// A mutex can be used
+/// - as a simple and efficient form of communication between tasks, by
+///   synchronizing acces to share data between multiple tasks
+/// - to protect data races on shared data or peripherals
+///
+/// # Example
+/// ```no_run
+/// // put the mutex in a section where all tasks have access
+/// #[link_section = ".shared"]
+/// // create mutex containing an integer with an initial values of 42
+/// static MUTEX: Mutex<u32> = Mutex::new(42);
+///
+/// fn main() -> ! {
+///     /*...*/
+///     sched::init();
+///     // allocate an event slot in the kernel, so that tasks can wait for a lock
+///     MUTEX.register().ok();
+///
+///     Task::new()
+///         .static_stack(kernel::alloc_static_stack!(512))
+///         .spawn(move || {
+///             loop {
+///                 /*...*/
+///                 // attempt to lock a mutex with timeout
+///                 match MUTEX.lock(1000) {
+///                     // access the inner value mutably
+///                     Ok(mut value) => *value = 134,
+///                     Err(_) => {}
+///                 }; // mutex unlocks automatically
+///            }
+///         });
+/// }
+/// ```
+///
+/// # Security
 ///
 /// For multiple tasks to access a mutex it must be placed in shared memory
-/// section. If the data is placed in a shared section the lock can be placed
-/// there as well. Malicious software can corrupt any shared memory section it
-/// has access to.
+/// section. If the data is placed in a shared section any part of the software
+/// can access the data. So the lock can be placed in the shared section instead
+/// of hiding it in the kernel behind a syscall. Using a shared mutex thus has
+/// limitted security but direct access to the lock decreases overhead.
 pub struct Mutex<T> {
     id: UnsafeCell<usize>,
     inner: UnsafeCell<T>,
@@ -58,7 +90,7 @@ impl<T> Mutex<T> {
         }
     }
 
-    /// Try to lock the mutex (blocking).Returns a [`MutexGuard`] or an
+    /// Try to lock the mutex (blocking). Returns a [`MutexGuard`] or an
     /// error if the request timed out or the mutex was poisoned.
     ///
     /// **Note:** The timeout function is not implemented yet.
@@ -93,7 +125,9 @@ impl<T> Mutex<T> {
 
 unsafe impl<T> Sync for Mutex<T> {}
 
-/// Scoped mutex (similar to [`std::sync::MutexGuard`](https://doc.rust-lang.org/std/sync/struct.MutexGuard.html))
+/// Scoped mutex
+///
+/// similar to [`std::sync::MutexGuard`](https://doc.rust-lang.org/std/sync/struct.MutexGuard.html).
 pub struct MutexGuard<'a,T> {
     lock: &'a Mutex<T>,
 }

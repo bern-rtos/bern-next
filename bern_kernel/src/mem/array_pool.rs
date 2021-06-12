@@ -4,7 +4,13 @@ use core::ptr::NonNull;
 use crate::mem::pool_allocator::{PoolAllocator, Error};
 use crate::mem::boxed::Box;
 
-
+/// Fixed size data pool based on arrays
+///
+/// # Example
+/// ```no_run
+/// static POOL: ArrayPool<Node<Task>, 10> = ArrayPool::new([None; 10]);
+/// let mut list = LinkedList::new(&POOL);
+/// ```
 #[derive(Debug)]
 pub struct ArrayPool<T, const N: usize> {
     pool: UnsafeCell<[Option<T>; N]>,
@@ -12,6 +18,10 @@ pub struct ArrayPool<T, const N: usize> {
 
 impl<T, const N: usize> ArrayPool<T, {N}>
 {
+    /// Create a new data pool from an existing array
+    ///
+    /// **Note:** The array must consist of `Option` type to evaluate whether
+    /// as cell is empty or not.
     pub const fn new(array: [Option<T>; N]) -> Self {
         ArrayPool {
             pool: UnsafeCell::new(array),

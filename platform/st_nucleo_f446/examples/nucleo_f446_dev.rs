@@ -1,4 +1,4 @@
-//#![deny(unsafe_code)]
+#![deny(unsafe_code)]
 #![no_main]
 #![no_std]
 
@@ -7,7 +7,7 @@ use kernel::{
     task::Task,
     task::Priority,
     sched,
-    sync::mutex::Mutex,
+    sync::Mutex,
 };
 
 use panic_halt as _;
@@ -16,9 +16,7 @@ use cortex_m;
 use cortex_m_rt::entry;
 use st_nucleo_f446::StNucleoF446;
 use stm32f4xx_hal::prelude::*;
-use bern_kernel::sync::semaphore::Semaphore;
-use bern_kernel::sync::mutex::MutexGuard;
-use bern_kernel::sync::Error;
+use bern_kernel::sync::Semaphore;
 
 #[link_section = ".shared"]
 static MUTEX: Mutex<u32> = Mutex::new(42);
@@ -37,7 +35,7 @@ fn main() -> ! {
     /* idle task */
     Task::new()
         .idle_task()
-        .static_stack(kernel::alloc_static_stack!(128))
+        .static_stack(kernel::alloc_static_stack!(256))
         .spawn(move || {
             loop {
                 cortex_m::asm::nop();
@@ -128,12 +126,15 @@ fn main() -> ! {
     //         }
     //     });
 
+
+    let mut heartbeat = board.shield.led_1;
     Task::new()
         .priority(Priority(0))
         .static_stack(kernel::alloc_static_stack!(512))
         .spawn(move || {
             loop {
-                kernel::sleep(50);
+                kernel::sleep(200);
+                heartbeat.toggle().ok();
             }
         });
 
@@ -147,6 +148,8 @@ fn main() -> ! {
                 led.set_high().ok();
                 kernel::sleep(1000);
                 led.set_low().ok();
+                kernel::sleep(200);
+
                 match MUTEX.try_lock() {
                     Ok(mut v) => *v = 134,
                     Err(_) => {}
@@ -158,6 +161,7 @@ fn main() -> ! {
     sched::start();
 }
 
+#[allow(dead_code)]
 fn recursion(a: u32) -> u32 {
     let b = a + 10;
     recursion(b)

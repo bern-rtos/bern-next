@@ -25,6 +25,11 @@ name = "arm_cm4-mutex"
 path = "tests/mutex.rs"
 harness = false
 
+[[test]]
+name = "arm_cm4-memory-protection"
+path = "tests/memory_protection.rs"
+harness = false
+
 [dependencies]
 bern-kernel = { version = "*", path = "../.." }
 bern-test = { version = "*", features = ["autorun", "serial", "colored"], path = "../../../bern_test" }
