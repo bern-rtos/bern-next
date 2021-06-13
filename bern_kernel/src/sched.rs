@@ -253,13 +253,12 @@ pub(crate) fn tick_update() {
             cursor.move_next();
         }
 
-        // time-slicing
+        #[cfg(feature = "time-slicing")]
         if sched.tasks_ready[preempt_prio].len() > 0 {
             trigger_switch = true;
         }
     });
 
-    #[cfg(feature = "time-slicing")]
     if trigger_switch {
         Arch::trigger_context_switch();
     }
