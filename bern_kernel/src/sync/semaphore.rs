@@ -41,7 +41,7 @@ use crate::sched::event;
 /// ```
 pub struct Semaphore {
     id: UnsafeCell<usize>,
-    permits: usize,
+    permits: AtomicUsize,
     permits_issued: AtomicUsize,
 }
 
@@ -49,7 +49,7 @@ impl Semaphore {
     pub const fn new(permits: usize) -> Self {
         Semaphore {
             id: UnsafeCell::new(0),
-            permits,
+            permits:  AtomicUsize::new(permits),
             permits_issued: AtomicUsize::new(0),
         }
     }
@@ -102,13 +102,20 @@ impl Semaphore {
 
     /// Number of permits that can be issued from this semaphore
     pub fn available_permits(&self) -> usize {
-        self.permits - self.permits_issued.load(Ordering::Relaxed)
+        self.permits.load(Ordering::Relaxed) - self.permits_issued.load(Ordering::Relaxed)
+    }
+
+    // Add `n` new permits to the semaphore.
+    pub fn add_permits(&self, n: usize) {
+        self.permits.fetch_add(n, Ordering::Release);
+        // NOTE(unsafe): `id` is not changed after startup
+        syscall::event_fire(unsafe { *self.id.get() });
     }
 
     /// **Note:** This will return a false positive when `permits_issued` overflows
     fn raw_acquire(&self) -> Result<(), ()> {
         let permits = self.permits_issued.fetch_add(1, Ordering::Acquire);
-        if permits >= self.permits {
+        if permits >= self.permits.load(Ordering::Relaxed) {
             self.permits_issued.fetch_sub(1, Ordering::Release);
             Err(())
         } else {
@@ -139,6 +146,11 @@ impl<'a> SemaphorePermit<'a> {
         SemaphorePermit {
             semaphore,
         }
+    }
+
+    /// Forget permit. Will not be returned to the available permits.
+    pub fn forget(self) {
+        self.semaphore.permits.fetch_sub(1, Ordering::Relaxed);
     }
 }
 
