@@ -44,6 +44,8 @@ pub struct Memory {
     pub sram: MemorySection,
     /// Memory mapped peripherals section
     pub peripheral: MemorySection,
+    /// Shared memory section
+    pub shared: MemorySection,
 }
 
 /// Combined config

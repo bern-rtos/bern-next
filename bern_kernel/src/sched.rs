@@ -24,7 +24,6 @@ use crate::mem::{
 use bern_arch::{ICore, IScheduler, IStartup, IMemoryProtection};
 use bern_arch::arch::{ArchCore, Arch};
 use bern_arch::memory_protection::{Config, Type, Access, Permission};
-use bern_arch::arch::memory_protection::Size;
 use bern_conf::CONF;
 
 // These statics are MaybeUninit because, there currently no solution to
@@ -87,7 +86,7 @@ pub fn init() {
         Config {
             addr: shared.start,
             memory: Type::SramInternal,
-            size: Size::S256,
+            size: CONF.memory.shared.size,
             access: Access { user: Permission::ReadWrite, system: Permission::ReadWrite },
             executable: false
         });

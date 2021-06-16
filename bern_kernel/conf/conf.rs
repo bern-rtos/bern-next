@@ -34,5 +34,9 @@ pub const CONF: Conf = Conf {
             start_address: 0x4000_0000,
             size: Size::S512M,
         },
+        shared: MemorySection {
+            start_address: 0x2001FC00,
+            size: Size::S1K,
+        }
     },
 };
