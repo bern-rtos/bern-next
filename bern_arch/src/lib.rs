@@ -1,7 +1,18 @@
+//! Bern RTOS kernel architecture support.
+//!
+//! # Documentation
+//! Refer to the kernel book [kernel.bern-rtos.org](https://kerneel.bern-rtos.org).
+//!
+//! # Supported Architectures
+//! | Core Name | Architecture | Rust Target |
+//! |-----------|--------------|-------------|
+//! | ARM Cortex-M4 w/MPU | ARMv7E-M | `thumbv7em-none-eabi` |
+
 #![cfg_attr(target_os = "none", no_std)]
 #![feature(asm)]
 #![feature(naked_functions)]
-#![feature(never_type)] // for mock only
+
+#![cfg_attr(not(target_os = "none"), never_type)]
 
 #![allow(unused)]
 
@@ -28,6 +39,5 @@ pub use crate::mock as arch;
 
 #[cfg(all(target_arch = "arm", target_os = "none"))]
 pub mod cortex_m;
-
 #[cfg(all(target_arch = "arm", target_os = "none"))]
 pub use crate::cortex_m as arch;

@@ -1,5 +1,6 @@
-
-/* adapted from cortex-m crate */
+//! CPU Register definitions.
+//!
+//! Adapted from the `cortex-m` crate.
 
 /// CPU registers pushed/popped by the hardware
 #[repr(C)]
@@ -43,7 +44,8 @@ pub struct StackFrameExtension {
     pub r11: u32,
 }
 
-/// todo: CPU registers used by the floating point unit
+/// FPU registers the software must push/pop to/from the stack
+// todo: CPU registers used by the floating point unit
 #[allow(dead_code)]
 #[repr(C)]
 pub struct StackFrameFpu {

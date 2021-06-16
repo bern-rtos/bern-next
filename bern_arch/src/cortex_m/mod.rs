@@ -1,3 +1,5 @@
+//! ARM Cortex-M hardware support.
+
 pub mod syscall;
 pub mod core;
 pub mod sync;

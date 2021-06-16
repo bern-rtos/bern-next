@@ -1,3 +1,5 @@
+//! ARM Cortex-M implementation of [`IScheduler`] and context switch.
+
 use core::mem;
 use cortex_m::peripheral::SCB;
 
@@ -5,6 +7,11 @@ use crate::scheduler::IScheduler;
 use crate::arch::Arch;
 use crate::arch::register::{StackFrame, StackFrameExtension};
 
+/// Pendable service call.
+///
+/// Storing and loading registers in context switch.
+///
+/// Exception is triggered by `cortex_m::peripheral::SCB::PendSV()`.
 #[no_mangle]
 #[naked] // todo: move to separate assembly file and introduce at link time
 extern "C" fn PendSV() {
@@ -34,9 +41,6 @@ extern "C" fn PendSV() {
 }
 
 impl IScheduler for Arch {
-    ///
-    /// # Safety
-    /// - The stack must be large enough for the initial stack frame
     unsafe fn init_task_stack(stack_ptr: *mut usize, entry: *const usize, arg: *const usize, exit: *const usize) -> *mut usize {
         let stack_frame_offset = mem::size_of::<StackFrame>() / mem::size_of::<usize>();
         let mut stack_frame: &mut StackFrame =

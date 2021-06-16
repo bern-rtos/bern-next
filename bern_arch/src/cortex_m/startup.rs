@@ -1,3 +1,5 @@
+//! ARM Cortex-M implementation of [`IStartup`].
+
 use crate::IStartup;
 use crate::arch::Arch;
 use r0;

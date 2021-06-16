@@ -1,3 +1,5 @@
+//! Mock all architecture interfaces.
+
 #![allow(unreachable_code)]
 
 use mockall::*;

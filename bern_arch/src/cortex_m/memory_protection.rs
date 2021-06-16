@@ -1,3 +1,5 @@
+//! ARM Cortex-M implementation of [`IMemoryProtection`].
+
 use crate::memory_protection::{IMemoryProtection, Config, Type};
 use crate::arch::Arch;
 use crate::arch::mpu::{self, Mpu, RegionNumber, Permission, Subregions, Attributes, CachePolicy};
@@ -85,9 +87,13 @@ impl IMemoryProtection for Arch {
 }
 
 
-extern "C" {
+extern "Rust" {
+    /// Exception called on a memory protection violation.
+    ///
+    /// **Note:** Must be implemented in the kernel.
     pub fn memory_protection_exception();
 }
+
 #[allow(non_snake_case)]
 #[exception]
 fn MemoryManagement() -> () {

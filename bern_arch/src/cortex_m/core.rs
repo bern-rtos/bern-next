@@ -1,3 +1,5 @@
+//! ARM Cortex-M implementation of [`ICore`].
+
 use crate::core::ICore;
 use cortex_m::{Peripherals, asm};
 use cortex_m::peripheral::syst::SystClkSource;

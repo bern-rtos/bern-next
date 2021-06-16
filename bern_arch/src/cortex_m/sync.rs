@@ -1,3 +1,5 @@
+//! ARM Cortex-M implementation of [`ISync`].
+
 use crate::sync::ISync;
 use crate::cortex_m::Arch;
 
