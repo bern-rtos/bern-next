@@ -15,14 +15,17 @@ impl ICore for ArchCore {
         // system is doomed
         let mut peripherals = unsafe { Peripherals::steal() };
         peripherals.SYST.set_clock_source(SystClkSource::Core);
-        // this is configured for the STM32F411 which has a default CPU clock of 48 MHz
-        peripherals.SYST.set_reload(48_000);
-        peripherals.SYST.clear_current();
 
         ArchCore {
             peripherals
         }
     }
+
+    fn set_systick_div(&mut self, divisor: u32) {
+        self.peripherals.SYST.set_reload(48_000);
+        self.peripherals.SYST.clear_current();
+    }
+
 
     fn start(&mut self) {
         self.peripherals.SYST.enable_counter();
