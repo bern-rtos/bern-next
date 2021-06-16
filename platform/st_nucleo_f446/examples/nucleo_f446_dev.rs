@@ -21,7 +21,7 @@ use bern_kernel::sync::Semaphore;
 #[link_section = ".shared"]
 static MUTEX: Mutex<u32> = Mutex::new(42);
 #[link_section = ".shared"]
-static SEMAPHORE: Semaphore = Semaphore::new(4);
+static SEMAPHORE: Semaphore = Semaphore::new(10);
 
 #[entry]
 fn main() -> ! {
@@ -29,6 +29,10 @@ fn main() -> ! {
     let board = StNucleoF446::new();
 
     sched::init();
+    sched::set_tick_frequency(
+        1_000,
+        48_000_000
+    );
     MUTEX.register().ok();
     SEMAPHORE.register().ok();
 
@@ -155,6 +159,26 @@ fn main() -> ! {
                     Err(_) => {}
                 };
                 //recursion(1);
+            }
+        });
+
+
+    let mut led = board.shield.led_6;
+    Task::new()
+        .static_stack(kernel::alloc_static_stack!(512))
+        .spawn(move || {
+            loop {
+                match SEMAPHORE.acquire(1000) {
+                    Ok(permit) => {
+                        led.set_high().ok();
+                        kernel::sleep(200);
+                        led.set_low().ok();
+                        kernel::sleep(800);
+
+                        permit.forget();
+                    }
+                    Err(_) => {}
+                }
             }
         });
 

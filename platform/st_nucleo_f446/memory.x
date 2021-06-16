@@ -1,6 +1,7 @@
 MEMORY {
     FLASH : ORIGIN = 0x08000000, LENGTH = 512K
-    RAM : ORIGIN = 0x20000000, LENGTH = 128K
+    RAM : ORIGIN = 0x20000000, LENGTH = 128K - 1K
+    SHARED : ORIGIN = 0x2001FC00, LENGTH = 1K
 }
 
 /* Align stacks to double word see:
@@ -26,6 +27,6 @@ SECTIONS {
         *(.shared);
         . = ALIGN(4);
         __eshared = .;
-    } > RAM
+    } > SHARED
     __sishared = LOADADDR(.shared);
-} INSERT AFTER .task_stack
+}
