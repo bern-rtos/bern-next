@@ -8,6 +8,8 @@
 //! [patch.crates-io]
 //! bern-conf = { path = "conf" }
 //! ```
+//!
+//! [Example Configuration](../src/bern_conf/conf.rs.html#18-44)
 
 #![no_std]
 
@@ -35,6 +37,8 @@ pub const CONF: Conf = Conf {
             size: Size::S512M,
         },
         shared: MemorySection {
+            // will be ignored, start of shared section is read via linker
+            // symbol
             start_address: 0x2001FC00,
             size: Size::S1K,
         }

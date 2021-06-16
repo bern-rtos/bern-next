@@ -1,5 +1,8 @@
 //! Bern RTOS kernel architecture support.
 //!
+//! This crates was developed for the `bern_kernel` but can be used as basis for
+//! any real-time operating system.
+//!
 //! # Documentation
 //! Refer to the kernel book [kernel.bern-rtos.org](https://kerneel.bern-rtos.org).
 //!

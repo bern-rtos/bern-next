@@ -1,8 +1,11 @@
+//! ARM Cortex-M Memory Protection Unit.
+//!
+//! Based on <https://github.com/helium/cortex-mpu>.
+
 use cortex_m::peripheral::{self, mpu, MPU};
 use cortex_m::asm;
 
-// based on https://github.com/helium/cortex-mpu
-
+/// Valid sizes for the MPU.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(u8)]
 pub enum Size {
@@ -36,35 +39,16 @@ pub enum Size {
     S4G = 31,
 }
 impl Size {
+    /// Return register value from `Size`.
     pub const fn bits(self) -> u32 {
         self as u32
     }
 
+    /// Return `Size` in bytes
     pub const fn size_bytes(self) -> u32 {
         2u32.pow((self as u32) + 1)
     }
 }
-
-/*
-pub struct Region {
-    size: u8,
-    base: Size,
-    subregions_enabled: u8,
-    align: usize,
-}
-
-impl Region {
-    pub const S32: Self = Self { base: Size::S32, size: 32, subregions_enabled: 8, align: 32 };
-    pub const S64: Self = Self { base: Size::S64, size: 64, subregions_enabled: 8, align: 64 };
-    pub const S128: Self = Self { base: Size::S128, size: 128, subregions_enabled: 8, align: 128 };
-
-    pub const S96: Self = Self { base: Size::S256, size: 96, subregions_enabled: 1, align: 96 };
-    pub const S160: Self = Self { base: Size::S256, size: 224, subregions_enabled: 7, align: 224 };
-    pub const S192: Self = Self { base: Size::S256, size: 224, subregions_enabled: 7, align: 224 };
-    pub const S224: Self = Self { base: Size::S256, size: 224, subregions_enabled: 7, align: 224 };
-    pub const S256: Self = Self { base: Size::S256, size: 256, subregions_enabled: 8, align: 256 };
-}
-*/
 
 /* Control Register */
 pub const MPU_ENABLE: u32 = 1;
@@ -90,6 +74,7 @@ pub enum Permission {
 }
 
 impl From<crate::memory_protection::Permission> for Permission {
+    /// Match permission from interface to local permission enum
     fn from(permission: crate::memory_protection::Permission) -> Self {
         match permission {
             crate::memory_protection::Permission::NoAccess => Permission::NoAccess,
@@ -99,31 +84,52 @@ impl From<crate::memory_protection::Permission> for Permission {
     }
 }
 
+/// Memory attributes on the hardware.
 pub enum Attributes {
+    /// No caching or buffering allowed
     StronglyOrdered,
+    /// Memory mapped peripheral.
     Device {
+        /// Can be shared between multiple cores.
         shareable: bool,
     },
+    /// Normal memory, e.g. Flash or SRAM.
     Normal {
+        /// Can be shared between multiple cores.
         shareable: bool,
-        /// (inner, outer, write allocate)
+        /// (inner, outer)
         cache_policy: (CachePolicy, CachePolicy),
     },
 }
 
+/// Requested cache policy if implemented on MCU.
 pub enum CachePolicy {
+    /// No caching allowed.
     NoCache,
+    /// Write without caching, allow read caching.
     WriteThrough,
+    /// Allow read and write caching. Cache will write back to main memory on
+    /// its own.
     WriteBack {
-        /// write allocate
+        /// Write allocate: fetch data on a write miss to the cache.
         wa: bool,
     },
 }
 
+/// MPU subregions.
+///
+/// A memory region is divided into 8 subregion of equal size. The memory region
+/// rule can be disabled for any of the 8 subregions.
+/// A bit corresponds to one subregion: LSB - lowest address, MSB - highest
+/// address.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Subregions(u8);
 impl Subregions {
+    /// Memory rule applies to all subregions.
     pub const ALL: Subregions = Subregions(0xFF);
+    /// All subregions disabled.
+    ///
+    /// **Note:** Just disable the memory region altogether.
     pub const NONE: Subregions = Subregions(0);
 
     pub const fn bits(self) -> u32 {
@@ -148,11 +154,13 @@ pub struct MemoryRegion {
 pub struct Mpu<'a>(&'a mut mpu::RegisterBlock);
 
 impl Mpu<'_> {
+    /// Get the memory protection peripheral.
     #[inline]
     pub unsafe fn take() -> Self {
         Self(&mut *(peripheral::MPU::PTR as *mut _))
     }
 
+    /// Global MPU enable.
     #[inline]
     pub fn enable(&mut self) {
         unsafe {
@@ -162,6 +170,7 @@ impl Mpu<'_> {
         asm::isb();
     }
 
+    /// Global MPU disable.
     #[inline]
     pub fn disable(&mut self) {
         asm::dmb();
@@ -170,6 +179,7 @@ impl Mpu<'_> {
         }
     }
 
+    /// Compile RBAR register values from configuration.
     pub const fn prepare_region_base_address(addr: u32, region: RegionNumber) -> u32 {
         let base_addr = addr & !0x1F;
         let (valid, region) = match region {
@@ -180,6 +190,7 @@ impl Mpu<'_> {
         base_addr | valid | region as u32
     }
 
+    /// Apply memory base address and region.
     #[inline]
     pub fn set_region_base_address(&mut self, addr: u32, region: RegionNumber) {
         let register = Self::prepare_region_base_address(
@@ -192,6 +203,7 @@ impl Mpu<'_> {
         }
     }
 
+    /// Compile RASR register values from configuration.
     pub const fn prepare_region_attributes(executable: bool,
                                      access: (Permission, Permission),
                                      attributes: Attributes,
@@ -244,6 +256,7 @@ impl Mpu<'_> {
         register
     }
 
+    /// Apply memory region attributes and size.
     #[inline]
     pub fn set_region_attributes(&mut self,
                                  executable: bool,
@@ -265,6 +278,7 @@ impl Mpu<'_> {
         }
     }
 
+    /// Apply one precompiled region.
     pub fn set_region(&mut self, memory_region: &MemoryRegion) {
         unsafe {
             self.0.rbar.write(memory_region.region_base_address_reg);
@@ -272,6 +286,7 @@ impl Mpu<'_> {
         }
     }
 
+    /// Apply 3 precompiled regions.
     pub fn set_regions(&mut self, memory_region: &[MemoryRegion; 3]) {
         unsafe {
             self.0.rbar_a1.write(memory_region[0].region_base_address_reg);
@@ -283,6 +298,7 @@ impl Mpu<'_> {
         }
     }
 
+    /// Disable one memory region.
     #[inline]
     pub fn disable_region(&mut self, region: u8) {
         unsafe {

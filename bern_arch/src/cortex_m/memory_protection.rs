@@ -179,6 +179,7 @@ pub struct A256M;
 #[repr(align(536_870_912))]
 pub struct A512M;
 
+/// Return a valid memory protection alignment object from size in bytes.
 #[macro_export]
 macro_rules! alignment_from_size {
     (32) => { $crate::arch::memory_protection::A32 };
@@ -215,6 +216,7 @@ macro_rules! alignment_from_size {
     };
 }
 
+/// Return a valid memory protection size object from size in bytes.
 #[macro_export]
 macro_rules! size_from_raw {
     (32) => { $crate::arch::memory_protection::Size::S32 };

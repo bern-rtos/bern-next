@@ -2,10 +2,77 @@
 
 use crate::arch::memory_protection::MemoryRegion;
 /// Memory Protection.
+///
+/// # Implementation
+/// In addition to the trait the following features have to be implemented:
+///
+/// ## Memory Protection Exception
+/// A violation of a memory rule will trigger an exception. The exception must
+/// call `memory_protection_exception()` to notify the kernel, i.e.:
+/// ```no_run
+/// extern "Rust" {
+///     pub fn memory_protection_exception();
+/// }
+///
+/// #[allow(non_snake_case)]
+/// #[exception]
+/// fn MemoryManagement() -> () {
+///     unsafe {
+///         memory_protection_exception();
+///     }
+/// }
+/// ```
+///
+/// ## Size and Alignment
+/// Different memory protection implementation have different requirements in
+/// terms of sizes and alignment.
+/// A hardware implementation must provide
+/// - Alignment structs for all available alignments with naming convention
+///   `A<size number><unit prefix (_,K,M,G)>`, i.e.
+///   ```no_run
+///   #[repr(align(4_096))]
+///   pub struct A4K;
+///   ```
+/// - A macro `alignment_from_size!()` that returns valid alignment for given
+///   memory size, i.e.
+///   ```no_run
+///   #[macro_export]
+///   macro_rules! alignment_from_size {
+///       (4_096) => { $crate::arch::memory_protection::A4K };
+///       ($x:expr) => {
+///           compile_error!("Size does not meet alignment requirements from the MPU. \
+///           Compatible sizes are: 4KB");
+///        };
+///   }
+///   ```
+///
+/// - A macro `size_from_raw!()` that returns a valid size type from raw number,
+///   i.e.
+///   ```no_run
+///   #[macro_export]
+///   macro_rules! size_from_raw {
+///       (4_096) => { $crate::arch::memory_protection::Size::S4K };
+///       ($x:expr) => {
+///           compile_error!("Size cannot be protected by MPU. \
+///           Compatible sizes are: 4KB");
+///        };
+///   }
+///   ```
 pub trait IMemoryProtection {
-    /// Size of a memory region
+    /// Size of a memory region.
+    ///
+    /// Size must be an enum adhering to the naming convention
+    /// `S<size number><unit prefix (_,K,M,G)>`, i.e.
+    /// ```no_run
+    /// #[repr(u8)]
+    /// pub enum Size {
+    ///     S64 = 5,
+    ///     S4K = 11,
+    ///     S128M = 26,
+    /// }
+    /// ```
     type Size;
-    /// Precalculated memory region configuration
+    /// Precalculated memory region configuration.
     type MemoryRegion;
 
     /// Enable memory protection hardware.
@@ -13,6 +80,20 @@ pub trait IMemoryProtection {
     /// Disable memory protection hardware.
     fn disable_memory_protection();
     /// Setup and enable one memory region.
+    ///
+    /// # Example
+    /// Protect all flash memory from write access, instruction fetch allowed.
+    /// ```no_run
+    /// Arch::enable_memory_region(
+    ///    0,
+    ///    Config {
+    ///         addr: 0x0800_0000 as *const _,
+    ///         memory: Type::Flash,
+    ///         size: Size::S512K,
+    ///         access: Access { user: Permission::ReadOnly, system: Permission::ReadOnly },
+    ///         executable: true
+    /// });
+    /// ```
     fn enable_memory_region(region: u8, config: Config<Self::Size>);
     /// Disable one memory region.
     fn disable_memory_region(region: u8);
