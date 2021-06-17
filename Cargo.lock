@@ -55,7 +55,19 @@ checksum = "f8fe8f5a8a398345e52358e18ff07cc17a568fbca5c6f73873d3a62056309603"
 
 [[package]]
 name = "bern-arch"
-version = "0.1.0"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "005c7118f8d5089468d41ebf6c4e52bdb4157f61acadce851e6efd224da38c2b"
+dependencies = [
+ "cortex-m 0.7.2",
+ "cortex-m-rt",
+ "mockall",
+ "r0 1.0.0",
+]
+
+[[package]]
+name = "bern-arch"
+version = "0.2.1"
 dependencies = [
  "cortex-m 0.7.2",
  "cortex-m-rt",
@@ -67,23 +79,55 @@ dependencies = [
 name = "bern-conf"
 version = "0.1.0"
 dependencies = [
- "bern-conf-type",
+ "bern-conf-type 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "bern-conf"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc9ee9f6a584043e8b319eb866775d311c5eeaf3081822916863c3a6be1bf50f"
+dependencies = [
+ "bern-conf-type 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "bern-conf-type"
 version = "0.1.0"
 dependencies = [
- "bern-arch",
+ "bern-arch 0.2.0",
+]
+
+[[package]]
+name = "bern-conf-type"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b0c35ed6be31b753617aa7cf578ace46c3891350abf41acf35ed992af365bfc9"
+dependencies = [
+ "bern-arch 0.2.0",
 ]
 
 [[package]]
 name = "bern-kernel"
-version = "0.0.1"
+version = "0.2.0"
 dependencies = [
- "bern-arch",
- "bern-conf",
- "bern-kernel-macros",
+ "bern-arch 0.2.0",
+ "bern-conf 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "bern-kernel-macros 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde",
+ "serde_derive",
+ "toml",
+]
+
+[[package]]
+name = "bern-kernel"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9257dff3addf7119590371e08ac8e1aa616ad0fdadeb050e13de4b9a2bd8695"
+dependencies = [
+ "bern-arch 0.2.0",
+ "bern-conf 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "bern-kernel-macros 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
  "serde_derive",
  "toml",
@@ -91,7 +135,21 @@ dependencies = [
 
 [[package]]
 name = "bern-kernel-macros"
-version = "0.1.0"
+version = "0.2.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_derive",
+ "syn",
+ "toml",
+]
+
+[[package]]
+name = "bern-kernel-macros"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6aa7ccd7e5b3f0836d3115988bdee80f85a4e3306ae429024642d78480e3776b"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -111,8 +169,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "bern-test"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f558553c39c9feaed6431cc845d626b796ec8c4dd4e9d33d22d9a542af14ca18"
+dependencies = [
+ "bern-test-macros",
+ "nb 1.0.0",
+]
+
+[[package]]
 name = "bern-test-macros"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d0c839827ac923d6003bf77f0c1efdace6e63d153cd3e0a7d8f98a4801b391ab"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -474,7 +544,7 @@ dependencies = [
 name = "segger-cortex-m-trace"
 version = "0.1.0"
 dependencies = [
- "bern-kernel",
+ "bern-kernel 0.2.0",
  "cortex-m 0.7.2",
  "cortex-m-rt",
  "embedded-hal",
@@ -518,7 +588,7 @@ dependencies = [
 name = "st-nucleo-f446"
 version = "0.1.0"
 dependencies = [
- "bern-kernel",
+ "bern-kernel 0.2.0",
  "cortex-m 0.7.2",
  "cortex-m-rt",
  "embedded-hal",
@@ -607,8 +677,8 @@ dependencies = [
 name = "test-armv7e-m"
 version = "0.1.0"
 dependencies = [
- "bern-kernel",
- "bern-test",
+ "bern-kernel 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "bern-test 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "cortex-m 0.7.2",
  "cortex-m-rt",
  "embedded-hal",
