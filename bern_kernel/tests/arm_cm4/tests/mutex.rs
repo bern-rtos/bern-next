@@ -3,7 +3,7 @@
 
 mod common;
 use common::main as _;
-use bern_kernel::sync::mutex::Mutex;
+use bern_kernel::sync::Mutex;
 
 struct MyStruct {
     a: u32,

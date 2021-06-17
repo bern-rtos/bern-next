@@ -6,7 +6,7 @@ use common::main as _;
 
 #[bern_test::tests]
 mod tests {
-    use crate::common::st_nucleo_f446::StNucleoF446;
+    use crate::common::Board;
     use stm32f4xx_hal::prelude::*;
     use bern_kernel as kernel;
     use kernel::sched;
@@ -15,6 +15,11 @@ mod tests {
     #[test_set_up]
     fn init_scheduler() {
         sched::init();
+        sched::set_tick_frequency(
+            1_000,
+            48_000_000
+        );
+
         /* idle task */
         Task::new()
             .idle_task()
@@ -28,9 +33,6 @@ mod tests {
 
     #[test_tear_down]
     fn reset() {
-        // add a short delay to flush serial
-        // todo: add wait functionality
-        super::common::stupid_wait(100);
         cortex_m::peripheral::SCB::sys_reset();
     }
 
@@ -40,7 +42,7 @@ mod tests {
     }
 
     #[test]
-    fn first_task(board: &mut StNucleoF446) {
+    fn first_task(board: &mut Board) {
         let mut led = board.led.take().unwrap();
         Task::new()
             .static_stack(kernel::alloc_static_stack!(512))

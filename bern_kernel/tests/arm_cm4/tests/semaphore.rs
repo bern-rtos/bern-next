@@ -3,7 +3,7 @@
 
 mod common;
 use common::main as _;
-use bern_kernel::sync::semaphore::Semaphore;
+use bern_kernel::sync::Semaphore;
 
 #[link_section = ".shared"]
 static SEMAPHORE: Semaphore = Semaphore::new(1);
