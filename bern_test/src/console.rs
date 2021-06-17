@@ -39,6 +39,7 @@ pub fn handle_user_input() -> u8 {
 // todo: make nicer
 /* ansi terminal colors, see: <https://github.com/l-tools/ansi-colors/blob/master/src/colors.rs> */
 #[cfg(feature = "colored")]
+# [doc(hidden)]
 # [macro_export]
 macro_rules! term_reset {
     () => {
@@ -47,6 +48,7 @@ macro_rules! term_reset {
 }
 
 #[cfg(feature = "colored")]
+# [doc(hidden)]
 # [macro_export]
 macro_rules! term_green {
     ($string:expr) => {
@@ -55,6 +57,7 @@ macro_rules! term_green {
 }
 
 #[cfg(feature = "colored")]
+# [doc(hidden)]
 # [macro_export]
 macro_rules! term_red {
     ($string:expr) => {
@@ -63,6 +66,7 @@ macro_rules! term_red {
 }
 
 #[cfg(feature = "colored")]
+# [doc(hidden)]
 # [macro_export]
 macro_rules! term_gray {
     ($string:expr) => {
@@ -72,17 +76,21 @@ macro_rules! term_gray {
 
 
 #[cfg(not(feature = "colored"))]
+# [doc(hidden)]
 # [macro_export]
 macro_rules ! term_reset { () => { "" } }
 
 #[cfg(not(feature = "colored"))]
+# [doc(hidden)]
 # [macro_export]
 macro_rules ! term_red { () => { "" } }
 
 #[cfg(not(feature = "colored"))]
+# [doc(hidden)]
 # [macro_export]
 macro_rules ! term_green { () => { "" } }
 
 #[cfg(not(feature = "colored"))]
+# [doc(hidden)]
 # [macro_export]
 macro_rules ! term_gray { () => { "" } }

@@ -1,12 +1,57 @@
+//! Bern Test macros.
+//!
+//! Adapted from <https://github.com/knurling-rs/defmt/blob/main/firmware/defmt-test/macros/src/lib.rs>
+//!
+//! Similar to `defmt-test` but can output on any interface (typically blocking)
+//! and can be run interactively (select a test via serial interface).
+//!
+//! # Example
+//! ```no_run
+//! /* Setup omitted */
+//! #[bern_test::tests]
+//! mod tests {
+//!     #[test_set_up]
+//!     fn base_setup() {
+//!         // Run before every test
+//!     }
+//!
+//!     #[test_tear_down]
+//!     fn reset() {
+//!         // Runs after every test
+//!         // For autorun this must be soft reset
+//!         cortex_m::peripheral::SCB::sys_reset();
+//!     }
+//!
+//!     #[tear_down]
+//!     fn stop() {
+//!         // Runs after all tests
+//!         cortex_m::asm::bkpt();
+//!     }
+//!
+//!     #[test]
+//!     fn some_test() {
+//!         assert_eq!(0, 1);
+//!     }
+//!
+//!     #[test]
+//!     fn test_with_hardware(board: &mut Board) {
+//!         // A test can use the argument given when the runner is started
+//!         // from main
+//!         board.led.set_high().ok();
+//!         assert_eq!(board.led.is_high().unwrap(), true);
+//!     }
+//! }
+//! ```
+
 extern crate proc_macro;
 use proc_macro::TokenStream;
 use proc_macro2::Ident;
 use quote::quote;
 use syn::{parse, spanned::Spanned, Item, ItemFn, ItemMod, FnArg, Pat};
 
-
-// adapted from https://github.com/knurling-rs/defmt/blob/main/firmware/defmt-test/macros/src/lib.rs
-
+/// Test module proc macro.
+///
+/// See [module level documentation](index.html).
 #[proc_macro_attribute]
 pub fn tests(_args: TokenStream, input: TokenStream) -> TokenStream {
     let module: ItemMod = syn::parse(input).unwrap();

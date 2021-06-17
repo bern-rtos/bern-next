@@ -1,13 +1,44 @@
-
+//! Serial interface transport.
+//!
+//! Setup any serial interface for transport.
+//!
+//! # Example
+//! ```no_run
+//! #[cortex_m_rt::entry]
+//! fn main() -> ! {
+//!     let mut board = Board::new();
+//!     let vcp = board.vcp.take().unwrap();
+//!
+//!     // Set serial uplink
+//!     Serial::set_write(move |b| {
+//!         match tx.write(b) {
+//!             Ok(_) => {
+//!                 nb::block!(vcp.tx.flush()).ok();
+//!                 Ok(())
+//!             },
+//!             Err(e) => match e {
+//!                 WouldBlock => Err(WouldBlock),
+//!                 _ => Err(Other(serial::Error::Peripheral)),
+//!             }
+//!         }
+//!     });
+//!     /*...*/
+//! }
+//! ```
 use core::{fmt, mem};
 use nb::{block, Error::Other};
 use core::fmt::Write;
 
+/// Serial Errors.
 #[derive(Debug)]
 pub enum Error {
+    /// Error from peripheral.
     Peripheral,
+    /// No function to send defined.
     NoUplink,
+    /// No function to receive defined.
     NoDownlink,
+    /// RX buffer overrun
     BufferOverrun,
 }
 
@@ -16,6 +47,7 @@ static mut SERIAL: Serial = Serial {
     read: None,
 };
 
+#[doc(hidden)]
 pub struct Serial {
     write: Option<&'static mut dyn FnMut(u8) -> nb::Result<(), Error>>,
     read: Option<&'static mut dyn FnMut() -> nb::Result<u8, Error>>,
@@ -23,13 +55,13 @@ pub struct Serial {
 
 // todo: interrupt driven read and write
 impl Serial {
+    /// Set a serial write function (mandatory).
     ///
     /// # Safety
     /// We basically want to create a memory leak/unbounded lifetime, so we can
     /// access a serial write function from anywhere. This is quite unsafe, but
     /// at least `mem::transmute` checks that the buffer has the correct size.
-    ///
-    /// todo: critical section, reentrancy check
+    // todo: critical section, reentrancy check
     pub fn set_write<F>(write: F)
         where F: FnMut(u8) -> nb::Result<(), Error> + 'static
     {
@@ -41,6 +73,7 @@ impl Serial {
         }
     }
 
+    /// Set a serial read function.
     ///
     /// # Safety
     /// see [`Self::set_write`]
@@ -59,6 +92,7 @@ impl Serial {
         &mut SERIAL
     }
 
+    #[doc(hidden)]
     pub fn write(&mut self, byte: u8) -> nb::Result<(), Error> {
         match &mut self.write {
             Some(w) => (w)(byte),
@@ -78,6 +112,7 @@ impl Serial {
         ser.write_fmt(arg).ok();
     }
 
+    #[doc(hidden)]
     pub fn read(&mut self) -> nb::Result<u8, Error> {
         match &mut self.read {
             Some(r) => (r)(),
@@ -85,7 +120,7 @@ impl Serial {
         }
     }
 
-
+    #[doc(hidden)]
     pub fn readln(&mut self, buffer: &mut [u8]) -> nb::Result<usize, Error> {
         if self.read.is_none() {
             return Err(Other(Error::NoDownlink));
@@ -119,6 +154,7 @@ impl fmt::Write for Serial
 
 // from probe-rs
 #[macro_export]
+#[doc(hidden)]
 macro_rules! sprintln {
     ($fmt:expr) => {
         $crate::serial::Serial::write_str(concat!($fmt, "\r\n"));
@@ -129,6 +165,7 @@ macro_rules! sprintln {
 }
 
 #[macro_export]
+#[doc(hidden)]
 macro_rules! sprint {
     ($fmt:expr) => {
         $crate::serial::Serial::write_str($fmt);
