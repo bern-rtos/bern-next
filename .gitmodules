@@ -1,0 +1,9 @@
+[submodule "bern_arch"]
+	path = bern_arch
+	url = https://gitlab.com/bern-rtos/kernel/bern-arch.git
+[submodule "bern_kernel"]
+	path = bern_kernel
+	url = https://gitlab.com/bern-rtos/kernel/bern-kernel.git
+[submodule "bern_test"]
+	path = bern_test
+	url = https://gitlab.com/bern-rtos/tools/bern-test.git
