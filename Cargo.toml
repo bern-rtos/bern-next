@@ -12,6 +12,13 @@ members = [
     "platform/segger_cortex_m_trace",
 ]
 
+[patch.crates-io]
+bern-kernel = { path = "bern_kernel" }
+bern-kernel-macros = { path = "bern_kernel/macros" }
+bern-conf-type = { path = "bern_kernel/conf_type" }
+bern-conf = { path = "bern_kernel/conf" }
+bern-arch = { path = "bern_arch" }
+
 [profile.release]
 codegen-units = 1 # better optimizations
 debug = 1 # symbols are nice and they don't increase the size on Flash

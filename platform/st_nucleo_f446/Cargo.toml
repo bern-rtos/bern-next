@@ -11,10 +11,9 @@ embedded-hal = "0.2.4"
 stm32f4xx-hal = { version = "0.8", features = ["rt", "stm32f446"] }
 
 [dev-dependencies]
-bern-kernel = { version = "*", path = "../../bern_kernel" }
+bern-kernel = "*"
 panic-halt = "0.2.0"
 
 # Optimize all dependencies
 #[profile.dev.package."*"]
 #opt-level = "s"
-

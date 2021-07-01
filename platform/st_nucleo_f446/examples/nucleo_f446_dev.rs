@@ -165,7 +165,7 @@ fn main() -> ! {
 
     let mut led = board.shield.led_6;
     Task::new()
-        .static_stack(kernel::alloc_static_stack!(512))
+        .static_stack(kernel::alloc_static_stack!(1024))
         .spawn(move || {
             loop {
                 match SEMAPHORE.acquire(1000) {
@@ -179,6 +179,16 @@ fn main() -> ! {
                     }
                     Err(_) => {}
                 }
+            }
+        });
+
+
+    let mut float = 42f32;
+    Task::new()
+        .static_stack(kernel::alloc_static_stack!(512))
+        .spawn(move || {
+            loop {
+                float += 1f32;
             }
         });
 
