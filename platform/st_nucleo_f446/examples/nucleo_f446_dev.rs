@@ -26,7 +26,7 @@ static SEMAPHORE: Semaphore = Semaphore::new(10);
 #[entry]
 fn main() -> ! {
     cortex_m::asm::bkpt();
-    let board = StNucleoF446::new();
+    let mut board = StNucleoF446::new();
 
     sched::init();
     sched::set_tick_frequency(
@@ -39,7 +39,7 @@ fn main() -> ! {
     /* idle task */
     Task::new()
         .idle_task()
-        .static_stack(kernel::alloc_static_stack!(256))
+        .stack(kernel::mem::size_from_raw!(256))
         .spawn(move || {
             loop {
                 cortex_m::asm::nop();
@@ -131,10 +131,11 @@ fn main() -> ! {
     //     });
 
 
-    let mut heartbeat = board.shield.led_1;
+    //let mut heartbeat = board.shield.led_1;
+    let mut heartbeat = board.led.take().unwrap();
     Task::new()
         .priority(Priority(0))
-        .static_stack(kernel::alloc_static_stack!(512))
+        .stack(kernel::mem::size_from_raw!(512))
         .spawn(move || {
             loop {
                 kernel::sleep(200);
@@ -146,7 +147,7 @@ fn main() -> ! {
     let mut led = board.shield.led_7;
     Task::new()
         .priority(Priority(1))
-        .static_stack(kernel::alloc_static_stack!(512))
+        .stack(kernel::mem::size_from_raw!(512))
         .spawn(move || {
             loop {
                 led.set_high().ok();
@@ -165,7 +166,7 @@ fn main() -> ! {
 
     let mut led = board.shield.led_6;
     Task::new()
-        .static_stack(kernel::alloc_static_stack!(1024))
+        .stack(kernel::mem::size_from_raw!(1024))
         .spawn(move || {
             loop {
                 match SEMAPHORE.acquire(1000) {
@@ -185,7 +186,7 @@ fn main() -> ! {
 
     let mut float = 42f32;
     Task::new()
-        .static_stack(kernel::alloc_static_stack!(512))
+        .stack(kernel::mem::size_from_raw!(1024))
         .spawn(move || {
             loop {
                 float += 1f32;
