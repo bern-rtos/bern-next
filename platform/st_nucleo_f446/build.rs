@@ -21,4 +21,8 @@ fn main() {
         .unwrap();
     println!("cargo:rustc-link-search={}", out.display());
     println!("cargo:rerun-if-changed=memory.x");
+
+    File::create(out.join("bern.x"))
+        .unwrap();
+    println!("cargo:rerun-if-changed=bern.x");
 }

@@ -14,6 +14,23 @@ stm32f4xx-hal = { version = "0.8", features = ["rt", "stm32f446"] }
 bern-kernel = "*"
 panic-halt = "0.2.0"
 
+ufmt = "0.1.0"
+#rtt-target = "0.3.0"
+defmt = "0.2.3"
+defmt-rtt = "0.2.0"
+
+[features]
+defmt-default = []
+defmt-trace = []
+defmt-debug = []
+defmt-info = []
+defmt-warn = []
+defmt-error = []
+
+default = [
+    "defmt-default",
+]
+
 # Optimize all dependencies
 #[profile.dev.package."*"]
 #opt-level = "s"

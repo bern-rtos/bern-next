@@ -1,14 +1,6 @@
-#![deny(unsafe_code)]
+//#![deny(unsafe_code)]
 #![no_main]
 #![no_std]
-
-use bern_kernel as kernel;
-use kernel::{
-    task::Task,
-    task::Priority,
-    sched,
-    sync::Mutex,
-};
 
 use panic_halt as _;
 
@@ -16,12 +8,20 @@ use cortex_m;
 use cortex_m_rt::entry;
 use st_nucleo_f446::StNucleoF446;
 use stm32f4xx_hal::prelude::*;
-use bern_kernel::sync::Semaphore;
 
-#[link_section = ".shared"]
-static MUTEX: Mutex<u32> = Mutex::new(42);
-#[link_section = ".shared"]
-static SEMAPHORE: Semaphore = Semaphore::new(10);
+use bern_kernel as kernel;
+use kernel::{
+    task::Priority,
+    sched,
+    process::Process,
+};
+
+#[link_section=".process.my_process"]
+static SOME_ARR: [u8; 8] = [1,2,3,4,5,6,7,8];
+
+static PROC: &Process = kernel::new_process!(my_process, 4096);
+static IDLE_PROC: &Process = kernel::new_process!(idle, 1024);
+
 
 #[entry]
 fn main() -> ! {
@@ -33,171 +33,55 @@ fn main() -> ! {
         1_000,
         48_000_000
     );
-    MUTEX.register().ok();
-    SEMAPHORE.register().ok();
 
-    /* idle task */
-    Task::new()
-        .idle_task()
-        .stack(kernel::mem::size_from_raw!(256))
-        .spawn(move || {
-            loop {
-                cortex_m::asm::nop();
-            }
-        });
-
-    // /* task 1 */
-    // let mut led = board.shield.led_7;
-    // Task::new()
-    //     .priority(Priority(1))
-    //     .static_stack(kernel::alloc_static_stack!(512))
-    //     .spawn(move || {
-    //         loop {
-    //             {
-    //                 match MUTEX.lock(1000) {
-    //                     Ok(mut value) => *value = 54,
-    //                     Err(_) => (),
-    //                 }
-    //             }
-    //             led.toggle().ok();
-    //             kernel::sleep(100);
-    //         }
-    //     });
-    //
-    // /* task 2 */
-    // let mut another_led = board.shield.led_6;
-    // Task::new()
-    //     .priority(Priority(3))
-    //     .static_stack(kernel::alloc_static_stack!(1024))
-    //     .spawn(move || {
-    //         /* spawn a new task while the system is running */
-    //         Task::new()
-    //             .static_stack(kernel::alloc_static_stack!(512))
-    //             .spawn(move || {
-    //                 loop {
-    //                     kernel::sleep(800);
-    //                 }
-    //             });
-    //
-    //         loop {
-    //             another_led.set_high().ok();
-    //             match MUTEX.try_lock() {
-    //                 Ok(_) => kernel::sleep(500),
-    //                 Err(_) => (),
-    //             }
-    //             another_led.set_low().ok();
-    //             kernel::sleep(1000);
-    //         }
-    //     });
-    //
-    //
-    // let mut yet_another_led = board.shield.led_1;
-    // let mut a = 10;
-    // Task::new()
-    //     .priority(Priority(3))
-    //     .static_stack(kernel::alloc_static_stack!(512))
-    //     .spawn(move || {
-    //         loop {
-    //             a += 1;
-    //             yet_another_led.set_high().ok();
-    //             kernel::sleep(50);
-    //             yet_another_led.set_low().ok();
-    //             kernel::sleep(150);
-    //
-    //             if a >= 60 {
-    //                 let perm0 = SEMAPHORE.acquire(100);
-    //                 let perm1 = SEMAPHORE.acquire(100);
-    //                 let perm2 = SEMAPHORE.acquire(100);
-    //                 let perm3 = SEMAPHORE.acquire(100);
-    //                 let perm4 = SEMAPHORE.acquire(100);
-    //                 core::mem::drop(perm0.ok().unwrap());
-    //                 core::mem::drop(perm1.ok().unwrap());
-    //                 core::mem::drop(perm2.ok().unwrap());
-    //                 core::mem::drop(perm3.ok().unwrap());
-    //                 core::mem::drop(perm4.ok().unwrap());
-    //                 //kernel::task_exit();
-    //             }
-    //         }
-    //     });
-    //
-    // /* blocking task */
-    // Task::new()
-    //     .priority(Priority(4))
-    //     .static_stack(kernel::alloc_static_stack!(128))
-    //     .spawn(move || {
-    //         loop {
-    //             cortex_m::asm::nop();
-    //         }
-    //     });
-
-
-    //let mut heartbeat = board.shield.led_1;
     let mut heartbeat = board.led.take().unwrap();
-    Task::new()
+
+    PROC.create_thread()
         .priority(Priority(0))
-        .stack(kernel::mem::size_from_raw!(512))
+        .stack(1024)
         .spawn(move || {
-            loop {
-                kernel::sleep(200);
-                heartbeat.toggle().ok();
-            }
-        });
 
-    /* stack overflow */
-    let mut led = board.shield.led_7;
-    Task::new()
-        .priority(Priority(1))
-        .stack(kernel::mem::size_from_raw!(512))
-        .spawn(move || {
             loop {
-                led.set_high().ok();
-                kernel::sleep(1000);
-                led.set_low().ok();
-                kernel::sleep(200);
+                heartbeat.set_high().ok();
+                kernel::sleep(100);
+                heartbeat.set_low().ok();
+                kernel::sleep(900);
 
-                match MUTEX.try_lock() {
-                    Ok(mut v) => *v = 134,
-                    Err(_) => {}
-                };
+                //defmt::info!("Hello from task A! {}", i);
+                //if unsafe { AAA }  % 2 == 0 && unsafe { FF } == 123 {
+                //    i += 1;
+                //}
+
                 //recursion(1);
             }
         });
 
-
-    let mut led = board.shield.led_6;
-    Task::new()
-        .stack(kernel::mem::size_from_raw!(1024))
+    IDLE_PROC.create_thread()
+        .idle_task()
+        .stack(512)
         .spawn(move || {
             loop {
-                match SEMAPHORE.acquire(1000) {
-                    Ok(permit) => {
-                        led.set_high().ok();
-                        kernel::sleep(200);
-                        led.set_low().ok();
-                        kernel::sleep(800);
 
-                        permit.forget();
-                    }
-                    Err(_) => {}
-                }
             }
         });
 
 
-    let mut float = 42f32;
-    Task::new()
+    /*Task::new()
+        .priority(Priority(0))
         .stack(kernel::mem::size_from_raw!(1024))
         .spawn(move || {
+            let mut b = 0;
             loop {
-                float += 1f32;
+                kernel::sleep(200);
+
+                //defmt::info!("Hello from task B! {}", b);
+                b += 1;
             }
-        });
+        });*/
 
     sched::start();
 }
 
-#[allow(dead_code)]
-fn recursion(a: u32) -> u32 {
-    let b = a + 10;
-    recursion(b)
+fn recursion(a: u32) {
+    recursion(a + 1);
 }

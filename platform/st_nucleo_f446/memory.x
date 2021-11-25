@@ -1,32 +1,29 @@
 MEMORY {
     FLASH : ORIGIN = 0x08000000, LENGTH = 512K
     RAM : ORIGIN = 0x20000000, LENGTH = 127K
-    SHARED : ORIGIN = 0x20000000 + 127K, LENGTH = 1K
 }
 
-/* Align stacks to double word see:
-   https://community.arm.com/developer/ip-products/processors/f/cortex-m-forum/6344/what-is-the-meaning-of-a-64-bit-aligned-stack-pointer-address */
 SECTIONS {
-    .task_stack (NOLOAD) : ALIGN(8)
+    /*### .kernel */
+    _kernel_size = 2K;
+
+    .kernel : ALIGN(4)
     {
-        . = ALIGN(8);
-        __stask_stack = .;
-        *(.task_stack);
-        . = ALIGN(8);
-        __etask_stack = .;
+        /* Kernel static memory */
+        . = ALIGN(4);
+        __smkernel = .;
+        *(.kernel);
+        *(.kernel.process);
+        . = ALIGN(4);
+        __emkernel = .;
+
+        /* Kernel heap */
+        . = ALIGN(4);
+        __shkernel = .;
+        . = __smkernel + _kernel_size;
+        __ehkernel = .;
+
+        ASSERT(__emkernel <= __ehkernel, "Error: No room left in bern kernel.");
     } > RAM
-    __sitask_stack = LOADADDR(.task_stack);
+    __sikernel = LOADADDR(.kernel);
 } INSERT AFTER .bss;
-
-SECTIONS {
-    /*### .shared */
-    .shared : ALIGN(4)
-    {
-        . = ALIGN(4);
-        __sshared = .;
-        *(.shared);
-        . = ALIGN(4);
-        __eshared = .;
-    } > SHARED
-    __sishared = LOADADDR(.shared);
-}
