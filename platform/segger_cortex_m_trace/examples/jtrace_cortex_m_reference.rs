@@ -3,8 +3,6 @@
 
 use bern_kernel as kernel;
 use kernel::{
-    task::Task,
-    task::Priority,
     sched,
     sync::mutex::Mutex,
 };
@@ -15,6 +13,7 @@ use cortex_m;
 use cortex_m_rt::entry;
 use segger_cortex_m_trace::SeggerCortexMTrace;
 use stm32f4xx_hal::prelude::*;
+use bern_kernel::exec::thread::{Priority, Runnable};
 use bern_kernel::sync::semaphore::Semaphore;
 
 #[link_section = ".shared"]
@@ -31,7 +30,7 @@ fn main() -> ! {
     SEMAPHORE.register().ok();
 
     /* idle task */
-    Task::new()
+    Runnable::new()
         .idle_task()
         .static_stack(kernel::alloc_static_stack!(128))
         .spawn(move || {
@@ -41,7 +40,7 @@ fn main() -> ! {
         });
 
     /* task 1 */
-    Task::new()
+    Runnable::new()
         .priority(Priority(1))
         .static_stack(kernel::alloc_static_stack!(512))
         .spawn(move || {
@@ -57,12 +56,12 @@ fn main() -> ! {
         });
 
     /* task 2 */
-    Task::new()
+    Runnable::new()
         .priority(Priority(3))
         .static_stack(kernel::alloc_static_stack!(1024))
         .spawn(move || {
             /* spawn a new task while the system is running */
-            Task::new()
+            Runnable::new()
                 .static_stack(kernel::alloc_static_stack!(512))
                 .spawn(move || {
                     loop {
@@ -81,7 +80,7 @@ fn main() -> ! {
 
 
     let mut a = 10;
-    Task::new()
+    Runnable::new()
         .priority(Priority(3))
         .static_stack(kernel::alloc_static_stack!(512))
         .spawn(move || {
@@ -107,7 +106,7 @@ fn main() -> ! {
         });
 
     /* blocking task */
-    Task::new()
+    Runnable::new()
         .priority(Priority(4))
         .static_stack(kernel::alloc_static_stack!(128))
         .spawn(move || {
