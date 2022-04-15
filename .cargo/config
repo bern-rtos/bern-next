@@ -1,13 +1,4 @@
-[target.thumbv7m-none-eabi]
-# uncomment this to make `cargo run` execute programs on QEMU
-# runner = "qemu-system-arm -cpu cortex-m3 -machine lm3s6965evb -nographic -semihosting-config enable=on,target=native -bern_kernel"
-
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
-# uncomment ONE of these three option to make `cargo run` start a GDB session
-# which option to pick depends on your system
-# runner = "arm-none-eabi-gdb -q -x openocd.gdb"
-# runner = "gdb-multiarch -q -x openocd.gdb"
-# runner = "gdb -q -x openocd.gdb"
 runner = "probe-run --chip STM32f411RETx"
 
 rustflags = [
@@ -20,24 +11,11 @@ rustflags = [
   "-C", "link-arg=-Tdefmt.x",
   "-C", "link-arg=-Tbern.x",
 
-  # if you run into problems with LLD switch to the GNU linker by commenting out
-  # this line
-  #"-C", "linker=arm-none-eabi-ld",
-
-  # if you need to link to pre-compiled C libraries provided by a C toolchain
-  # use GCC as the linker by commenting out both lines above and then
-  # uncommenting the three lines below
-  # "-C", "linker=arm-none-eabi-gcc",
-  # "-C", "link-arg=-Wl,-Tlink.x",
-  # "-C", "link-arg=-nostartfiles",
 
   "-C", "inline-threshold=275", # use with opt "s"
 
   "-C", "link-arg=-Map=output.map",
   "-C", "link-arg=--demangle",
-  #"-C", "link-arg=--print-memory-usage",
-  # "-Z", "print-link-args",
-  "-Z", "macro-backtrace",
 ]
 
 [build]
@@ -46,3 +24,7 @@ rustflags = [
 # target = "thumbv7m-none-eabi"    # Cortex-M3
 # target = "thumbv7em-none-eabi"   # Cortex-M4 and Cortex-M7 (no FPU)
 target = "thumbv7em-none-eabihf" # Cortex-M4F and Cortex-M7F (with FPU)
+
+
+[alias]
+xtask = "run --manifest-path xtask/Cargo.toml --target=x86_64-unknown-linux-gnu --"
